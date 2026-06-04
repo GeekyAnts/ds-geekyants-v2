@@ -72,8 +72,9 @@ A floating menu panel that opens when the trigger is clicked. Follows the [WAI-A
 | `--dropdown-item-text` | Item label colour (`--color-text-primary`) |
 | `--dropdown-item-text-disabled` | Disabled label colour (`--color-text-disabled`) |
 | `--dropdown-item-text-destructive` | Destructive label colour (`--color-text-error`) |
-| `--dropdown-item-bg-destructive-hover` | Destructive hover fill (`--color-status-error`) |
-| `--dropdown-item-text-destructive-hover` | Destructive hover text (`--color-text-inverse`) |
+| `--dropdown-item-bg-destructive` | Destructive resting background (transparent) |
+| `--dropdown-item-bg-destructive-hover` | Destructive hover fill (`--color-status-error-subtle`) |
+| `--dropdown-item-text-destructive-hover` | Destructive hover text (`--color-text-error`) |
 | `--dropdown-item-icon-color` | Icon colour (`--color-text-secondary`) |
 | `--dropdown-item-icon-color-destructive` | Destructive icon colour (`--color-text-error`) |
 | `--dropdown-item-shortcut-text` | Shortcut hint colour (`--color-text-tertiary`) |
@@ -114,7 +115,7 @@ All position values use logical CSS (`start-0` / `end-0`) for full RTL support.
 | Hover | `--dropdown-item-bg-hover` fill |
 | Active | `--dropdown-item-bg-active` fill |
 | Disabled | `--dropdown-item-text-disabled`; `cursor-not-allowed`; `pointer-events-none` |
-| Destructive hover | Error-filled background + inverse text |
+| Destructive hover | Subtle error-tint background + error text |
 
 ---
 

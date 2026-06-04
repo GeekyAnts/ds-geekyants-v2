@@ -17,7 +17,7 @@ A single node in a hierarchical tree view. Handles its own expand/collapse toggl
 | `isExpanded` | `boolean` | `false` | Whether the node's children are visible. |
 | `isSelected` | `boolean` | `false` | Whether this node is the active selection. |
 | `isDisabled` | `boolean` | `false` | Prevents interaction and applies muted styles. |
-| `isLoading` | `boolean` | `false` | Shows a spinner — use while async children are fetching. |
+| `loading` | `boolean` | `false` | Shows a spinner — use while async children are fetching. |
 | `hasChildren` | `boolean` | `false` | Controls visibility of the expand toggle. |
 | `badge` | `string \| number` | — | Trailing count or label (folder item count, notification, etc.). |
 | `tabIndex` | `0 \| -1` | `-1` | Roving tabindex — managed by parent TreeView. |

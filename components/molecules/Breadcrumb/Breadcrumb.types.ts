@@ -8,7 +8,7 @@ export interface BreadcrumbItemData {
   /** URL this item links to. Omit for the current page or non-navigable items. */
   href?: string;
   /** Explicitly marks as current page. Auto-applied to the last item in the array. */
-  current?: boolean;
+  isActive?: boolean;
   /** Disabled state. Non-interactive, visually muted. */
   disabled?: boolean;
   /** Optional icon before the label. Use lucide-react icon nodes. */

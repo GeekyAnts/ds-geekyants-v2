@@ -59,7 +59,7 @@ export const Variants: Story = {
       </div>
       <div className="flex flex-col gap-2">
         <span className="text-body-sm text-[var(--color-text-tertiary)]">box</span>
-        <Skeleton variant="box" height="var(--spacing-32)" />
+        <Skeleton variant="box" height="var(--size-fixed-32)" />
       </div>
       <div className="flex flex-col gap-2">
         <span className="text-body-sm text-[var(--color-text-tertiary)]">circle</span>
@@ -135,7 +135,7 @@ export const States: Story = {
       </div>
       <div className="flex flex-col gap-2">
         <span className="text-body-sm text-[var(--color-text-tertiary)]">Image/media placeholder</span>
-        <Skeleton variant="box" height="var(--spacing-40)" />
+        <Skeleton variant="box" height="var(--size-fixed-40)" />
       </div>
     </div>
   ),
@@ -153,7 +153,7 @@ export const DarkMode: Story = {
         </div>
         <div className="flex flex-col gap-2">
           <span className="text-body-sm text-[var(--color-text-tertiary)]">box</span>
-          <Skeleton variant="box" height="var(--spacing-32)" />
+          <Skeleton variant="box" height="var(--size-fixed-32)" />
         </div>
         <div className="flex flex-col gap-2">
           <span className="text-body-sm text-[var(--color-text-tertiary)]">circles</span>
@@ -218,7 +218,7 @@ export const Accessibility: Story = {
         <span className="text-body-sm text-[var(--color-text-tertiary)]">
           <code>aria-busy={'{true}'}</code> always set — signals active loading to assistive tech
         </span>
-        <Skeleton variant="box" height="var(--spacing-24)" aria-label="Loading image" />
+        <Skeleton variant="box" height="var(--size-fixed-24)" aria-label="Loading image" />
       </div>
     </div>
   ),

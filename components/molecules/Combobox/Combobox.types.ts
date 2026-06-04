@@ -78,7 +78,7 @@ export interface ComboboxProps
    * Loading state — shows spinner inside the input and an informational message
    * in the panel. Useful during async option fetching.
    */
-  isLoading?: boolean;
+  loading?: boolean;
 
   /**
    * When true (default), shows a clear (×) button when an option is selected.

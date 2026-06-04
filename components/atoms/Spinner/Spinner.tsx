@@ -2,6 +2,7 @@
 import { forwardRef, memo, useMemo } from 'react';
 import { useComponentI18n } from '../../utils/i18n/useGeeklegoI18n';
 import type { SpinnerProps, SpinnerVariant, SpinnerSize } from './Spinner.types';
+import { VisuallyHidden } from '../../utils/accessibility/VisuallyHidden';
 
 // SVG diameter per size — maps to icon size scale primitives
 const sizeClasses: Record<SpinnerSize, string> = {
@@ -73,7 +74,7 @@ export const Spinner = memo(forwardRef<HTMLDivElement, SpinnerProps>(
           />
         </svg>
         {/* Visually hidden label for screen readers */}
-        <span className="sr-only">{resolvedLabel}</span>
+        <VisuallyHidden>{resolvedLabel}</VisuallyHidden>
       </div>
     );
   },

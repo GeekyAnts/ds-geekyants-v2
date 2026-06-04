@@ -111,7 +111,7 @@ export const States: Story = {
         <p className="text-label-sm text-secondary">With loading button</p>
         <ButtonGroup aria-label="Mixed loading state">
           <Button variant="primary">Save</Button>
-          <Button variant="primary" isLoading>Saving…</Button>
+          <Button variant="primary" loading>Saving…</Button>
           <Button variant="primary">Discard</Button>
         </ButtonGroup>
       </div>

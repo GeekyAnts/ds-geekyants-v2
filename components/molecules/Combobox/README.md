@@ -52,7 +52,7 @@ const [value, setValue] = useState<string | null>(null);
 | `size` | `'sm' \| 'md' \| 'lg'` | `'md'` | Height and typography scale |
 | `disabled` | `boolean` | `false` | Disables the entire combobox |
 | `error` | `boolean` | `false` | Shows error border on the input |
-| `isLoading` | `boolean` | `false` | Shows spinner and loading message in the panel |
+| `loading` | `boolean` | `false` | Shows spinner and loading message in the panel |
 | `clearable` | `boolean` | `true` | Shows clear (×) button when a value is selected |
 | `id` | `string` | — | Forwarded to the inner `<input>` |
 | `name` | `string` | — | Forwarded to the inner `<input>` for form participation |

@@ -84,7 +84,7 @@ export const Combobox = memo(forwardRef<HTMLInputElement, ComboboxProps>(
       size = 'md',
       disabled = false,
       error = false,
-      isLoading = false,
+      loading = false,
       clearable = true,
       id: idProp,
       name,
@@ -266,7 +266,7 @@ export const Combobox = memo(forwardRef<HTMLInputElement, ComboboxProps>(
     }, [disabled]);
 
     // ── Clear icon node (passed as rightIcon to Input) ────────────────────
-    const showClear = clearable && selectedId != null && !disabled && !isLoading;
+    const showClear = clearable && selectedId != null && !disabled && !loading;
     const clearIcon = useMemo(() => {
       if (!showClear) return undefined;
       return (
@@ -395,7 +395,7 @@ export const Combobox = memo(forwardRef<HTMLInputElement, ComboboxProps>(
           size={size}
           disabled={disabled}
           error={error}
-          isLoading={isLoading}
+          loading={loading}
           value={displayValue}
           onChange={handleInputChange}
           onFocus={handleInputFocus}
@@ -406,7 +406,7 @@ export const Combobox = memo(forwardRef<HTMLInputElement, ComboboxProps>(
           autoCorrect="off"
           autoCapitalize="off"
           spellCheck={false}
-          rightIcon={isLoading ? undefined : clearIcon}
+          rightIcon={loading ? undefined : clearIcon}
           className={className}
           // ARIA — combobox pattern
           role="combobox"
@@ -434,7 +434,7 @@ export const Combobox = memo(forwardRef<HTMLInputElement, ComboboxProps>(
               aria-multiselectable={false}
             >
               {/* Loading state */}
-              {isLoading && (
+              {loading && (
                 <li
                   className={emptyStateBase}
                   role="option"
@@ -446,7 +446,7 @@ export const Combobox = memo(forwardRef<HTMLInputElement, ComboboxProps>(
               )}
 
               {/* Empty state — no matches */}
-              {!isLoading && flatOptions.length === 0 && (
+              {!loading && flatOptions.length === 0 && (
                 <li
                   className={emptyStateBase}
                   role="option"
@@ -458,7 +458,7 @@ export const Combobox = memo(forwardRef<HTMLInputElement, ComboboxProps>(
               )}
 
               {/* Options — grouped or flat */}
-              {!isLoading && flatOptions.length > 0 && (
+              {!loading && flatOptions.length > 0 && (
                 hasGroups ? (
                   groups.map((group, gIdx) => {
                     const groupOptions = flatOptions.filter(

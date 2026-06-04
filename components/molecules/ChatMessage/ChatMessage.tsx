@@ -47,7 +47,7 @@ export const ChatMessage = memo(forwardRef<HTMLLIElement, ChatMessageProps>(
           {/* Sender name — received messages, optional */}
           {!isSent && showName && senderName && (
             <span
-              className="text-caption-sm text-[var(--chat-message-name-color)] truncate-label ps-[var(--chat-bubble-px)]"
+              className="text-caption-sm text-[var(--chat-message-name-color)] truncate-label ps-[var(--chat-message-px)]"
               aria-hidden="true"
             >
               {senderName}

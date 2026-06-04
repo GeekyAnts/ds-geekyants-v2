@@ -79,7 +79,10 @@ For each component in the approved list (process bottom-up: atoms → molecules 
 
 **Step 1 — Add to types file:**
 ```typescript
+// IMPORT from the public barrel, NOT the private path:
 import type { ComponentNameI18nStrings } from '../../utils/i18n';
+// ❌ Do NOT import from: '../../utils/i18n/GeeklegoI18nProvider.types'
+// ❌ Do NOT define the interface inline in the types file
 
 export interface ComponentNameProps ... {
   // ... existing props ...
@@ -95,7 +98,7 @@ import { useComponentI18n } from '../../utils/i18n/useGeeklegoI18n';
 // In destructuring:
 { ..., i18nStrings, ...rest }
 
-// First line inside the component function:
+// First line inside the component function (MUST be called, not just imported):
 const i18n = useComponentI18n('componentKey', i18nStrings);
 ```
 
@@ -114,6 +117,18 @@ const i18n = useComponentI18n('componentKey', i18nStrings);
 // The i18n system provides a smarter DEFAULT for when the prop is not passed.
 const resolvedDeltaLabel = deltaLabelProp ?? i18n.deltaLabel;
 ```
+
+**Step 5 — Forward i18nStrings to delegated child components:**
+```tsx
+// If this component delegates system strings to a child atom (e.g. FormField → Label),
+// forward the i18nStrings prop so per-instance overrides reach the child:
+<Label i18nStrings={i18nStrings} ...>
+```
+
+**Step 6 — Verify the hook is not dead code:**
+- Confirm `useComponentI18n` is both imported AND called (not just imported and unused)
+- Confirm `i18nStrings` is destructured from props (not left in `...rest`)
+- Confirm the resolved i18n values are actually used in the JSX
 
 ### Phase 2C — RTL Fixes
 
@@ -158,6 +173,11 @@ Run through this checklist before presenting work as complete.
 - [ ] `useComponentI18n('key', i18nStrings)` called as first non-hook-of-hooks line
 - [ ] Template functions typed as `(arg: T) => string`, never concatenated inline
 - [ ] Existing content props unchanged — no breaking changes
+- [ ] **Hook is NOT dead code** — `useComponentI18n` is both imported AND called (search for the call site, not just the import)
+- [ ] **Import from public barrel** — `.types.ts` imports the i18n type from `../../utils/i18n`, NOT from `GeeklegoI18nProvider.types` private path
+- [ ] **No duplicate inline interface** — The i18n interface is NOT redefined in the component's `.types.ts`; it is imported and re-exported
+- [ ] **Forwarding** — If the component delegates to a child that also has `i18nStrings`, the prop is forwarded (not swallowed)
+- [ ] **Default options resolved from i18n** — If the component has a static default options array with hardcoded labels (e.g. ThemeSwitcher defaults), those labels are resolved from i18n, not hardcoded at module scope
 
 ### Fallback chain (manual test)
 - [ ] No provider + no prop → English defaults appear in DOM

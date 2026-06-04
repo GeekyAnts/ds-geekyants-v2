@@ -1,5 +1,5 @@
 "use client"
-import { forwardRef, memo, useMemo, useId } from 'react';
+import { forwardRef, memo, useMemo, useCallback, useId } from 'react';
 import type { RadioProps, RadioSize } from './Radio.types';
 import { getErrorFieldProps } from '../../utils/accessibility/aria-helpers';
 
@@ -20,39 +20,12 @@ const sizeClasses: Record<RadioSize, { indicator: string; dot: string }> = {
 };
 
 // ── Indicator state classes — each state uses a distinct visual strategy ───
-
-// Unselected, no error
-const indicatorUnselected =
-  'bg-[var(--radio-bg)] border-[var(--radio-border)] ' +
-  'group-hover:bg-[var(--radio-bg-hover)] group-hover:border-[var(--radio-border-hover)] ' +
-  'group-hover:shadow-[var(--radio-shadow-hover)] group-active:shadow-[var(--radio-shadow-active)]';
-
-// Unselected with error
-const indicatorUnselectedError =
-  'bg-[var(--radio-bg)] border-[var(--radio-border-error)] ' +
-  'group-hover:bg-[var(--radio-bg-hover)]';
-
-// Selected, no error — filled background + dot
-const indicatorSelected =
-  'bg-[var(--radio-bg-checked)] border-[var(--radio-border-checked)] ' +
-  'group-hover:bg-[var(--radio-bg-checked-hover)] group-hover:border-[var(--radio-border-checked-hover)] ' +
-  'group-hover:shadow-[var(--radio-shadow-hover)] group-active:shadow-[var(--radio-shadow-active)]';
-
-// Selected with error — filled + error border
-const indicatorSelectedError =
-  'bg-[var(--radio-bg-checked)] border-[var(--radio-border-error)] ' +
-  'group-hover:bg-[var(--radio-bg-checked-hover)] group-hover:shadow-[var(--radio-shadow-hover)] ' +
-  'group-active:shadow-[var(--radio-shadow-active)]';
-
-// Disabled (all states)
-const indicatorDisabled =
-  'bg-[var(--radio-bg-disabled)] border-[var(--radio-border-disabled)] cursor-not-allowed';
-
 export const Radio = memo(
   forwardRef<HTMLInputElement, RadioProps>(
     (
       {
         checked,
+        defaultChecked: defaultCheckedProp,
         size = 'md',
         error = false,
         disabled = false,
@@ -68,10 +41,19 @@ export const Radio = memo(
       const generatedId = useId();
       const inputId = idProp ?? generatedId;
 
+      const isControlled = checked !== undefined;
+
+      const handleChange = useCallback(
+        (e: React.ChangeEvent<HTMLInputElement>) => {
+          onChange?.(e);
+        },
+        [onChange],
+      );
+
       const sz = sizeClasses[size];
 
       // Visual indicator circle — aria-hidden; screen readers use the native input.
-      // Focus ring uses peer-focus-visible: CSS — no JS state needed.
+      // Checked/disabled detection via CSS peer:* variants — no JS state needed.
       const indicatorClasses = useMemo(
         () =>
           [
@@ -81,19 +63,39 @@ export const Radio = memo(
             'shadow-[var(--radio-shadow)]',
             'peer-focus-visible:focus-ring',
             sz.indicator,
-            disabled
-              ? indicatorDisabled
-              : checked
-                ? error
-                  ? indicatorSelectedError
-                  : indicatorSelected
-                : error
-                  ? indicatorUnselectedError
-                  : indicatorUnselected,
+
+            // Dot visibility: indicator acts as CSS proxy for the dot (peer sibling)
+            '[&>*]:hidden peer-checked:[&>*]:block',
+
+            // Unchecked state (default)
+            'bg-[var(--radio-bg)] border-[var(--radio-border)]',
+            'group-hover:bg-[var(--radio-bg-hover)] group-hover:border-[var(--radio-border-hover)]',
+            'group-hover:shadow-[var(--radio-shadow-hover)] group-active:shadow-[var(--radio-shadow-active)]',
+
+            // Checked state — via CSS peer:checked
+            'peer-checked:bg-[var(--radio-bg-checked)] peer-checked:border-[var(--radio-border-checked)]',
+            'peer-checked:group-hover:bg-[var(--radio-bg-checked-hover)] peer-checked:group-hover:border-[var(--radio-border-checked-hover)]',
+            'peer-checked:group-hover:shadow-[var(--radio-shadow-hover)] peer-checked:group-active:shadow-[var(--radio-shadow-active)]',
+
+            // Error overrides (only when not disabled — disabled takes precedence)
+            ...(error && !disabled
+              ? [
+                  'border-[var(--radio-border-error)]',
+                  'peer-checked:border-[var(--radio-border-error)]',
+                ]
+              : []),
+
+            // Disabled override (final — wins over everything)
+            ...(disabled
+              ? [
+                  'bg-[var(--radio-bg-disabled)] border-[var(--radio-border-disabled)]',
+                  'cursor-not-allowed',
+                ]
+              : []),
           ]
             .filter(Boolean)
             .join(' '),
-        [sz.indicator, disabled, checked, error],
+        [sz.indicator, disabled, error],
       );
 
       // Wrapper label — owns hover group and cursor
@@ -137,30 +139,29 @@ export const Radio = memo(
               ref={ref}
               id={inputId}
               type="radio"
-              checked={checked}
+              checked={isControlled ? checked : undefined}
+              defaultChecked={isControlled ? undefined : defaultCheckedProp}
               disabled={disabled}
               required={required}
               aria-required={required || undefined}
               {...getErrorFieldProps(error, `${inputId}-error`)}
-              onChange={onChange}
-              readOnly={checked !== undefined && onChange === undefined}
+              onChange={handleChange}
+              readOnly={isControlled && onChange === undefined}
               className="peer absolute inset-0 w-full h-full opacity-0 m-0 cursor-[inherit]"
               {...rest}
             />
 
             {/* Custom visual indicator — decorative, hidden from assistive tech */}
             <span className={indicatorClasses} aria-hidden="true">
-              {checked && (
-                <span
-                  className={[
-                    'rounded-[var(--radio-radius)] flex-shrink-0',
-                    sz.dot,
-                    disabled
-                      ? 'bg-[var(--radio-dot-disabled)]'
-                      : 'bg-[var(--radio-dot)]',
-                  ].join(' ')}
-                />
-              )}
+              <span
+                className={[
+                  'rounded-[var(--radio-radius)] flex-shrink-0',
+                  sz.dot,
+                  disabled
+                    ? 'bg-[var(--radio-dot-disabled)]'
+                    : 'bg-[var(--radio-dot)]',
+                ].join(' ')}
+              />
             </span>
           </span>
 

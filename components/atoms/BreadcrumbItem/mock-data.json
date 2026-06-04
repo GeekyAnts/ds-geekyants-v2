@@ -5,7 +5,7 @@
   },
   "variants": [
     { "href": "#", "children": "Home" },
-    { "current": true, "children": "Dashboard" },
+    { "isActive": true, "children": "Dashboard" },
     { "href": "#", "disabled": true, "children": "Settings" }
   ],
   "sizes": [
@@ -15,12 +15,12 @@
   ],
   "states": {
     "default": { "href": "#", "children": "Home" },
-    "current": { "current": true, "children": "Dashboard" },
+    "active": { "isActive": true, "children": "Dashboard" },
     "disabled": { "href": "#", "disabled": true, "children": "Settings" }
   },
   "edge_cases": [
     { "href": "#", "children": "A" },
     { "href": "#", "children": "Very Long Breadcrumb Item Label That May Wrap" },
-    { "current": true, "children": "Current with no href" }
+    { "isActive": true, "children": "Current with no href" }
   ]
 }

@@ -28,7 +28,7 @@
     },
     "error": {
       "label": "Event date",
-      "errorMessage": "Please enter a valid date"
+      "error": "Please enter a valid date"
     },
     "disabled": {
       "label": "Locked date",
@@ -39,7 +39,7 @@
     "loading": {
       "label": "Appointment date",
       "hint": "Fetching allowed date range…",
-      "isLoading": true
+      "loading": true
     },
     "required": {
       "label": "Submission deadline",
@@ -58,7 +58,7 @@
     },
     "long_error": {
       "label": "Return date",
-      "errorMessage": "The selected date falls outside the allowed booking window. Please choose a date between today and 12 months from now."
+      "error": "The selected date falls outside the allowed booking window. Please choose a date between today and 12 months from now."
     },
     "min_max": {
       "label": "Appointment date",

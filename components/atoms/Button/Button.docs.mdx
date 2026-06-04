@@ -68,18 +68,18 @@ level: atom
 
 ## Loading
 
-<ComponentPreview code={"import { Button } from \"@geeklego/ui\"\n\n<div className=\"flex flex-wrap items-center gap-3\">\n  <Button variant=\"primary\" isLoading>Saving changes</Button>\n  <Button variant=\"secondary\" isLoading>Processing</Button>\n  <Button variant=\"outline\" isLoading>Loading</Button>\n  <Button variant=\"destructive\" isLoading>Deleting</Button>\n</div>"}>
+<ComponentPreview code={"import { Button } from \"@geeklego/ui\"\n\n<div className=\"flex flex-wrap items-center gap-3\">\n  <Button variant=\"primary\" loading>Saving changes</Button>\n  <Button variant=\"secondary\" loading>Processing</Button>\n  <Button variant=\"outline\" loading>Loading</Button>\n  <Button variant=\"destructive\" loading>Deleting</Button>\n</div>"}>
   <div className="flex flex-wrap items-center gap-3">
-    <Button variant="primary" isLoading>Saving changes</Button>
-    <Button variant="secondary" isLoading>Processing</Button>
-    <Button variant="outline" isLoading>Loading</Button>
-    <Button variant="destructive" isLoading>Deleting</Button>
+    <Button variant="primary" loading>Saving changes</Button>
+    <Button variant="secondary" loading>Processing</Button>
+    <Button variant="outline" loading>Loading</Button>
+    <Button variant="destructive" loading>Deleting</Button>
   </div>
 </ComponentPreview>
 
 ## Dark Mode
 
-<ComponentPreview code={"import { Button } from \"@geeklego/ui\"\nimport { Plus, Settings } from \"lucide-react\"\n\n<div\n  data-theme=\"dark\"\n  className=\"flex flex-col gap-6 p-8 bg-[var(--color-bg-primary)] rounded-[var(--radius-component-lg)] max-w-2xl\"\n>\n  <div className=\"flex flex-wrap gap-3 items-center\">\n    <Button variant=\"primary\">Primary</Button>\n    <Button variant=\"secondary\">Secondary</Button>\n    <Button variant=\"outline\">Outline</Button>\n    <Button variant=\"ghost\">Ghost</Button>\n    <Button variant=\"destructive\">Destructive</Button>\n    <Button variant=\"link\">Link</Button>\n  </div>\n  <div className=\"flex flex-wrap gap-3 items-center\">\n    <Button variant=\"primary\" disabled>Disabled</Button>\n    <Button variant=\"primary\" isLoading>Loading</Button>\n    <Button variant=\"primary\" leftIcon={<Plus size={16} />}>With icon</Button>\n    <Button variant=\"primary\" iconOnly leftIcon={<Settings size={16} />}>Settings</Button>\n  </div>\n</div>"}>
+<ComponentPreview code={"import { Button } from \"@geeklego/ui\"\nimport { Plus, Settings } from \"lucide-react\"\n\n<div\n  data-theme=\"dark\"\n  className=\"flex flex-col gap-6 p-8 bg-[var(--color-bg-primary)] rounded-[var(--radius-component-lg)] max-w-2xl\"\n>\n  <div className=\"flex flex-wrap gap-3 items-center\">\n    <Button variant=\"primary\">Primary</Button>\n    <Button variant=\"secondary\">Secondary</Button>\n    <Button variant=\"outline\">Outline</Button>\n    <Button variant=\"ghost\">Ghost</Button>\n    <Button variant=\"destructive\">Destructive</Button>\n    <Button variant=\"link\">Link</Button>\n  </div>\n  <div className=\"flex flex-wrap gap-3 items-center\">\n    <Button variant=\"primary\" disabled>Disabled</Button>\n    <Button variant=\"primary\" loading>Loading</Button>\n    <Button variant=\"primary\" leftIcon={<Plus size={16} />}>With icon</Button>\n    <Button variant=\"primary\" iconOnly leftIcon={<Settings size={16} />}>Settings</Button>\n  </div>\n</div>"}>
   <div
     data-theme="dark"
     className="flex flex-col gap-6 p-8 bg-[var(--color-bg-primary)] rounded-[var(--radius-component-lg)] max-w-2xl"
@@ -94,7 +94,7 @@ level: atom
     </div>
     <div className="flex flex-wrap gap-3 items-center">
       <Button variant="primary" disabled>Disabled</Button>
-      <Button variant="primary" isLoading>Loading</Button>
+      <Button variant="primary" loading>Loading</Button>
       <Button variant="primary" leftIcon={<Plus size={16} />}>With icon</Button>
       <Button variant="primary" iconOnly leftIcon={<Settings size={16} />}>Settings</Button>
     </div>
@@ -107,7 +107,7 @@ level: atom
   rows={[
     { name: "variant", type: "'primary' | 'secondary' | 'outline' | 'ghost' | 'destructive' | 'link'", defaultValue: "'primary'", description: "Visual style. Each variant uses a fundamentally different visual strategy." },
     { name: "size", type: "'xs' | 'sm' | 'md' | 'lg' | 'xl'", defaultValue: "'md'", description: "Component height and typography scale." },
-    { name: "isLoading", type: "boolean", defaultValue: "false", description: "Replaces content with a centered spinner and disables interaction. Preserves button dimensions." },
+    { name: "loading", type: "boolean", defaultValue: "false", description: "Replaces content with a centered spinner and disables interaction. Preserves button dimensions." },
     { name: "leftIcon", type: "ReactNode", defaultValue: "—", description: "Icon node rendered before the label. Omitted during loading." },
     { name: "rightIcon", type: "ReactNode", defaultValue: "—", description: "Icon node rendered after the label. Omitted during loading." },
     { name: "iconOnly", type: "boolean", defaultValue: "false", description: "Renders a perfectly square icon-only button. children is visually hidden but used as aria-label." },

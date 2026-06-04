@@ -28,7 +28,7 @@ const meta = {
       control: 'select',
       options: ['default', 'boxed'],
     },
-    error: { control: 'boolean' },
+    error: { control: 'text' },
     disabled: { control: 'boolean' },
     required: { control: 'boolean' },
   },
@@ -117,8 +117,7 @@ export const States: Story = {
         <RadioGroup
           legend="Plan"
           options={baseOptions}
-          error
-          errorMessage="Please select a plan to continue."
+          error="Please select a plan to continue."
         />
       </div>
       <div>
@@ -178,8 +177,7 @@ export const DarkMode: Story = {
       <RadioGroup
         legend="Plan"
         options={baseOptions}
-        error
-        errorMessage="Please select a plan to continue."
+        error="Please select a plan to continue."
         variant="boxed"
       />
       <RadioGroup legend="Plan" options={baseOptions} value="pro" disabled />
@@ -197,11 +195,10 @@ export const Playground: Story = {
     orientation: 'vertical',
     size: 'md',
     variant: 'default',
-    error: false,
+    error: '',
     disabled: false,
     required: false,
     hint: '',
-    errorMessage: '',
   },
 };
 
@@ -240,8 +237,7 @@ export const Accessibility: Story = {
           { value: 'monthly', label: 'Monthly' },
           { value: 'annual', label: 'Annual (save 20%)' },
         ]}
-        error
-        errorMessage="Please select a billing cycle."
+        error="Please select a billing cycle."
         required
       />
 

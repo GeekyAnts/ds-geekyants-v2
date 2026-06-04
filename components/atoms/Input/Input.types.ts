@@ -11,10 +11,10 @@ export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 
   /** Error state — shows error border and sets aria-invalid. */
   error?: boolean;
   /** Loading state — shows spinner and disables interaction. */
-  isLoading?: boolean;
+  loading?: boolean;
   /** Icon node displayed on the left side of the input. Decorative; aria-hidden. */
   leftIcon?: ReactNode;
-  /** Icon node displayed on the right side of the input. Decorative; aria-hidden. Replaced by spinner when isLoading. */
+  /** Icon node displayed on the right side of the input. Decorative; aria-hidden. Replaced by spinner when loading. */
   rightIcon?: ReactNode;
   /** Additional class names for the outer wrapper element. */
   wrapperClassName?: string;

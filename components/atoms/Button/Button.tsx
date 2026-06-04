@@ -1,6 +1,7 @@
 "use client"
 import { forwardRef, memo, useMemo } from 'react';
 import type { ButtonProps, ButtonVariant, ButtonSize } from './Button.types';
+import { VisuallyHidden } from '../../utils/accessibility/VisuallyHidden';
 
 // Each variant uses a fundamentally different visual strategy — not just color shifts
 const variantClasses: Record<ButtonVariant, string> = {
@@ -88,7 +89,7 @@ export const Button = memo(forwardRef<HTMLButtonElement, ButtonProps>(
     {
       variant = 'primary',
       size = 'md',
-      isLoading = false,
+      loading = false,
       leftIcon,
       rightIcon,
       iconOnly = false,
@@ -99,7 +100,7 @@ export const Button = memo(forwardRef<HTMLButtonElement, ButtonProps>(
     },
     ref,
   ) => {
-    const isDisabled = disabled || isLoading;
+    const isDisabled = disabled || loading;
     // When iconOnly, children becomes the accessible label on the <button> itself
     const ariaLabel = iconOnly && typeof children === 'string' ? children : undefined;
 
@@ -109,9 +110,11 @@ export const Button = memo(forwardRef<HTMLButtonElement, ButtonProps>(
       sizeClasses[size].text,
       'transition-default',
       'focus-visible:outline-none focus-visible:focus-ring',
-      isDisabled
-        ? 'bg-[var(--button-bg-disabled)] text-[var(--button-text-disabled)] border border-[var(--button-border-disabled)] cursor-not-allowed shadow-none pointer-events-none'
-        : variantClasses[variant],
+      isDisabled && variant === 'link'
+        ? 'bg-transparent text-[var(--button-text-disabled)] border border-transparent cursor-not-allowed shadow-none pointer-events-none no-underline h-auto px-0'
+        : isDisabled
+          ? 'bg-[var(--button-bg-disabled)] text-[var(--button-text-disabled)] border border-[var(--button-border-disabled)] cursor-not-allowed shadow-none pointer-events-none'
+          : variantClasses[variant],
       variant !== 'link' ? (iconOnly ? sizeClasses[size].square : sizeClasses[size].base) : '',
       className,
     ]
@@ -128,12 +131,12 @@ export const Button = memo(forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         disabled={isDisabled}
         aria-disabled={isDisabled || undefined}
-        aria-busy={isLoading || undefined}
+        aria-busy={loading || undefined}
         aria-label={ariaLabel}
         className={classes}
         {...rest}
       >
-        {isLoading ? (
+        {loading ? (
           <>
             {/* Centered spinner — dimensions come from invisible ghost below */}
             <span className="absolute inset-0 flex items-center justify-center" aria-hidden="true">
@@ -164,9 +167,7 @@ export const Button = memo(forwardRef<HTMLButtonElement, ButtonProps>(
                 {leftIcon}
               </span>
             )}
-            {iconOnly ? (
-              <span className="sr-only">{children}</span>
-            ) : (
+            {iconOnly ? <VisuallyHidden>{children}</VisuallyHidden> : (
               <span>{children}</span>
             )}
             {rightIcon && (

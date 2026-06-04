@@ -38,7 +38,7 @@
   ],
   "sizes": ["sm", "md", "lg"],
   "states": {
-    "loading": { "isLoading": true, "placeholder": "Loading…" },
+    "loading": { "loading": true, "placeholder": "Loading…" },
     "disabled": { "disabled": true, "placeholder": "Disabled combobox" },
     "error":    { "error": true,    "placeholder": "Select a value" },
     "with_value": { "defaultValue": "react", "placeholder": "Select a framework…" }

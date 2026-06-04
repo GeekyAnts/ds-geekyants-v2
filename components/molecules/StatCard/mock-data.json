@@ -38,7 +38,7 @@
     "loading": {
       "label": "Active Sessions",
       "value": "—",
-      "isLoading": true
+      "loading": true
     },
     "with_icon": {
       "label": "Total Revenue",

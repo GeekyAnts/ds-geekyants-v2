@@ -98,7 +98,7 @@ level: molecule
 
 <PropsTable
   rows={[
-    { name: "items", type: "BreadcrumbItemData[]", defaultValue: "—", description: "Ordered list of breadcrumb items. The last item is automatically treated as the current page." },
+    { name: "items", type: "BreadcrumbItemData[]", defaultValue: "—", description: "Ordered list of breadcrumb items. The last item is automatically treated as the active page." },
     { name: "separator", type: "ReactNode", defaultValue: "ChevronRight icon", description: "Custom separator element between items." },
     { name: "size", type: "'sm' | 'md' | 'lg'", defaultValue: "'md'", description: "Text size applied uniformly to all items." },
     { name: "schema", type: "boolean", defaultValue: "—", description: "Opt-in Schema.org BreadcrumbList Microdata on the nav and ListItem on each crumb." },
@@ -112,7 +112,7 @@ level: molecule
 |-------|------|-------------|
 | `label` | `string` | The visible label text. Required. |
 | `href` | `string` | URL this item links to. Omit for the current page. |
-| `current` | `boolean` | Explicitly marks as current page. Auto-applied to the last item. |
+| `isActive` | `boolean` | Explicitly marks as current page. Auto-applied to the last item. |
 | `disabled` | `boolean` | Non-interactive, visually muted. |
 | `icon` | `ReactNode` | Optional icon node before the label. |
 

@@ -13,7 +13,7 @@ const meta: Meta<typeof ProgressBar> = {
       control: 'select',
       options: ['default', 'success', 'warning', 'error', 'neutral'],
     },
-    size: { control: 'select', options: ['xs', 'sm', 'md', 'lg'] },
+    size: { control: 'select', options: ['xs', 'sm', 'md', 'lg', 'xl'] },
     rounded: { control: 'boolean' },
     showLabel: { control: 'boolean' },
     showValue: { control: 'boolean' },
@@ -65,7 +65,7 @@ export const Variants: Story = {
 export const Sizes: Story = {
   render: (args) => (
     <div className="w-80 flex flex-col gap-5">
-      {(['xs', 'sm', 'md', 'lg'] as const).map((size) => (
+      {(['xs', 'sm', 'md', 'lg', 'xl'] as const).map((size) => (
         <div key={size} className="flex flex-col gap-1">
           <span className="text-label-sm text-[var(--color-text-secondary)]">size="{size}"</span>
           <ProgressBar {...args} size={size} label={`${size} size progress`} />

@@ -28,7 +28,7 @@ import { FileInput } from './FileInput';
 <FileInput multiple accept="image/*" aria-label="Upload images" />
 
 // Loading / uploading
-<FileInput isLoading aria-label="Upload document" />
+<FileInput loading aria-label="Upload document" />
 ```
 
 ---
@@ -40,7 +40,7 @@ import { FileInput } from './FileInput';
 | `variant` | `'default' \| 'filled' \| 'ghost'` | `'default'` | Visual style variant |
 | `size` | `'sm' \| 'md' \| 'lg'` | `'md'` | Height and typography scale |
 | `error` | `boolean` | `false` | Error state — error border colour, sets `aria-invalid` |
-| `isLoading` | `boolean` | `false` | Loading state — spinner in browse area, disables interaction |
+| `loading` | `boolean` | `false` | Loading state — spinner in browse area, disables interaction |
 | `disabled` | `boolean` | `false` | Disabled state — muted appearance, no interaction |
 | `multiple` | `boolean` | `false` | Allow multiple file selection (native attribute) |
 | `accept` | `string` | — | Accepted MIME types / extensions, e.g. `"image/*,.pdf"` |
@@ -151,10 +151,10 @@ The `FileInput` atom does **not** provide its own label. Consumers must supply o
 | Attribute | Condition | Value |
 |---|---|---|
 | `aria-required` | `required` prop | `"true"` |
-| `aria-disabled` | `disabled` or `isLoading` | `"true"` |
+| `aria-disabled` | `disabled` or `loading` | `"true"` |
 | `aria-invalid` | `error` prop | `"true"` |
 | `aria-describedby` | `error` prop | Points to `${id}-error` |
-| `aria-busy` | `isLoading` | `"true"` |
+| `aria-busy` | `loading` | `"true"` |
 | `aria-live="polite"` | Filename display `<span>` | Announces selection changes |
 
 ### Keyboard interaction

@@ -14,7 +14,7 @@ const meta: Meta<typeof Input> = {
     },
     size: { control: 'select', options: ['sm', 'md', 'lg'] },
     error: { control: 'boolean' },
-    isLoading: { control: 'boolean' },
+    loading: { control: 'boolean' },
     disabled: { control: 'boolean' },
     placeholder: { control: 'text' },
     type: { control: 'text' },
@@ -101,7 +101,7 @@ export const States: Story = {
 
       <div>
         <p className="text-label-sm text-secondary mb-2">Loading</p>
-        <Input placeholder="Validating…" isLoading />
+        <Input placeholder="Validating…" loading />
       </div>
 
       <div>
@@ -167,7 +167,7 @@ export const DarkMode: Story = {
         leftIcon={<Search size="var(--input-icon-size-md)" />}
       />
       <Input variant="default" placeholder="Error state" error />
-      <Input variant="default" placeholder="Loading…" isLoading />
+      <Input variant="default" placeholder="Loading…" loading />
       <Input variant="default" placeholder="Disabled" disabled />
     </div>
   ),
@@ -181,7 +181,7 @@ export const Playground: Story = {
     size: 'md',
     type: 'text',
     error: false,
-    isLoading: false,
+    loading: false,
     disabled: false,
   },
 };
@@ -262,7 +262,7 @@ export const Accessibility: Story = {
         <Input
           id="a11y-loading"
           defaultValue="johndoe"
-          isLoading
+          loading
           aria-label="Username, checking availability"
         />
       </div>

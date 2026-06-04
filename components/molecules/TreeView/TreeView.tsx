@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  forwardRef,
   memo,
   useCallback,
   useMemo,
@@ -79,7 +80,8 @@ function defaultIcon(node: TreeNode, isExpanded: boolean, size: TreeViewSize): R
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
-export const TreeView = memo(function TreeView({
+export const TreeView = memo(forwardRef<HTMLUListElement, TreeViewProps>(
+  ({
   items,
   expanded: controlledExpanded,
   defaultExpanded,
@@ -94,7 +96,7 @@ export const TreeView = memo(function TreeView({
   'aria-label': ariaLabel,
   'aria-labelledby': ariaLabelledBy,
   ...rest
-}: TreeViewProps) {
+  }, ref) => {
   const i18n = useComponentI18n('treeView', i18nStrings);
   // ── Expand state ────────────────────────────────────────────────────────
   const [internalExpanded, setInternalExpanded] = useState<Set<string>>(
@@ -258,7 +260,7 @@ export const TreeView = memo(function TreeView({
           isExpanded={isExpanded}
           isSelected={isSelected}
           isDisabled={node.disabled}
-          isLoading={node.loading}
+          loading={node.loading}
           hasChildren={hasChildren}
           badge={node.badge}
           tabIndex={activeId === node.id ? 0 : -1}
@@ -300,6 +302,5 @@ export const TreeView = memo(function TreeView({
       {items.map((node, i) => renderNode(node, items, i, 1))}
     </ul>
   );
-});
-
+}));
 TreeView.displayName = 'TreeView';

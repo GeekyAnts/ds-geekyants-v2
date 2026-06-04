@@ -23,4 +23,6 @@ export interface ThemeSwitcherProps extends Omit<HTMLAttributes<HTMLDivElement>,
   options?: ThemeSwitcherOption[];
   /** Size of each toggle button. Defaults to `'md'`. */
   size?: ThemeSwitcherSize;
+  /** Override localised strings for this instance. */
+  i18nStrings?: import('../../utils/i18n').ThemeSwitcherI18nStrings;
 }

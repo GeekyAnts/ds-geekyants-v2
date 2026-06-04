@@ -1,0 +1,62 @@
+.ed-shell {
+  display: grid;
+  grid-template-rows: var(--ed-shell-header-h) 1fr auto;
+  grid-template-columns: var(--ed-nav-rail-w) 1fr var(--ed-inspector-w);
+  height: 100vh;
+  overflow: hidden;
+  background: var(--ed-bg);
+  color: var(--ed-text);
+  font-family: var(--ed-font-sans);
+  font-size: var(--ed-text-md);
+  letter-spacing: -0.005em;
+}
+
+.ed-shell--loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Grid placement */
+.ed-shell > .ed-header {
+  grid-column: 1 / -1;
+  grid-row: 1;
+  z-index: 5;
+}
+.ed-shell > .ed-nav-rail {
+  grid-column: 1;
+  grid-row: 2;
+  overflow: hidden;
+  border-right: 1px solid var(--ed-border);
+}
+.ed-shell > .ed-context-pane {
+  grid-column: 2;
+  grid-row: 2;
+  overflow-y: auto;
+  min-height: 0;
+}
+.ed-shell > .ed-inspector {
+  grid-column: 3;
+  grid-row: 2;
+  overflow-y: auto;
+  background: var(--ed-bg-panel);
+  border-left: 1px solid var(--ed-border);
+}
+.ed-shell > .ed-pending-drawer {
+  grid-column: 1 / -1;
+  grid-row: 3;
+}
+
+/* Responsive — collapse nav rail to icons under 1280px, hide inspector under 1024px.
+   We use min-content tricks only when necessary; here we shrink ranges proportionally. */
+@media (max-width: 1280px) {
+  .ed-shell {
+    grid-template-columns: 240px 1fr 360px;
+  }
+}
+@media (max-width: 1024px) {
+  .ed-shell {
+    grid-template-columns: 220px 1fr;
+  }
+  .ed-shell > .ed-inspector { display: none; }
+}

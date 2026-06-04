@@ -1,0 +1,130 @@
+.ed-header {
+  height: var(--ed-shell-header-h);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 16px;
+  background: var(--ed-bg);
+  border-bottom: 1px solid var(--ed-border);
+  flex-shrink: 0;
+}
+
+.ed-header__logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-right: 6px;
+  flex-shrink: 0;
+}
+
+.ed-header__logo-icon {
+  width: 24px;
+  height: 24px;
+  display: block;
+  border-radius: 6px;
+}
+
+.ed-header__logo-text {
+  font-family: var(--ed-font-display);
+  font-size: 15px;
+  font-weight: var(--ed-weight-bold);
+  letter-spacing: -0.015em;
+  color: var(--ed-text-strong);
+}
+
+/* Search trigger — looks like an input, behaves like a button */
+.ed-header__search-trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  padding: 0 10px 0 28px;
+  position: relative;
+  border: 1px solid var(--ed-border);
+  border-radius: var(--ed-radius-md);
+  background: var(--ed-bg-panel);
+  color: var(--ed-text-muted);
+  font-family: var(--ed-font-sans);
+  font-size: var(--ed-text-base);
+  cursor: pointer;
+  width: 320px;
+  max-width: 40vw;
+  text-align: left;
+  transition: border-color var(--ed-motion-fast), background var(--ed-motion-fast);
+}
+
+.ed-header__search-trigger::before {
+  content: "";
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  transform: translateY(-50%);
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2374716b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='11' cy='11' r='7'/><line x1='21' y1='21' x2='16.65' y2='16.65'/></svg>");
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+[data-ed-theme="dark"] .ed-header__search-trigger::before {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239a9690' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='11' cy='11' r='7'/><line x1='21' y1='21' x2='16.65' y2='16.65'/></svg>");
+}
+
+.ed-header__search-trigger:hover {
+  border-color: var(--ed-border-strong);
+  background: var(--ed-bg-subtle);
+}
+
+.ed-header__search-trigger > span {
+  flex: 1;
+}
+
+.ed-header__search-trigger kbd {
+  margin-left: auto;
+  padding: 1px 5px;
+  border: 1px solid var(--ed-border);
+  border-radius: 4px;
+  background: var(--ed-bg);
+  font-family: var(--ed-font-mono);
+  font-size: 10.5px;
+  color: var(--ed-text-muted);
+  line-height: 1.2;
+}
+
+.ed-header__spacer {
+  flex: 1;
+}
+
+.ed-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Pending badge — orange pill, now a button */
+.ed-header__pending-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 7px;
+  border-radius: 999px;
+  border: none;
+  background: var(--ed-accent);
+  color: var(--ed-accent-fg);
+  font-family: var(--ed-font-mono);
+  font-size: 11px;
+  font-weight: var(--ed-weight-semibold);
+  line-height: 1;
+  margin-right: 4px;
+  cursor: pointer;
+  transition: opacity var(--ed-motion-fast), transform var(--ed-motion-fast);
+}
+.ed-header__pending-badge:hover {
+  opacity: 0.85;
+  transform: scale(1.08);
+}
+.ed-header__pending-badge:focus-visible {
+  outline: 2px solid var(--ed-accent);
+  outline-offset: 2px;
+}

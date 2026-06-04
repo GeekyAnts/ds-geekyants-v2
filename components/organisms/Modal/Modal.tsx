@@ -1,5 +1,5 @@
 "use client"
-import { memo, useCallback, useId, useRef, useMemo } from 'react';
+import { forwardRef, memo, useCallback, useId, useRef, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { Button } from '../../atoms/Button/Button';
@@ -121,7 +121,7 @@ ModalFooter.displayName = 'Modal.Footer';
 
 // ── Main Modal component ──────────────────────────────────────────────────────
 
-const ModalInner = memo(function Modal({
+const ModalInner = memo(forwardRef<HTMLDivElement, ModalProps>(({
   isOpen,
   onClose,
   size = 'md',
@@ -131,7 +131,7 @@ const ModalInner = memo(function Modal({
   className,
   children,
   i18nStrings,
-}: ModalProps) {
+}, ref) => {
   const i18n = useComponentI18n('modal', i18nStrings);
   const baseId = useId();
   const titleId = `${baseId}-title`;
@@ -158,6 +158,7 @@ const ModalInner = memo(function Modal({
   return createPortal(
     /* Backdrop — closes modal on click when closeOnBackdropClick=true */
     <div
+      ref={ref}
       className={BACKDROP_CLASSES}
       onClick={handleBackdropClick}
     >
@@ -208,7 +209,7 @@ const ModalInner = memo(function Modal({
     </div>,
     document.body,
   );
-});
+}));
 ModalInner.displayName = 'Modal';
 
 // ── Public export with static slot properties ─────────────────────────────────

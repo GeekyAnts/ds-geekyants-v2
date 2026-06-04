@@ -109,7 +109,7 @@ export const Textarea = memo(forwardRef<HTMLTextAreaElement, TextareaProps>(
       size = 'md',
       resize = 'vertical',
       error = false,
-      isLoading = false,
+      loading = false,
       rows = 4,
       disabled,
       className,
@@ -122,7 +122,7 @@ export const Textarea = memo(forwardRef<HTMLTextAreaElement, TextareaProps>(
   ) => {
     const generatedId = useId();
     const textareaId = idProp ?? generatedId;
-    const isDisabled = disabled || isLoading;
+    const isDisabled = disabled || loading;
     const sz = sizeMap[size];
 
     // Wrapper: owns border, bg, radius, shadow, hover/focus-within visual state
@@ -163,7 +163,7 @@ export const Textarea = memo(forwardRef<HTMLTextAreaElement, TextareaProps>(
     return (
       <div className={wrapperClasses}>
         {/* Loading spinner — top-right corner, decorative */}
-        {isLoading && (
+        {loading && (
           <span className={spinnerClasses} aria-hidden="true">
             <Loader2 size={sz.spinnerSize} className="animate-spin" />
           </span>
@@ -176,7 +176,7 @@ export const Textarea = memo(forwardRef<HTMLTextAreaElement, TextareaProps>(
           disabled={isDisabled}
           aria-disabled={isDisabled || undefined}
           aria-required={required || undefined}
-          aria-busy={isLoading || undefined}
+          aria-busy={loading || undefined}
           {...getErrorFieldProps(error, `${textareaId}-error`)}
           className={textareaClasses}
           {...rest}

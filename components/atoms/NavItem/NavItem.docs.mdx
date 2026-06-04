@@ -19,6 +19,79 @@ level: atom
   </div>
 </ComponentPreview>
 
+## Sizes
+
+<ComponentPreview code={"import { NavItem } from \"@geeklego/ui\"\nimport { Grid, Box, BookOpen } from \"lucide-react\"\n\n<ul role=\"tree\" className=\"flex flex-col gap-1\">\n  <NavItem label=\"Dashboard\" icon={<Grid size={14} />} />\n  <NavItem label=\"Components\" icon={<Box size={14} />} />\n  <NavItem label=\"Documentation\" icon={<BookOpen size={14} />} />\n</ul>"}>
+  <div className="flex flex-col gap-6 w-full max-w-[240px]">
+    <div>
+      <p className="text-label-sm text-secondary mb-2">With icons</p>
+      <ul role="tree" className="flex flex-col gap-1">
+        <NavItem label="Dashboard" icon={<Grid size={14} />} />
+        <NavItem label="Components" icon={<Box size={14} />} />
+        <NavItem label="Documentation" icon={<BookOpen size={14} />} />
+      </ul>
+    </div>
+    <div>
+      <p className="text-label-sm text-secondary mb-2">Without icons</p>
+      <ul role="tree" className="flex flex-col gap-1">
+        <NavItem label="Overview" />
+        <NavItem label="Getting started" />
+        <NavItem label="Tokens" />
+      </ul>
+    </div>
+    <div>
+      <p className="text-label-sm text-secondary mb-2">With children (expandable)</p>
+      <ul role="tree" className="flex flex-col gap-1">
+        <NavItem label="Components" icon={<Box size={14} />} isExpandable isExpanded={true}>
+          <NavItem label="Button" />
+          <NavItem label="Input" />
+          <NavItem label="NavItem" isActive />
+        </NavItem>
+      </ul>
+    </div>
+  </div>
+</ComponentPreview>
+
+## States
+
+<ComponentPreview code={"import { NavItem } from \"@geeklego/ui\"\nimport { Grid, Star, Box, Settings } from \"lucide-react\"\n\n<ul role=\"tree\">\n  <NavItem label=\"Default\" icon={<Grid size={14} />} />\n  <NavItem label=\"Active\" icon={<Star size={14} />} isActive />\n  <NavItem label=\"Disabled\" icon={<Settings size={14} />} disabled />\n  <NavItem label=\"Expanded\" icon={<Box size={14} />} isExpandable isExpanded={true} />\n</ul>"}>
+  <div className="flex flex-col gap-4 w-full max-w-[240px]">
+    <div>
+      <p className="text-label-sm text-secondary mb-2">Default</p>
+      <ul role="tree">
+        <NavItem label="Default" icon={<Grid size={14} />} />
+      </ul>
+    </div>
+    <div>
+      <p className="text-label-sm text-secondary mb-2">Hover (interact to see)</p>
+      <ul role="tree">
+        <NavItem label="Hover me" icon={<Star size={14} />} />
+      </ul>
+    </div>
+    <div>
+      <p className="text-label-sm text-secondary mb-2">Active</p>
+      <ul role="tree">
+        <NavItem label="Active" icon={<Grid size={14} />} isActive />
+      </ul>
+    </div>
+    <div>
+      <p className="text-label-sm text-secondary mb-2">Disabled</p>
+      <ul role="tree">
+        <NavItem label="Disabled" icon={<Settings size={14} />} disabled />
+      </ul>
+    </div>
+    <div>
+      <p className="text-label-sm text-secondary mb-2">Expanded</p>
+      <ul role="tree">
+        <NavItem label="Expanded" icon={<Box size={14} />} isExpandable isExpanded={true}>
+          <NavItem label="Sub-item one" />
+          <NavItem label="Sub-item two" isActive />
+        </NavItem>
+      </ul>
+    </div>
+  </div>
+</ComponentPreview>
+
 ## With Icons
 
 <ComponentPreview code={"import { NavItem } from \"@geeklego/ui\"\nimport { Grid, Menu, List } from \"lucide-react\"\n\n{/* With icons */}\n<ul role=\"tree\" className=\"flex flex-col gap-1\">\n  <NavItem label=\"Dashboard\" icon={<Grid size={14} />} />\n  <NavItem label=\"Components\" icon={<Menu size={14} />} />\n  <NavItem label=\"Documentation\" icon={<List size={14} />} />\n</ul>\n\n{/* Without icons */}\n<ul role=\"tree\" className=\"flex flex-col gap-1\">\n  <NavItem label=\"Overview\" />\n  <NavItem label=\"Getting started\" />\n</ul>"}>
@@ -75,10 +148,28 @@ level: atom
   </ul>
 </ComponentPreview>
 
+## CollapsedHierarchy
+
+<ComponentPreview code={"import { NavItem } from \"@geeklego/ui\"\nimport { Box, Grid, BookOpen, Settings } from \"lucide-react\"\n\n<ul role=\"tree\">\n  <NavItem label=\"Platform\" icon={<Box size={14} />} isExpandable isExpanded={true}>\n    <NavItem label=\"Components\" icon={<Grid size={14} />} isExpandable isExpanded={true}>\n      <NavItem label=\"Button\" href=\"/components/button\" />\n      <NavItem label=\"Input\" href=\"/components/input\" isActive />\n      <NavItem label=\"Select\" href=\"/components/select\" />\n    </NavItem>\n    <NavItem label=\"Documentation\" icon={<BookOpen size={14} />} />\n    <NavItem label=\"Settings\" icon={<Settings size={14} />} />\n  </NavItem>\n</ul>"}>
+  <div className="w-full max-w-[240px]">
+    <ul role="tree" className="flex flex-col gap-1">
+      <NavItem label="Platform" icon={<Box size={14} />} isExpandable isExpanded={true}>
+        <NavItem label="Components" icon={<Grid size={14} />} isExpandable isExpanded={true}>
+          <NavItem label="Button" href="#" />
+          <NavItem label="Input" href="#" isActive />
+          <NavItem label="Select" href="#" />
+        </NavItem>
+        <NavItem label="Documentation" icon={<BookOpen size={14} />} />
+        <NavItem label="Settings" icon={<Settings size={14} />} />
+      </NavItem>
+    </ul>
+  </div>
+</ComponentPreview>
+
 ## Dark Mode
 
-<ComponentPreview code={"<div data-theme=\"dark\" className=\"p-8 bg-primary rounded-[var(--radius-component-lg)] max-w-2xl\">\n  <ul role=\"tree\" className=\"flex flex-col gap-1\">\n    <NavItem label=\"Dashboard\" icon={<Grid size={14} />} isActive />\n    <NavItem label=\"Components\" icon={<Menu size={14} />} />\n    <NavItem label=\"Settings\" icon={<Settings size={14} />} disabled />\n  </ul>\n</div>"}>
-  <div data-theme="dark" className="p-8 bg-primary rounded-[var(--radius-component-lg)] max-w-2xl">
+<ComponentPreview code={"<div data-theme=\"dark\" className=\"p-8 bg-[var(--color-bg-primary)] rounded-[var(--radius-component-lg)] max-w-2xl\">\n  <ul role=\"tree\" className=\"flex flex-col gap-1\">\n    <NavItem label=\"Dashboard\" icon={<Grid size={14} />} isActive />\n    <NavItem label=\"Components\" icon={<Menu size={14} />} />\n    <NavItem label=\"Settings\" icon={<Settings size={14} />} disabled />\n  </ul>\n</div>"}>
+  <div data-theme="dark" className="p-8 bg-[var(--color-bg-primary)] rounded-[var(--radius-component-lg)] max-w-2xl">
     <ul role="tree" className="flex flex-col gap-1">
       <NavItem label="Dashboard" icon={<Grid size={14} />} isActive />
       <NavItem label="Components" icon={<Menu size={14} />} />

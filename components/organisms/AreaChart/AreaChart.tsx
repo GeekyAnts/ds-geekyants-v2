@@ -5,6 +5,7 @@ import { Button } from '../../atoms/Button/Button';
 import { Select } from '../../atoms/Select/Select';
 import { Divider } from '../../atoms/Divider/Divider';
 import { Skeleton } from '../../atoms/Skeleton/Skeleton';
+import { StatCard } from '../../molecules/StatCard/StatCard';
 import type { AreaChartCurveType, AreaChartDataPoint, AreaChartProps, AreaChartSeries } from './AreaChart.types';
 import { useComponentI18n } from '../../utils/i18n/useGeeklegoI18n';
 import { getLoadingProps } from '../../utils/accessibility/aria-helpers';
@@ -218,18 +219,23 @@ export const AreaChart = memo(forwardRef<HTMLDivElement, AreaChartProps>(
     ref,
   ) => {
     const i18n = useComponentI18n('areaChart', i18nStrings);
+    const gradientId = useId();
     // Explicit prop wins over i18n default; formatter falls back to built-in defaultFormat
     const deltaLabel = deltaLabelProp ?? i18n.deltaLabel;
     const formatValue = formatValueProp ?? i18n.formatters.formatNumber ?? defaultFormat;
 
-    const gradientId = useId();
-    const isDeltaPositive = delta !== undefined && delta > 0;
-    const isDeltaNegative = delta !== undefined && delta < 0;
 
     const periodOptions = useMemo(
       () => periods.map((p) => ({ value: p.toLowerCase(), label: p })),
       [periods],
     );
+
+    const axisLabelFontSize = useMemo(() => {
+      if (typeof window === 'undefined') return 11;
+      const raw = getComputedStyle(document.documentElement).getPropertyValue('--areachart-axis-label-font-size').trim();
+      const parsed = parseInt(raw, 10);
+      return Number.isNaN(parsed) ? 11 : parsed;
+    }, []);
 
     // ── Hover state ──────────────────────────────────────────────────────────
     const svgRef = useRef<SVGSVGElement>(null);
@@ -292,6 +298,7 @@ export const AreaChart = memo(forwardRef<HTMLDivElement, AreaChartProps>(
     return (
       <div
         ref={ref}
+        // CSS custom property injection — passes min-width override to .card-shell
         style={{ '--card-shell-min-width': 'var(--areachart-min-width)' } as React.CSSProperties}
         className={[
           'card-shell',
@@ -340,33 +347,17 @@ export const AreaChart = memo(forwardRef<HTMLDivElement, AreaChartProps>(
           )}
         </div>
 
-        {/* ── Metric + delta ───────────────────────────────────────────────── */}
+        {/* ── Metric + delta (delegated to StatCard molecule) ───────────────── */}
         {metric !== undefined && (
           <div className="card-metric-row">
-            <span className="text-display-md text-[var(--areachart-metric-color)]">{metric}</span>
-
-            {delta !== undefined && (
-              <div className="flex items-center gap-[var(--spacing-component-xs)]">
-                <span
-                  className={[
-                    'text-body-sm-semibold',
-                    isDeltaPositive && 'text-[var(--areachart-delta-positive-color)]',
-                    isDeltaNegative && 'text-[var(--areachart-delta-negative-color)]',
-                    !isDeltaPositive && !isDeltaNegative && 'text-[var(--areachart-delta-context-color)]',
-                  ]
-                    .filter(Boolean)
-                    .join(' ')}
-                >
-                  {isDeltaPositive ? '+' : ''}
-                  {delta}%
-                </span>
-                {deltaLabel && (
-                  <span className="text-body-sm text-[var(--areachart-delta-context-color)] truncate-label">
-                    {deltaLabel}
-                  </span>
-                )}
-              </div>
-            )}
+            <StatCard
+              variant="ghost"
+              size="sm"
+              value={metric}
+              delta={delta}
+              deltaLabel={deltaLabel}
+              className="content-flex"
+            />
           </div>
         )}
 
@@ -437,15 +428,14 @@ export const AreaChart = memo(forwardRef<HTMLDivElement, AreaChartProps>(
                     x2="0"
                     y2="1"
                   >
-                    {/* data-driven — inline style intentional (SVG stop-color) */}
                     <stop
                       offset="0%"
-                      style={{ stopColor: SERIES_VARS[i % SERIES_VARS.length] }}
+                      stopColor={SERIES_VARS[i % SERIES_VARS.length]}
                       stopOpacity={0.25}
                     />
                     <stop
                       offset="100%"
-                      style={{ stopColor: SERIES_VARS[i % SERIES_VARS.length] }}
+                      stopColor={SERIES_VARS[i % SERIES_VARS.length]}
                       stopOpacity={0.03}
                     />
                   </linearGradient>
@@ -481,8 +471,8 @@ export const AreaChart = memo(forwardRef<HTMLDivElement, AreaChartProps>(
                       y={y + 4}
                       textAnchor="end"
                       fill="var(--areachart-axis-label-color)"
-                      fontSize={11}
-                      fontFamily="var(--font-family-sans)"
+                      fontSize={axisLabelFontSize}
+                      fontFamily="var(--areachart-axis-label-font-family)"
                     >
                       {formatValue(tick)}
                     </text>
@@ -503,8 +493,8 @@ export const AreaChart = memo(forwardRef<HTMLDivElement, AreaChartProps>(
                       y={PB + 18}
                       textAnchor="middle"
                       fill="var(--areachart-axis-label-color)"
-                      fontSize={11}
-                      fontFamily="var(--font-family-sans)"
+                      fontSize={axisLabelFontSize}
+                      fontFamily="var(--areachart-axis-label-font-family)"
                     >
                       {dp.label}
                     </text>
@@ -595,10 +585,10 @@ export const AreaChart = memo(forwardRef<HTMLDivElement, AreaChartProps>(
 
             {/* ── Tooltip (HTML overlay) ──────────────────────────────────── */}
             {hoveredIndex !== null && tooltipData && (
-              // data-driven — inline style intentional (dynamic left position)
+              // data-driven — dynamic left position from computed container offset
               <div
                 role="tooltip"
-                style={{ left: `${tooltipLeft}%` }}
+                style={{ left: `${tooltipLeft}%` } as React.CSSProperties}
                 className={[
                   'absolute top-0',
                   tooltipFlip ? '-translate-x-full -ml-3' : 'ml-3',

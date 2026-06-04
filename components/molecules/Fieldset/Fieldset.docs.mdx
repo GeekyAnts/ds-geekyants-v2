@@ -6,117 +6,117 @@ level: molecule
 
 ## Variants
 
-<ComponentPreview code={"import { Fieldset, Checkbox } from \"@geeklego/ui\"\n\n<div className=\"flex flex-col gap-6 max-w-md\">\n  <Fieldset legend=\"Default (no border)\" variant=\"default\">\n    <Checkbox label=\"Email notifications\" defaultChecked />\n    <Checkbox label=\"SMS notifications\" />\n    <Checkbox label=\"Push notifications\" />\n  </Fieldset>\n  <Fieldset legend=\"Boxed (bordered)\" variant=\"boxed\">\n    <Checkbox label=\"Email notifications\" defaultChecked />\n    <Checkbox label=\"SMS notifications\" />\n    <Checkbox label=\"Push notifications\" />\n  </Fieldset>\n</div>"}>
+<ComponentPreview code={"import { Fieldset, Checkbox } from \"@geeklego/ui\"\n\n<div className=\"flex flex-col gap-6 max-w-md\">\n  <Fieldset legend=\"Default (no border)\" variant=\"default\">\n    <Checkbox defaultChecked>Email notifications</Checkbox>\n    <Checkbox>SMS notifications</Checkbox>\n    <Checkbox>Push notifications</Checkbox>\n  </Fieldset>\n  <Fieldset legend=\"Boxed (bordered)\" variant=\"boxed\">\n    <Checkbox defaultChecked>Email notifications</Checkbox>\n    <Checkbox>SMS notifications</Checkbox>\n    <Checkbox>Push notifications</Checkbox>\n  </Fieldset>\n</div>"}>
   <div className="flex flex-col gap-6 max-w-md">
     <Fieldset legend="Default (no border)" variant="default">
-      <Checkbox label="Email notifications" defaultChecked />
-      <Checkbox label="SMS notifications" />
-      <Checkbox label="Push notifications" />
+      <Checkbox defaultChecked>Email notifications</Checkbox>
+      <Checkbox>SMS notifications</Checkbox>
+      <Checkbox>Push notifications</Checkbox>
     </Fieldset>
     <Fieldset legend="Boxed (bordered)" variant="boxed">
-      <Checkbox label="Email notifications" defaultChecked />
-      <Checkbox label="SMS notifications" />
-      <Checkbox label="Push notifications" />
+      <Checkbox defaultChecked>Email notifications</Checkbox>
+      <Checkbox>SMS notifications</Checkbox>
+      <Checkbox>Push notifications</Checkbox>
     </Fieldset>
   </div>
 </ComponentPreview>
 
 ## Layout
 
-<ComponentPreview code={"import { Fieldset, Radio } from \"@geeklego/ui\"\n\n<div className=\"flex flex-col gap-6 max-w-md\">\n  <Fieldset legend=\"Column layout (default)\" layout=\"column\">\n    <Radio name=\"plan-col\" value=\"free\" label=\"Free\" defaultChecked />\n    <Radio name=\"plan-col\" value=\"pro\" label=\"Pro\" />\n    <Radio name=\"plan-col\" value=\"enterprise\" label=\"Enterprise\" />\n  </Fieldset>\n  <Fieldset legend=\"Row layout\" layout=\"row\">\n    <Radio name=\"plan-row\" value=\"free\" label=\"Free\" defaultChecked />\n    <Radio name=\"plan-row\" value=\"pro\" label=\"Pro\" />\n    <Radio name=\"plan-row\" value=\"enterprise\" label=\"Enterprise\" />\n  </Fieldset>\n</div>"}>
+<ComponentPreview code={"import { Fieldset, Radio } from \"@geeklego/ui\"\n\n<div className=\"flex flex-col gap-6 max-w-md\">\n  <Fieldset legend=\"Column layout (default)\" layout=\"column\">\n    <Radio name=\"plan-col\" value=\"free\" defaultChecked>Free</Radio>\n    <Radio name=\"plan-col\" value=\"pro\">Pro</Radio>\n    <Radio name=\"plan-col\" value=\"enterprise\">Enterprise</Radio>\n  </Fieldset>\n  <Fieldset legend=\"Row layout\" layout=\"row\">\n    <Radio name=\"plan-row\" value=\"free\" defaultChecked>Free</Radio>\n    <Radio name=\"plan-row\" value=\"pro\">Pro</Radio>\n    <Radio name=\"plan-row\" value=\"enterprise\">Enterprise</Radio>\n  </Fieldset>\n</div>"}>
   <div className="flex flex-col gap-6 max-w-md">
     <Fieldset legend="Column layout (default)" layout="column">
-      <Radio name="plan-col" value="free" label="Free" defaultChecked />
-      <Radio name="plan-col" value="pro" label="Pro" />
-      <Radio name="plan-col" value="enterprise" label="Enterprise" />
+      <Radio name="plan-col" value="free" defaultChecked>Free</Radio>
+      <Radio name="plan-col" value="pro">Pro</Radio>
+      <Radio name="plan-col" value="enterprise">Enterprise</Radio>
     </Fieldset>
     <Fieldset legend="Row layout" layout="row">
-      <Radio name="plan-row" value="free" label="Free" defaultChecked />
-      <Radio name="plan-row" value="pro" label="Pro" />
-      <Radio name="plan-row" value="enterprise" label="Enterprise" />
+      <Radio name="plan-row" value="free" defaultChecked>Free</Radio>
+      <Radio name="plan-row" value="pro">Pro</Radio>
+      <Radio name="plan-row" value="enterprise">Enterprise</Radio>
     </Fieldset>
   </div>
 </ComponentPreview>
 
 ## With Hint
 
-<ComponentPreview code={"import { Fieldset, Checkbox } from \"@geeklego/ui\"\n\n<Fieldset\n  legend=\"Communication preferences\"\n  hint=\"You can update these settings at any time.\"\n  className=\"max-w-md\"\n>\n  <Checkbox label=\"Email notifications\" defaultChecked />\n  <Checkbox label=\"Weekly digest\" />\n  <Checkbox label=\"Product announcements\" />\n</Fieldset>"}>
+<ComponentPreview code={"import { Fieldset, Checkbox } from \"@geeklego/ui\"\n\n<Fieldset\n  legend=\"Communication preferences\"\n  hint=\"You can update these settings at any time.\"\n  className=\"max-w-md\"\n>\n  <Checkbox defaultChecked>Email notifications</Checkbox>\n  <Checkbox>Weekly digest</Checkbox>\n  <Checkbox>Product announcements</Checkbox>\n</Fieldset>"}>
   <Fieldset
     legend="Communication preferences"
     hint="You can update these settings at any time."
     className="max-w-md"
   >
-    <Checkbox label="Email notifications" defaultChecked />
-    <Checkbox label="Weekly digest" />
-    <Checkbox label="Product announcements" />
+    <Checkbox defaultChecked>Email notifications</Checkbox>
+    <Checkbox>Weekly digest</Checkbox>
+    <Checkbox>Product announcements</Checkbox>
   </Fieldset>
 </ComponentPreview>
 
 ## Required
 
-<ComponentPreview code={"import { Fieldset, Radio } from \"@geeklego/ui\"\n\n<Fieldset legend=\"Subscription plan\" required hint=\"Select one plan to continue.\" className=\"max-w-md\">\n  <Radio name=\"plan-req\" value=\"free\" label=\"Free\" defaultChecked />\n  <Radio name=\"plan-req\" value=\"pro\" label=\"Pro\" />\n  <Radio name=\"plan-req\" value=\"enterprise\" label=\"Enterprise\" />\n</Fieldset>"}>
+<ComponentPreview code={"import { Fieldset, Radio } from \"@geeklego/ui\"\n\n<Fieldset legend=\"Subscription plan\" required hint=\"Select one plan to continue.\" className=\"max-w-md\">\n  <Radio name=\"plan-req\" value=\"free\" defaultChecked>Free</Radio>\n  <Radio name=\"plan-req\" value=\"pro\">Pro</Radio>\n  <Radio name=\"plan-req\" value=\"enterprise\">Enterprise</Radio>\n</Fieldset>"}>
   <Fieldset legend="Subscription plan" required hint="Select one plan to continue." className="max-w-md">
-    <Radio name="plan-req" value="free" label="Free" defaultChecked />
-    <Radio name="plan-req" value="pro" label="Pro" />
-    <Radio name="plan-req" value="enterprise" label="Enterprise" />
+    <Radio name="plan-req" value="free" defaultChecked>Free</Radio>
+    <Radio name="plan-req" value="pro">Pro</Radio>
+    <Radio name="plan-req" value="enterprise">Enterprise</Radio>
   </Fieldset>
 </ComponentPreview>
 
 ## Error
 
-<ComponentPreview code={"import { Fieldset, Checkbox } from \"@geeklego/ui\"\n\n<div className=\"flex flex-col gap-6 max-w-md\">\n  <Fieldset\n    legend=\"Terms and conditions\"\n    error=\"You must accept at least one term to continue.\"\n  >\n    <Checkbox label=\"I agree to the terms of service\" />\n    <Checkbox label=\"I agree to the privacy policy\" />\n  </Fieldset>\n  <Fieldset\n    legend=\"Notification channels\"\n    variant=\"boxed\"\n    error=\"Please select at least one channel.\"\n  >\n    <Checkbox label=\"Email\" />\n    <Checkbox label=\"SMS\" />\n  </Fieldset>\n</div>"}>
+<ComponentPreview code={"import { Fieldset, Checkbox } from \"@geeklego/ui\"\n\n<div className=\"flex flex-col gap-6 max-w-md\">\n  <Fieldset\n    legend=\"Terms and conditions\"\n    error=\"You must accept at least one term to continue.\"\n  >\n    <Checkbox>I agree to the terms of service</Checkbox>\n    <Checkbox>I agree to the privacy policy</Checkbox>\n  </Fieldset>\n  <Fieldset\n    legend=\"Notification channels\"\n    variant=\"boxed\"\n    error=\"Please select at least one channel.\"\n  >\n    <Checkbox>Email</Checkbox>\n    <Checkbox>SMS</Checkbox>\n  </Fieldset>\n</div>"}>
   <div className="flex flex-col gap-6 max-w-md">
     <Fieldset
       legend="Terms and conditions"
       error="You must accept at least one term to continue."
     >
-      <Checkbox label="I agree to the terms of service" />
-      <Checkbox label="I agree to the privacy policy" />
+      <Checkbox>I agree to the terms of service</Checkbox>
+      <Checkbox>I agree to the privacy policy</Checkbox>
     </Fieldset>
     <Fieldset
       legend="Notification channels"
       variant="boxed"
       error="Please select at least one channel."
     >
-      <Checkbox label="Email" />
-      <Checkbox label="SMS" />
+      <Checkbox>Email</Checkbox>
+      <Checkbox>SMS</Checkbox>
     </Fieldset>
   </div>
 </ComponentPreview>
 
 ## Disabled
 
-<ComponentPreview code={"import { Fieldset, Checkbox, Radio } from \"@geeklego/ui\"\n\n<div className=\"flex flex-col gap-6 max-w-md\">\n  <Fieldset legend=\"Disabled group\" disabled hint=\"These options are currently unavailable.\">\n    <Checkbox label=\"Email notifications\" defaultChecked />\n    <Checkbox label=\"SMS notifications\" />\n  </Fieldset>\n  <Fieldset legend=\"Locked plan\" variant=\"boxed\" disabled>\n    <Radio name=\"locked-plan\" value=\"free\" label=\"Free\" defaultChecked />\n    <Radio name=\"locked-plan\" value=\"pro\" label=\"Pro\" />\n  </Fieldset>\n</div>"}>
+<ComponentPreview code={"import { Fieldset, Checkbox, Radio } from \"@geeklego/ui\"\n\n<div className=\"flex flex-col gap-6 max-w-md\">\n  <Fieldset legend=\"Disabled group\" disabled hint=\"These options are currently unavailable.\">\n    <Checkbox defaultChecked>Email notifications</Checkbox>\n    <Checkbox>SMS notifications</Checkbox>\n  </Fieldset>\n  <Fieldset legend=\"Locked plan\" variant=\"boxed\" disabled>\n    <Radio name=\"locked-plan\" value=\"free\" defaultChecked>Free</Radio>\n    <Radio name=\"locked-plan\" value=\"pro\">Pro</Radio>\n  </Fieldset>\n</div>"}>
   <div className="flex flex-col gap-6 max-w-md">
     <Fieldset legend="Disabled group" disabled hint="These options are currently unavailable.">
-      <Checkbox label="Email notifications" defaultChecked />
-      <Checkbox label="SMS notifications" />
+      <Checkbox defaultChecked>Email notifications</Checkbox>
+      <Checkbox>SMS notifications</Checkbox>
     </Fieldset>
     <Fieldset legend="Locked plan" variant="boxed" disabled>
-      <Radio name="locked-plan" value="free" label="Free" defaultChecked />
-      <Radio name="locked-plan" value="pro" label="Pro" />
+      <Radio name="locked-plan" value="free" defaultChecked>Free</Radio>
+      <Radio name="locked-plan" value="pro">Pro</Radio>
     </Fieldset>
   </div>
 </ComponentPreview>
 
 ## Dark Mode
 
-<ComponentPreview code={"import { Fieldset, Checkbox, Radio } from \"@geeklego/ui\"\n\n<div\n  data-theme=\"dark\"\n  className=\"flex flex-col gap-6 p-8 bg-[var(--color-bg-primary)] rounded-[var(--radius-component-lg)] max-w-2xl\"\n>\n  <Fieldset legend=\"Communication preferences\" hint=\"Choose how we contact you.\">\n    <Checkbox label=\"Email notifications\" defaultChecked />\n    <Checkbox label=\"Weekly digest\" />\n  </Fieldset>\n  <Fieldset legend=\"Subscription plan\" variant=\"boxed\" required>\n    <Radio name=\"dm-plan\" value=\"free\" label=\"Free\" defaultChecked />\n    <Radio name=\"dm-plan\" value=\"pro\" label=\"Pro\" />\n  </Fieldset>\n  <Fieldset legend=\"Notification channels\" error=\"Please select at least one channel.\">\n    <Checkbox label=\"Email\" />\n    <Checkbox label=\"SMS\" />\n  </Fieldset>\n</div>"}>
+<ComponentPreview code={"import { Fieldset, Checkbox, Radio } from \"@geeklego/ui\"\n\n<div\n  data-theme=\"dark\"\n  className=\"flex flex-col gap-6 p-8 bg-[var(--color-bg-primary)] rounded-[var(--radius-component-lg)] max-w-2xl\"\n>\n  <Fieldset legend=\"Communication preferences\" hint=\"Choose how we contact you.\">\n    <Checkbox defaultChecked>Email notifications</Checkbox>\n    <Checkbox>Weekly digest</Checkbox>\n  </Fieldset>\n  <Fieldset legend=\"Subscription plan\" variant=\"boxed\" required>\n    <Radio name=\"dm-plan\" value=\"free\" defaultChecked>Free</Radio>\n    <Radio name=\"dm-plan\" value=\"pro\">Pro</Radio>\n  </Fieldset>\n  <Fieldset legend=\"Notification channels\" error=\"Please select at least one channel.\">\n    <Checkbox>Email</Checkbox>\n    <Checkbox>SMS</Checkbox>\n  </Fieldset>\n</div>"}>
   <div
     data-theme="dark"
     className="flex flex-col gap-6 p-8 bg-[var(--color-bg-primary)] rounded-[var(--radius-component-lg)] max-w-2xl"
   >
     <Fieldset legend="Communication preferences" hint="Choose how we contact you.">
-      <Checkbox label="Email notifications" defaultChecked />
-      <Checkbox label="Weekly digest" />
+      <Checkbox defaultChecked>Email notifications</Checkbox>
+      <Checkbox>Weekly digest</Checkbox>
     </Fieldset>
     <Fieldset legend="Subscription plan" variant="boxed" required>
-      <Radio name="dm-plan" value="free" label="Free" defaultChecked />
-      <Radio name="dm-plan" value="pro" label="Pro" />
+      <Radio name="dm-plan" value="free" defaultChecked>Free</Radio>
+      <Radio name="dm-plan" value="pro">Pro</Radio>
     </Fieldset>
     <Fieldset legend="Notification channels" error="Please select at least one channel.">
-      <Checkbox label="Email" />
-      <Checkbox label="SMS" />
+      <Checkbox>Email</Checkbox>
+      <Checkbox>SMS</Checkbox>
     </Fieldset>
   </div>
 </ComponentPreview>

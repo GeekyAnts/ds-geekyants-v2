@@ -222,8 +222,7 @@ export const FileUpload = memo(forwardRef<HTMLDivElement, FileUploadProps>(
     maxFiles,
     maxFileSize,
     disabled = false,
-    error = false,
-    errorMessage,
+    error,
     hint,
     files: controlledFiles,
     onFilesChange,
@@ -346,8 +345,8 @@ export const FileUpload = memo(forwardRef<HTMLDivElement, FileUploadProps>(
     ].filter(Boolean).join(' '), [className]);
 
     const errorProps = useMemo(
-      () => getErrorFieldProps(error && !!errorMessage, errorId),
-      [error, errorMessage, errorId],
+      () => getErrorFieldProps(!!error, errorId),
+      [error, errorId],
     );
 
     // ── Resolved i18n strings ────────────────────────────────────────────
@@ -455,13 +454,13 @@ export const FileUpload = memo(forwardRef<HTMLDivElement, FileUploadProps>(
         )}
 
         {/* Error message */}
-        {error && errorMessage && (
+        {error && (
           <p
             id={errorId}
             role="alert"
             className="mt-[var(--file-upload-gap)] text-body-sm text-[var(--file-upload-item-error-color)]"
           >
-            {errorMessage}
+            {error}
           </p>
         )}
       </div>

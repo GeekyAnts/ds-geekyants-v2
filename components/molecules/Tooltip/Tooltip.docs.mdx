@@ -81,6 +81,42 @@ level: molecule
   </div>
 </ComponentPreview>
 
+## Edge Cases
+
+<ComponentPreview code={"import { Tooltip, Button } from \"@geeklego/ui\"\nimport { Star } from \"lucide-react\"\n\n<div className=\"flex flex-col gap-3 p-4 min-h-[300px]\">\n  <div className=\"flex items-center gap-2\">\n    <Tooltip content=\"This tooltip contains a longer description that spans multiple lines to verify the panel wraps gracefully without overflowing the viewport.\" delayMs={0}>\n      <Button variant=\"secondary\" size=\"sm\">Long content</Button>\n    </Tooltip>\n    <span className=\"text-body-xs text-[var(--color-text-tertiary)]\">Multi-line wrap</span>\n  </div>\n\n  <div className=\"flex items-center gap-2\">\n    <Tooltip content=\"This action is unavailable because you don't have the required permissions.\" placement=\"right\" delayMs={0}>\n      <span tabIndex={0} role=\"button\" aria-disabled=\"true\" className=\"inline-flex items-center gap-[var(--button-gap)] h-[var(--button-height-md)] px-[var(--button-px-md)] rounded-[var(--button-radius)] bg-[var(--button-bg-disabled)] text-[var(--button-text-disabled)] text-button-md cursor-not-allowed focus-visible:outline-none focus-visible:focus-ring\">\n        Restricted\n      </span>\n    </Tooltip>\n    <span className=\"text-body-xs text-[var(--color-text-tertiary)]\">Disabled element wrapper pattern</span>\n  </div>\n\n  <div className=\"flex items-center gap-2\">\n    <Tooltip content={<Star size={16} />} i18nStrings={{ panelLabel: 'Starred item indicator' }} placement=\"bottom\" delayMs={0}>\n      <Button variant=\"ghost\" size=\"sm\" iconOnly leftIcon={<Star size={16} />}>Star</Button>\n    </Tooltip>\n    <span className=\"text-body-xs text-[var(--color-text-tertiary)]\">Non-textual content — panelLabel provides accessible name</span>\n  </div>\n\n  <div className=\"flex items-center gap-2\">\n    <Tooltip content=\"You should never see this\" disabled delayMs={0}>\n      <Button variant=\"outline\" size=\"sm\">No tooltip</Button>\n    </Tooltip>\n    <span className=\"text-body-xs text-[var(--color-text-tertiary)]\">disabled=true — tooltip suppressed</span>\n  </div>\n</div>"}>
+  <div className="flex flex-col gap-3 p-4 min-h-[300px]">
+    <div className="flex items-center gap-2">
+      <Tooltip content="This tooltip contains a longer description that spans multiple lines to verify the panel wraps gracefully without overflowing the viewport." delayMs={0}>
+        <Button variant="secondary" size="sm">Long content</Button>
+      </Tooltip>
+      <span className="text-body-xs text-[var(--color-text-tertiary)]">Multi-line wrap</span>
+    </div>
+
+    <div className="flex items-center gap-2">
+      <Tooltip content="This action is unavailable because you don't have the required permissions." placement="right" delayMs={0}>
+        <span tabIndex={0} role="button" aria-disabled="true" className="inline-flex items-center gap-[var(--button-gap)] h-[var(--button-height-md)] px-[var(--button-px-md)] rounded-[var(--button-radius)] bg-[var(--button-bg-disabled)] text-[var(--button-text-disabled)] text-button-md cursor-not-allowed focus-visible:outline-none focus-visible:focus-ring">
+          Restricted
+        </span>
+      </Tooltip>
+      <span className="text-body-xs text-[var(--color-text-tertiary)]">Disabled element wrapper pattern</span>
+    </div>
+
+    <div className="flex items-center gap-2">
+      <Tooltip content={<Star size={16} />} i18nStrings={{ panelLabel: 'Starred item indicator' }} placement="bottom" delayMs={0}>
+        <Button variant="ghost" size="sm" iconOnly leftIcon={<Star size={16} />}>Star</Button>
+      </Tooltip>
+      <span className="text-body-xs text-[var(--color-text-tertiary)]">Non-textual content — panelLabel provides accessible name</span>
+    </div>
+
+    <div className="flex items-center gap-2">
+      <Tooltip content="You should never see this" disabled delayMs={0}>
+        <Button variant="outline" size="sm">No tooltip</Button>
+      </Tooltip>
+      <span className="text-body-xs text-[var(--color-text-tertiary)]">disabled=true — tooltip suppressed</span>
+    </div>
+  </div>
+</ComponentPreview>
+
 ## Dark Mode
 
 <ComponentPreview code={"import { Tooltip, Button } from \"@geeklego/ui\"\n\n<div\n  data-theme=\"dark\"\n  className=\"flex items-center gap-6 p-8 bg-[var(--color-bg-primary)] rounded-[var(--radius-component-lg)] max-w-2xl\"\n>\n  <Tooltip content=\"Dark mode tooltip — panel inverts against the dark surface\" delayMs={0}>\n    <Button variant=\"primary\">Hover me</Button>\n  </Tooltip>\n  <Tooltip content=\"Bottom placement in dark mode\" placement=\"bottom\" delayMs={0}>\n    <Button variant=\"secondary\">Bottom</Button>\n  </Tooltip>\n  <Tooltip content=\"Right placement in dark mode\" placement=\"right\" delayMs={0}>\n    <Button variant=\"outline\">Right</Button>\n  </Tooltip>\n</div>"}>

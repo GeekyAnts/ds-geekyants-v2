@@ -27,7 +27,7 @@ const meta: Meta<typeof FileInput> = {
       description: 'Height and typography scale',
     },
     error: { control: 'boolean', description: 'Error state' },
-    isLoading: { control: 'boolean', description: 'Loading/uploading state' },
+    loading: { control: 'boolean', description: 'Loading/uploading state' },
     disabled: { control: 'boolean', description: 'Disabled state' },
     multiple: { control: 'boolean', description: 'Allow multiple file selection' },
     accept: { control: 'text', description: 'Accepted file types (e.g. "image/*,.pdf")' },
@@ -90,7 +90,7 @@ export const States: Story = {
       </div>
       <div className="flex flex-col gap-[var(--spacing-component-xs)]">
         <span className="text-body-sm text-[var(--color-text-secondary)]">Loading</span>
-        <FileInput isLoading aria-label="Upload document" />
+        <FileInput loading aria-label="Upload document" />
       </div>
       <div className="flex flex-col gap-[var(--spacing-component-xs)]">
         <span className="text-body-sm text-[var(--color-text-secondary)]">Disabled</span>
@@ -120,7 +120,7 @@ export const DarkMode: Story = {
           </div>
         ))}
         <FileInput error aria-label="Upload with error — dark" />
-        <FileInput isLoading aria-label="Upload loading — dark" />
+        <FileInput loading aria-label="Upload loading — dark" />
         <FileInput disabled aria-label="Upload disabled — dark" />
       </div>
     </div>
@@ -133,7 +133,7 @@ export const Playground: Story = {
     variant: 'default',
     size: 'md',
     error: false,
-    isLoading: false,
+    loading: false,
     disabled: false,
     multiple: false,
     accept: '',
@@ -211,7 +211,7 @@ export const Accessibility: Story = {
       <div className="flex flex-col gap-[var(--spacing-component-xs)]">
         <span className="text-body-sm text-[var(--color-text-secondary)]">Loading (aria-busy)</span>
         <FileInput
-          isLoading
+          loading
           aria-label="Upload document"
           aria-busy="true"
         />

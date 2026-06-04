@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { Label } from './Label';
+import { Input } from '../Input/Input';
 
 const meta: Meta<typeof Label> = {
   title: 'Atoms/Label',
@@ -158,47 +159,25 @@ export const Accessibility: Story = {
       {/* Default: label associated to input via htmlFor/id */}
       <div className="flex flex-col gap-[var(--spacing-component-xs)]">
         <Label htmlFor="a11y-email">Email address</Label>
-        <input
-          id="a11y-email"
-          type="email"
-          className="h-[var(--size-component-md)] px-[var(--spacing-component-md)] rounded-[var(--radius-component-md)] border border-[var(--color-border-default)] text-body-sm text-[var(--color-text-primary)] bg-[var(--color-bg-primary)]"
-          placeholder="you@example.com"
-        />
+        <Input id="a11y-email" type="email" size="md" placeholder="you@example.com" />
       </div>
 
       {/* Required: asterisk hidden from AT, "(required)" announced via sr-only */}
       <div className="flex flex-col gap-[var(--spacing-component-xs)]">
         <Label htmlFor="a11y-password" required>Password</Label>
-        <input
-          id="a11y-password"
-          type="password"
-          required
-          aria-required="true"
-          className="h-[var(--size-component-md)] px-[var(--spacing-component-md)] rounded-[var(--radius-component-md)] border border-[var(--color-border-default)] text-body-sm text-[var(--color-text-primary)] bg-[var(--color-bg-primary)]"
-        />
+        <Input id="a11y-password" type="password" size="md" required aria-required="true" />
       </div>
 
       {/* Optional: "(Optional)" text readable by screen readers */}
       <div className="flex flex-col gap-[var(--spacing-component-xs)]">
         <Label htmlFor="a11y-middle" optional>Middle name</Label>
-        <input
-          id="a11y-middle"
-          type="text"
-          className="h-[var(--size-component-md)] px-[var(--spacing-component-md)] rounded-[var(--radius-component-md)] border border-[var(--color-border-default)] text-body-sm text-[var(--color-text-primary)] bg-[var(--color-bg-primary)]"
-        />
+        <Input id="a11y-middle" type="text" size="md" />
       </div>
 
       {/* Error: label color changes; aria-invalid belongs on the input, not the label */}
       <div className="flex flex-col gap-[var(--spacing-component-xs)]">
         <Label htmlFor="a11y-username" hasError required>Username</Label>
-        <input
-          id="a11y-username"
-          type="text"
-          aria-invalid="true"
-          aria-describedby="a11y-username-error"
-          className="h-[var(--size-component-md)] px-[var(--spacing-component-md)] rounded-[var(--radius-component-md)] border border-[var(--color-border-error)] text-body-sm text-[var(--color-text-primary)] bg-[var(--color-bg-primary)]"
-          defaultValue="taken@user"
-        />
+        <Input id="a11y-username" type="text" size="md" error aria-describedby="a11y-username-error" defaultValue="taken@user" />
         <span
           id="a11y-username-error"
           className="text-label-sm text-[var(--color-status-error)]"

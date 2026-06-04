@@ -6,7 +6,7 @@ level: atom
 
 ## Variants
 
-<ComponentPreview code={"import { BreadcrumbItem } from \"@geeklego/ui\"\nimport { Home } from \"lucide-react\"\n\n<ol className=\"flex items-center\">\n  <BreadcrumbItem href=\"#\">Products</BreadcrumbItem>\n  <BreadcrumbItem current>Dashboard</BreadcrumbItem>\n  <BreadcrumbItem href=\"#\" disabled>Settings</BreadcrumbItem>\n  <BreadcrumbItem href=\"#\" leftIcon={<Home size={14} />}>Home</BreadcrumbItem>\n</ol>"}>
+<ComponentPreview code={"import { BreadcrumbItem } from \"@geeklego/ui\"\nimport { Home } from \"lucide-react\"\n\n<ol className=\"flex items-center\">\n  <BreadcrumbItem href=\"#\">Products</BreadcrumbItem>\n  <BreadcrumbItem isActive>Dashboard</BreadcrumbItem>\n  <BreadcrumbItem href=\"#\" disabled>Settings</BreadcrumbItem>\n  <BreadcrumbItem href=\"#\" leftIcon={<Home size={14} />}>Home</BreadcrumbItem>\n</ol>"}>
   <div className="flex flex-col gap-4">
     <div className="flex items-center gap-3">
       <span className="text-body-sm text-secondary w-20 shrink-0">Link</span>
@@ -17,7 +17,7 @@ level: atom
     <div className="flex items-center gap-3">
       <span className="text-body-sm text-secondary w-20 shrink-0">Current</span>
       <ol className="flex items-center">
-        <BreadcrumbItem current>Dashboard</BreadcrumbItem>
+        <BreadcrumbItem isActive>Dashboard</BreadcrumbItem>
       </ol>
     </div>
     <div className="flex items-center gap-3">
@@ -62,7 +62,7 @@ level: atom
 
 ## States
 
-<ComponentPreview code={"import { BreadcrumbItem } from \"@geeklego/ui\"\n\n{/* Link — focusable anchor */}\n<BreadcrumbItem href=\"/home\">Home</BreadcrumbItem>\n\n{/* Current page — aria-current=\"page\", non-interactive */}\n<BreadcrumbItem current>Dashboard</BreadcrumbItem>\n\n{/* Disabled — non-interactive, visually muted */}\n<BreadcrumbItem href=\"#\" disabled>Settings</BreadcrumbItem>"}>
+<ComponentPreview code={"import { BreadcrumbItem } from \"@geeklego/ui\"\n\n{/* Link — focusable anchor */}\n<BreadcrumbItem href=\"/home\">Home</BreadcrumbItem>\n\n{/* Current page — aria-current=\"page\", non-interactive */}\n<BreadcrumbItem isActive>Dashboard</BreadcrumbItem>\n\n{/* Disabled — non-interactive, visually muted */}\n<BreadcrumbItem href=\"#\" disabled>Settings</BreadcrumbItem>"}>
   <div className="flex flex-col gap-4">
     <div className="flex items-center gap-3">
       <span className="text-body-sm text-secondary w-20 shrink-0">Default</span>
@@ -73,7 +73,7 @@ level: atom
     <div className="flex items-center gap-3">
       <span className="text-body-sm text-secondary w-20 shrink-0">Current</span>
       <ol className="flex items-center">
-        <BreadcrumbItem current>Dashboard</BreadcrumbItem>
+        <BreadcrumbItem isActive>Dashboard</BreadcrumbItem>
       </ol>
     </div>
     <div className="flex items-center gap-3">
@@ -87,15 +87,15 @@ level: atom
 
 ## Dark Mode
 
-<ComponentPreview code={"<div data-theme=\"dark\" className=\"flex flex-col gap-4 p-8 bg-primary rounded-[var(--radius-component-lg)] max-w-2xl\">\n  <ol className=\"flex items-center\">\n    <BreadcrumbItem href=\"#\">Products</BreadcrumbItem>\n    <BreadcrumbItem current>Dashboard</BreadcrumbItem>\n  </ol>\n</div>"}>
-  <div data-theme="dark" className="flex flex-col gap-4 p-8 bg-primary rounded-[var(--radius-component-lg)] max-w-2xl">
+<ComponentPreview code={"<div data-theme=\"dark\" className=\"flex flex-col gap-4 p-8 bg-[var(--color-bg-primary)] rounded-[var(--radius-component-lg)] max-w-2xl\">\n  <ol className=\"flex items-center\">\n    <BreadcrumbItem href=\"#\">Products</BreadcrumbItem>\n    <BreadcrumbItem isActive>Dashboard</BreadcrumbItem>\n  </ol>\n</div>"}>
+  <div data-theme="dark" className="flex flex-col gap-4 p-8 bg-[var(--color-bg-primary)] rounded-[var(--radius-component-lg)] max-w-2xl">
     <div className="flex items-center gap-3">
       <span className="text-body-sm text-secondary w-20 shrink-0">Link</span>
       <ol className="flex items-center"><BreadcrumbItem href="#">Products</BreadcrumbItem></ol>
     </div>
     <div className="flex items-center gap-3">
       <span className="text-body-sm text-secondary w-20 shrink-0">Current</span>
-      <ol className="flex items-center"><BreadcrumbItem current>Dashboard</BreadcrumbItem></ol>
+      <ol className="flex items-center"><BreadcrumbItem isActive>Dashboard</BreadcrumbItem></ol>
     </div>
     <div className="flex items-center gap-3">
       <span className="text-body-sm text-secondary w-20 shrink-0">Disabled</span>
@@ -113,7 +113,7 @@ level: atom
 <PropsTable
   rows={[
     { name: "href", type: "string", defaultValue: "—", description: "URL this item links to. When provided (and not current/disabled), renders as an anchor." },
-    { name: "current", type: "boolean", defaultValue: "false", description: "Marks as the current page. Renders non-interactive text with aria-current='page'." },
+    { name: "isActive", type: "boolean", defaultValue: "false", description: "Marks as the current page. Renders non-interactive text with aria-current='page'." },
     { name: "disabled", type: "boolean", defaultValue: "false", description: "Non-interactive and visually muted." },
     { name: "size", type: "'sm' | 'md' | 'lg'", defaultValue: "'md'", description: "Text size." },
     { name: "leftIcon", type: "ReactNode", defaultValue: "—", description: "Optional icon displayed before the label." },
@@ -127,7 +127,7 @@ level: atom
 ## Accessibility
 
 - Link items render as `<a>` — focusable, supports Enter key activation
-- `current` items render as non-interactive `<span>` with `aria-current="page"`
+- `isActive` items render as non-interactive `<span>` with `aria-current="page"`
 - `disabled` items are non-interactive with `aria-disabled="true"` and visually muted
 - Icon nodes are `aria-hidden="true"` — the text label carries full meaning
 - Wrap multiple `BreadcrumbItem` components in an `<ol>` element for proper list semantics

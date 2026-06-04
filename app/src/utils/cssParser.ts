@@ -206,6 +206,14 @@ function applyThemeToken(name: string, value: string, primitives: any): void {
     return
   }
 
+  // Size scale: --size-{n} (only numeric/simple names, not size-avatar-*, size-component-* etc.)
+  // In @theme the actual tokens are --size-6, --size-8, --size-10, etc.
+  const sizeScaleMatch = name.match(/^size-(\d+)$/)
+  if (sizeScaleMatch) {
+    primitives.sizeScale[sizeScaleMatch[1]] = value
+    return
+  }
+
   // Icon size: --icon-size-{name}
   const iconSizeMatch = name.match(/^icon-size-(.+)$/)
   if (iconSizeMatch) {
@@ -451,6 +459,7 @@ export function parseGeeklegoCss(cssText: string): GeeklegoTokens {
     zIndex: {},
     duration: {},
     easing: {},
+    sizeScale: {},
     iconSize: {},
     colorShadowNeutral: '',
     breakpoints: {},

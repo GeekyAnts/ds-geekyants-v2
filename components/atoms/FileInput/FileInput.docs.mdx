@@ -53,9 +53,9 @@ level: atom
 
 ## Loading
 
-<ComponentPreview code={"import { FileInput } from \"@geeklego/ui\"\n\n<FileInput isLoading aria-label=\"Uploading document\" />"}>
+<ComponentPreview code={"import { FileInput } from \"@geeklego/ui\"\n\n<FileInput loading aria-label=\"Uploading document\" />"}>
   <div className="max-w-sm">
-    <FileInput isLoading aria-label="Uploading document" />
+    <FileInput loading aria-label="Uploading document" />
   </div>
 </ComponentPreview>
 
@@ -84,14 +84,14 @@ level: atom
 
 ## Dark Mode
 
-<ComponentPreview code={"<div data-theme=\"dark\" className=\"bg-primary p-8 rounded-[var(--radius-component-lg)]\">\n  <FileInput variant=\"default\" aria-label=\"Upload document\" />\n  <FileInput variant=\"filled\" aria-label=\"Upload document\" />\n  <FileInput variant=\"ghost\" aria-label=\"Upload document\" />\n  <FileInput error aria-label=\"Upload document\" />\n  <FileInput disabled aria-label=\"Upload document\" />\n</div>"}>
-  <div data-theme="dark" className="bg-primary p-8 rounded-[var(--radius-component-lg)] max-w-2xl">
+<ComponentPreview code={"<div data-theme=\"dark\" className=\"bg-[var(--color-bg-primary)] p-8 rounded-[var(--radius-component-lg)]\">\n  <FileInput variant=\"default\" aria-label=\"Upload document\" />\n  <FileInput variant=\"filled\" aria-label=\"Upload document\" />\n  <FileInput variant=\"ghost\" aria-label=\"Upload document\" />\n  <FileInput error aria-label=\"Upload document\" />\n  <FileInput disabled aria-label=\"Upload document\" />\n</div>"}>
+  <div data-theme="dark" className="bg-[var(--color-bg-primary)] p-8 rounded-[var(--radius-component-lg)] max-w-2xl">
     <div className="flex flex-col gap-4">
       <FileInput variant="default" aria-label="Upload — default dark" />
       <FileInput variant="filled" aria-label="Upload — filled dark" />
       <FileInput variant="ghost" aria-label="Upload — ghost dark" />
       <FileInput error aria-label="Upload with error — dark" />
-      <FileInput isLoading aria-label="Upload loading — dark" />
+      <FileInput loading aria-label="Upload loading — dark" />
       <FileInput disabled aria-label="Upload disabled — dark" />
     </div>
   </div>
@@ -104,7 +104,7 @@ level: atom
     { name: "variant", type: "'default' | 'filled' | 'ghost'", defaultValue: "'default'", description: "Visual style variant." },
     { name: "size", type: "'sm' | 'md' | 'lg'", defaultValue: "'md'", description: "Height and typography scale." },
     { name: "error", type: "boolean", defaultValue: "false", description: "Error state — shows error border and sets aria-invalid." },
-    { name: "isLoading", type: "boolean", defaultValue: "false", description: "Loading state — shows spinner in browse area and disables interaction." },
+    { name: "loading", type: "boolean", defaultValue: "false", description: "Loading state — shows spinner in browse area and disables interaction." },
     { name: "i18nStrings", type: "FileInputI18nStrings", defaultValue: "—", description: "i18n string overrides for placeholder, browse label, and multi-file label." },
     { name: "wrapperClassName", type: "string", defaultValue: "—", description: "Additional class names applied to the outer wrapper element." },
     { name: "multiple", type: "boolean", defaultValue: "false", description: "Allow multiple file selection (native HTML attribute)." },

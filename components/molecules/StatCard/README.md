@@ -14,7 +14,7 @@ A single KPI metric card built on `<article>` + `<dl>` semantics. Displays a lab
 | `icon` | `ReactNode` | — | Optional icon displayed top-right. Pass a Lucide icon node. |
 | `variant` | `'elevated' \| 'outlined' \| 'filled' \| 'ghost'` | `'elevated'` | Visual container style. |
 | `size` | `'sm' \| 'md' \| 'lg'` | `'md'` | Typography and spacing scale. |
-| `isLoading` | `boolean` | `false` | Shows a spinner and suppresses metric content. |
+| `loading` | `boolean` | `false` | Shows a spinner and suppresses metric content. |
 | `i18nStrings` | `StatCardI18nStrings` | — | Per-instance string overrides for SR labels. |
 
 ## Tokens Used
@@ -90,7 +90,7 @@ import { DollarSign } from 'lucide-react';
 <StatCard
   label="Active Sessions"
   value="—"
-  isLoading
+  loading
 />
 
 // Dashboard grid

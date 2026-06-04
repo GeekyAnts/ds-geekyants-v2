@@ -14,7 +14,7 @@ export interface TextareaProps extends Omit<TextareaHTMLAttributes<HTMLTextAreaE
   /** Error state — shows error border and sets aria-invalid. */
   error?: boolean;
   /** Loading state — shows spinner and disables interaction. */
-  isLoading?: boolean;
+  loading?: boolean;
   /** Number of visible text rows. Defaults to 4. */
   rows?: number;
   /** Additional class names applied to the outer wrapper element. */

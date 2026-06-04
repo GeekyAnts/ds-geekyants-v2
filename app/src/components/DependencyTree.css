@@ -1,0 +1,139 @@
+/* ─── Dependency Tree Styles ───────────────────────────────────────────────── */
+
+.ed-dependency-tree {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90%;
+  max-width: 800px;
+  max-height: 80vh;
+  background-color: var(--ed-surface);
+  border: 1px solid var(--ed-border);
+  border-radius: var(--ed-radius-card);
+  box-shadow: 0 24px 64px var(--ed-nav-scrim);
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+}
+
+.ed-dependency-tree__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-6) var(--spacing-8);
+  border-bottom: 1px solid var(--ed-border);
+  flex-shrink: 0;
+}
+
+.ed-dependency-tree__title {
+  font-size: var(--ed-font-size-md);
+  font-weight: 600;
+  color: var(--ed-text-primary);
+  margin: 0;
+}
+
+.ed-dependency-tree__close-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-2);
+  color: var(--ed-text-muted);
+  background: none;
+  border: none;
+  font-size: var(--ed-font-size-lg);
+  cursor: pointer;
+}
+
+.ed-dependency-tree__close-btn:hover {
+  color: var(--ed-text-primary);
+}
+
+.ed-dependency-tree__info {
+  padding: var(--spacing-4) var(--spacing-8);
+  border-bottom: 1px solid var(--ed-border);
+  flex-shrink: 0;
+}
+
+.ed-dependency-tree__info p {
+  margin: 0 0 var(--spacing-2) 0;
+  font-size: var(--ed-font-size-sm);
+  color: var(--ed-text-secondary);
+}
+
+.ed-dependency-tree__path {
+  font-family: var(--font-family-mono);
+  color: var(--ed-text-tertiary);
+  font-size: var(--ed-font-size-xs);
+}
+
+.ed-dependency-tree__content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--spacing-6) var(--spacing-8);
+}
+
+.ed-dependency-tree__empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: var(--ed-text-muted);
+  font-size: var(--ed-font-size-sm);
+}
+
+.ed-dependency-tree__node {
+  margin-bottom: var(--spacing-2);
+}
+
+.ed-dependency-tree__node-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2);
+  border-radius: var(--ed-radius-chip);
+  transition: background-color 0.15s;
+}
+
+.ed-dependency-tree__node-header:hover {
+  background-color: var(--ed-secondary);
+}
+
+.ed-dependency-tree__node-header--highlighted {
+  background-color: var(--ed-accent);
+  color: var(--ed-canvas);
+}
+
+.ed-dependency-tree__node-header--highlighted .ed-dependency-tree__toggle-btn {
+  color: var(--ed-canvas);
+}
+
+.ed-dependency-tree__toggle-btn {
+  background: none;
+  border: none;
+  color: var(--ed-text-tertiary);
+  font-size: var(--ed-font-size-xs);
+  cursor: pointer;
+  padding: 0;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ed-dependency-tree__toggle-btn:hover {
+  color: var(--ed-text-secondary);
+}
+
+.ed-dependency-tree__children {
+  margin-left: var(--spacing-4);
+}
+
+.ed-dependency-tree__footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: var(--spacing-6) var(--spacing-8);
+  border-top: 1px solid var(--ed-border);
+  flex-shrink: 0;
+}

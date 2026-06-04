@@ -12,10 +12,10 @@ A labeled date field molecule. Composes the `Label` and `Input` atoms into a sin
 |---|---|---|---|
 | `label` | `string` | — | **Required.** Label text shown above the input. |
 | `hint` | `string` | `undefined` | Helper text shown below the input when no error is present. |
-| `errorMessage` | `string` | `undefined` | Validation error message. Shown instead of hint; sets the input to its error state and announces via `role="alert"`. |
+| `error` | `string` | `undefined` | Validation error message. Shown instead of hint; sets the input to its error state and announces via `role="alert"`. |
 | `size` | `'sm' \| 'md' \| 'lg'` | `'md'` | Height and typography scale. |
 | `variant` | `'default' \| 'filled' \| 'flushed' \| 'unstyled'` | `'default'` | Visual style variant. |
-| `isLoading` | `boolean` | `false` | Shows a spinner in the field and disables interaction. |
+| `loading` | `boolean` | `false` | Shows a spinner in the field and disables interaction. |
 | `disabled` | `boolean` | `false` | Mutes the field and prevents interaction. Label also mirrors the disabled state. |
 | `required` | `boolean` | `false` | Marks the field as required (asterisk on label, `aria-required` on input). |
 | `id` | `string` | auto | ID for the underlying `<input>`. Auto-generated when omitted; label `htmlFor` is always kept in sync. |
@@ -82,9 +82,9 @@ The visual states of the input control itself (borders, backgrounds, focus ring,
 | State | How to trigger |
 |---|---|
 | Default | No special props |
-| Error | `errorMessage="..."` — drives error border on Input, error text color on Label, `role="alert"` paragraph |
+| Error | `error="..."` — drives error border on Input, error text color on Label, `role="alert"` paragraph |
 | Disabled | `disabled` — muted input and label, no hover/active response |
-| Loading | `isLoading` — spinner in field, disabled interaction |
+| Loading | `loading` — spinner in field, disabled interaction |
 | Required | `required` — asterisk on label, `aria-required` on input |
 
 ---
@@ -97,11 +97,11 @@ The visual states of the input control itself (borders, backgrounds, focus ring,
 |---|---|---|
 | `htmlFor` | `<label>` | Matches `<input>` `id` (auto-generated or provided) |
 | `aria-required` | `<input>` | `true` when `required` prop is set |
-| `aria-disabled` | `<input>` | `true` when `disabled` or `isLoading` |
-| `aria-invalid` | `<input>` | `"true"` when `errorMessage` is set (via `getErrorFieldProps`) |
+| `aria-disabled` | `<input>` | `true` when `disabled` or `loading` |
+| `aria-invalid` | `<input>` | `"true"` when `error` is set (via `getErrorFieldProps`) |
 | `aria-describedby` | `<input>` | Points to hint `<p>` when hint is shown; points to error `<p>` when error is set |
 | `role="alert"` | error `<p>` | Announces error message immediately when it appears |
-| `aria-busy` | `<input>` | `true` when `isLoading` |
+| `aria-busy` | `<input>` | `true` when `loading` |
 
 ### Keyboard interaction
 
@@ -156,7 +156,7 @@ const validate = (v: string) => {
     setValue(e.target.value);
     setError(validate(e.target.value));
   }}
-  errorMessage={error}
+  error={error}
   required
 />
 ```

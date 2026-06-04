@@ -12,7 +12,7 @@ A multi-line text input atom built on the native `<textarea>` element. Inherits 
 | `size` | `'sm' \| 'md' \| 'lg'` | `'md'` | Padding and typography scale. |
 | `resize` | `'none' \| 'vertical' \| 'horizontal' \| 'both'` | `'vertical'` | Resize handle behaviour. |
 | `error` | `boolean` | `false` | Error state — error border + `aria-invalid`. |
-| `isLoading` | `boolean` | `false` | Loading state — shows spinner, disables interaction. |
+| `loading` | `boolean` | `false` | Loading state — shows spinner, disables interaction. |
 | `rows` | `number` | `4` | Number of visible text rows (native `rows` attribute). |
 | `wrapperClassName` | `string` | — | Extra classes on the outer wrapper `<div>`. |
 | `disabled` | `boolean` | — | Disabled state via native attribute + `aria-disabled`. |
@@ -116,9 +116,9 @@ Height is determined by the `rows` prop (native textarea behaviour) combined wit
 
 | Attribute | When set | Value |
 |---|---|---|
-| `aria-disabled` | `disabled` or `isLoading` | `true` |
+| `aria-disabled` | `disabled` or `loading` | `true` |
 | `aria-required` | `required` prop | `true` |
-| `aria-busy` | `isLoading` | `true` |
+| `aria-busy` | `loading` | `true` |
 | `aria-invalid` | `error` | `"true"` |
 | `aria-describedby` | `error` | `"{id}-error"` — wire the error message element to this ID |
 

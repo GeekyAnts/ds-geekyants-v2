@@ -84,15 +84,43 @@ Stories ARE the tests. There are no separate unit test files.
 
 ## Token Editor App (`app/`)
 
-The token editor is a full React + Vite app for editing the design system visually. It has 6 tabs: Primitives, Semantics, Components, Typography, Export, and Responsive.
+The token editor is a full React + Vite app for editing design tokens visually. It uses a **tri-pane shell** (`EditorShell.tsx`) with the following layout:
+
+```
+┌─────────────────────────────────────────────┐
+│ Header                                      │  56px
+├──────────┬──────────────────────┬───────────┤
+│          │                      │           │
+│ NavRail  │  ContextPane         │ Inspector │  flex-1
+│  280px   │  flex-1              │   400px   │
+│          │                      │           │
+├──────────┴──────────────────────┴───────────┤
+│ PendingDrawer (collapsible)                 │
+└─────────────────────────────────────────────┘
+```
+
+- **Header** (`shell/Header/`) — top bar with logo, search trigger (⌘K), pending changes badge, preview theme toggle, and Export button
+- **NavRail** (`shell/NavRail/`) — left sidebar (280px) with search, recently edited, pinned tokens, and the 3-tier IA tree (Foundations / Semantic / Components)
+- **ContextPane** (`shell/ContextPane/`) — center area that reads `useRouter()` and dispatches to `CategoryPage`, `ComponentPage`, or `HomePage`
+- **Inspector** (`shell/Inspector/`) — right panel (400px) showing selected token details, value editor, alias chain, and "Used By" references
+- **PendingDrawer** (`shell/PendingDrawer/`) — collapsible bottom drawer showing staged (uncommitted) edits with impact analysis
 
 Key internals:
-- **Custom Vite plugin** (`tokenSavePlugin()` in `vite.config.ts`) — provides API endpoints (`/api/load-tokens`, `/api/save-tokens`, `/api/component-tokens`, etc.) that parse `geeklego.css` into a JS token object and write it back
+- **Routing** — hash-based routing via `RouterProvider` (`routing/`), supports foundations/semantic/components/token/home route types
+- **Custom Vite plugin** (`vite.config.ts`) — provides API endpoints (`/api/load-tokens`, `/api/save-tokens`, `/api/component-tokens`, etc.) that parse `geeklego.css` into a JS token object and write it back
 - **Live reload** — watches `geeklego.css` for changes and pushes updates to the browser via WebSocket
 - **Backup** — automatically maintains `geeklego.default.css` as a backup copy
-- **Validation** — detects broken `var()` references on save
-- **History** — undo/redo (max 50 entries) stored in localStorage under `geeklego-tokens`
-- **CSS generation** — `app/src/utils/cssGenerator.ts` converts token objects to CSS with cross-browser `color-mix()` fallbacks (hex-to-rgba for older browsers)
+- **Staging** (`state/staging.ts`) — all edits flow through a staging layer (in-memory Map + localStorage) before export; `stage()` / `unstage()` / `commitToExport()` / `discardAll()`
+- **Dependency graph** (`graph/build.ts`) — `buildTokenGraph()` extracts `var(--x)` references to build a directed graph of token dependencies
+- **IA classifier** (`ia/classify.ts`) — `classifyTokens()` maps token names to the 3-tier IA (Foundations / Semantic / Components)
+- **Recently edited** (`state/recentlyEdited.ts`) — tracks last 20 edited tokens with localStorage persistence
+- **Pinning** (`state/pinning.ts`) — pin/unpin tokens to the NavRail sidebar, persisted to localStorage
+- **Metadata** (`state/metadata.ts`) — per-token descriptions, categories, and notes
+- **Validation** (`validators/`) — drift detection, broken `var()` reference checks
+- **Command palette** (`components/CommandPalette.tsx`) — ⌘K searchable omnibox with special queries (`unused`, `broken`, `used by:Name`)
+- **Export modal** (`components/ExportModal.tsx`) — 4-step wizard (Review → Validation → Diff → Export) with snapshot management
+- **CSS generation** (`utils/cssGenerator.ts`) — converts token objects to CSS with cross-browser `color-mix()` fallbacks
+- **History** — undo/redo is handled per-session in the EditorShell via checkpoint snapshots
 
 ---
 
@@ -140,6 +168,8 @@ L5 — Pages       Import L4 templates + lower.
 
 A component at level N may only import components at level N-1 or lower. Same-level imports are invalid.
 
+**Exception for stories:** Atom `.stories.tsx` files may import other atom components for documentation/demo purposes. This exception exists because stories are documentation and tests, not component logic — importing another atom for a demo does not create architectural coupling.
+
 ---
 
 ## Component File Structure — 5 Files Per Component
@@ -170,7 +200,35 @@ Every component consists of exactly 5 files:
 // Wrong — inline styles, hardcoded values, bare arbitrary values like bg-[#6366f1] or h-[40px]
 ```
 
+### When Inline `style` IS Acceptable
+
+There are four cases where `style` prop is justified. All others must use `className`.
+
+1. **CSS custom property injection** — Bind a runtime-computed value to a `--var` that is consumed by a `className`:
+   ```tsx
+   // CSS custom property injection — dynamic user color drives swatch bg
+   style={{ '--swatch-value': color } as CSSProperties}
+   className="bg-[var(--swatch-value)]"
+   ```
+   The `style` prop must ONLY set `--custom-props` — never `background`, `color`, `width`, etc. directly.
+
+2. **Consumer `style` prop passthrough** — A wrapper component may forward a consumer-supplied `style` for layout overrides. Document with a comment.
+
+3. **SVG presentation attributes** — Use camelCase React props (`stopColor`, `fillOpacity`), not the `style` prop:
+   ```tsx
+   // Correct — SVG intrinsic prop
+   <stop stopColor={seriesColor} />
+   // Wrong — using style for an SVG presentation attribute
+   <stop style={{ stopColor: seriesColor }} />
+   ```
+
+4. **Dynamic data-driven positioning** — Values computed at runtime from geometry or data (tooltip `left`, thumb `top`, `flexGrow` from data values). Always pair with a comment.
+
+**Rule of thumb:** If the value in the `style` prop is `var(--something)`, it should be a className. If it's a genuinely dynamic value (user color, mouse position, data value, `getBoundingClientRect()`), use the CSS var injection pattern.
+
 ---
+
+## Available Semantic Token Groups
 
 ## Available Semantic Token Groups
 
@@ -206,9 +264,10 @@ React 19 · TypeScript 5.7+ · Tailwind CSS v4.2 · Vite 6 · Storybook 10 · Vi
 ## What Claude Code Should Never Do
 
 1. **Never hardcode a value** — every value comes from a token.
-2. **Never use inline `style` prop** for visual styling.
+2. **Never use inline `style` prop** for CSS property values (color, background, width, height, border, shadow, etc.). CSS custom property injection (`--var`) is the only acceptable `style` prop pattern for dynamic values that cannot be expressed as a class. See "When Inline style IS Acceptable" above.
 3. **Never use arbitrary Tailwind values** like `bg-[#6366f1]` or `h-[40px]`. Only `bg-[var(--token)]` (must include `var()` wrapper).
 4. **Never create a component token that references a primitive directly.** Chain: primitive → semantic → component.
+4.5. **Never create a separate `[data-theme="dark"]` component token block.** All component tokens must use unified `:root, [data-theme="dark"]` selector. Fix semantic tokens instead.
 5. **Never import a component from the same or higher level.**
 6. **Never create more or fewer than 5 files per component.**
 7. **Never skip writing component tokens** into `geeklego.css` before writing the component.
@@ -240,7 +299,7 @@ React 19 · TypeScript 5.7+ · Tailwind CSS v4.2 · Vite 6 · Storybook 10 · Vi
 33. **Never hardcode `-webkit-line-clamp`.** Use `.clamp-description`/`.clamp-body` or `.clamp-lines` with a component token.
 34. **Never apply `will-change` permanently.** Use `.perf-will-change-transform` (hover/focus only).
 35. **Never use index as sole React key in `.map()`.** Use a stable unique identifier.
-36. **Never skip `React.memo` on L1/L2 components.** Wrap with `memo(forwardRef(...))`.
+36. **Never skip `React.memo` on L1/L2 components.** Wrap with `memo(forwardRef(...))`. For L3+ organisms, use `memo(forwardRef(...))` for consistency; bare `memo()` allowed only when the component genuinely cannot accept a ref.
 37. **Never create a card-shell component without responsive layout protection.** Use `.card-shell`, `.card-header-row`, `.card-header-title`, `.card-metric-row`.
 38. **Never write a DarkMode story without `max-w-2xl`.**
 39. **Never hand-roll ARIA attribute objects.** Use helpers from `components/utils/accessibility/aria-helpers.ts`.
@@ -250,13 +309,15 @@ React 19 · TypeScript 5.7+ · Tailwind CSS v4.2 · Vite 6 · Storybook 10 · Vi
 43. **Never render `<a target="_blank">` without `rel="noopener noreferrer"`.** Use `getSafeExternalLinkProps()` from `components/utils/security/sanitize.ts` for any component that accepts a `target` prop or has an `external` concept.
 44. **Never accept a `href` prop on any component that renders `<a>` without importing `sanitizeHref`.** Even when the href is expected to be a fragment or relative path — sanitize unconditionally. The utility is a no-op on safe values.
 45. **Never name a component token with the property before the component name.** Always use `--{component}-{property}-{scale}` (e.g. `--avatar-size-md`), never `--{property}-{component}-{scale}` (e.g. `--size-avatar-md`).
+46. **Never define child-component tokens in a parent component's token block.** If Navbar renders NavItem and needs to override `--navitem-height` per size, add a CSS class rule (`.navbar-size-sm { --navitem-height: var(--size-component-sm); }`) — do NOT create intermediate tokens like `--navbar-item-height-sm` in the Navbar block. These pollute the child's namespace, become dead code when the child block is regenerated, and the CSS class rules that consume them may be silently missing.
+47. **Never create a component token whose value references another component's token.** Component tokens must only alias `:root`-level semantic tokens. Cross-component token references (e.g., `--textarea-text-placeholder: var(--input-text-placeholder)`) create horizontal coupling that silently breaks when the referenced component is regenerated. Every `var()` in a component token's value must resolve to a `:root` semantic. Detection: `rg '--[a-z]+-[a-z]+-.*var\(--[a-z]+-[a-z]+-' design-system/geeklego.css` — review matches where the LHS component prefix differs from the RHS component prefix.
 
 ---
 
 ## What Claude Code Should Always Do
 
 1. **Read `design-system/geeklego.css` before generating any component.**
-2. **Check if a component token block already exists** before creating a new one.
+2. **Check if a component token block already exists** before creating a new one. Never create a second block for the same component — replace the existing one in-place. After writing tokens, `npm run validate-tokens` must exit 0 (it now also checks for within-block duplicates).
 3. **Write component tokens into `geeklego.css` first**, then write the component.
 4. **Follow the 5-file structure exactly.**
 5. **Place components in the correct level folder.**
@@ -288,7 +349,7 @@ React 19 · TypeScript 5.7+ · Tailwind CSS v4.2 · Vite 6 · Storybook 10 · Vi
 31. **Use `.content-flex`** on flex children with text (replaces `flex-1 min-w-0`).
 32. **Use `.content-nowrap`** for non-wrapping text in buttons/chips/badges.
 33. **Use `.empty-placeholder`** for empty/zero-data states with `emptyMessage?: string` prop.
-34. **Wrap L1/L2 with `memo(forwardRef(...))`**, L3+ with `memo` unless complex internal state. Set `displayName`.
+34. **Wrap L1/L2 with `memo(forwardRef(...))`** (mandatory). L3+ with `memo(forwardRef(...))` (recommended for consistency; bare `memo` allowed only when ref is impossible). Set `displayName`.
 35. **Use `useMemo`** for computed className strings. Hoist static strings to module scope.
 36. **Use `useCallback`** only for internally-created handlers, not pass-through props.
 37. **Use stable unique identifiers as React keys** — id, href, or unique data field, never index alone.
@@ -382,11 +443,7 @@ Opt-in via `schema?: boolean` prop (default `false`). Two levels: Microdata on L
 | Avatar | `components/atoms/Avatar/` |
 | Badge | `components/atoms/Badge/` |
 | BreadcrumbItem | `components/atoms/BreadcrumbItem/` |
-| Button | `components/atoms/Button/` |
-| ChatBubble | `components/atoms/ChatBubble/` |
 | Checkbox | `components/atoms/Checkbox/` |
-| Chip | `components/atoms/Chip/` |
-| ColorSwatch | `components/atoms/ColorSwatch/` |
 | Divider | `components/atoms/Divider/` |
 | EmptyState | `components/atoms/EmptyState/` |
 | FileInput | `components/atoms/FileInput/` |
@@ -399,25 +456,19 @@ Opt-in via `schema?: boolean` prop (default `false`). Two levels: Microdata on L
 | List | `components/atoms/List/` |
 | NavItem | `components/atoms/NavItem/` |
 | ProgressBar | `components/atoms/ProgressBar/` |
-| ProgressIndicator | `components/atoms/ProgressIndicator/` |
 | Quote | `components/atoms/Quote/` |
 | Radio | `components/atoms/Radio/` |
 | Rating | `components/atoms/Rating/` |
 | SegmentedControl | `components/atoms/SegmentedControl/` |
 | Select | `components/atoms/Select/` |
 | Skeleton | `components/atoms/Skeleton/` |
-| SkipLink | `components/atoms/SkipLink/` |
 | Slider | `components/atoms/Slider/` |
 | Spinner | `components/atoms/Spinner/` |
-| Stack | `components/atoms/Stack/` |
 | Switch | `components/atoms/Switch/` |
-| Tag | `components/atoms/Tag/` |
 | Textarea | `components/atoms/Textarea/` |
 | ThemeSwitcher | `components/atoms/ThemeSwitcher/` |
 | Toggle | `components/atoms/Toggle/` |
 | TreeItem | `components/atoms/TreeItem/` |
-| TypingIndicator | `components/atoms/TypingIndicator/` |
-| Video | `components/atoms/Video/` |
 | VisuallyHidden | `components/atoms/VisuallyHidden/` |
 
 **L2 Molecules**
@@ -428,23 +479,13 @@ Opt-in via `schema?: boolean` prop (default `false`). Two levels: Microdata on L
 | Breadcrumb | `components/molecules/Breadcrumb/` |
 | ButtonGroup | `components/molecules/ButtonGroup/` |
 | Card | `components/molecules/Card/` |
-| ChatHeader | `components/molecules/ChatHeader/` |
-| ChatInputBar | `components/molecules/ChatInputBar/` |
-| ChatMessage | `components/molecules/ChatMessage/` |
 | Combobox | `components/molecules/Combobox/` |
 | DateInput | `components/molecules/DateInput/` |
 | DropdownMenu | `components/molecules/DropdownMenu/` |
 | Fieldset | `components/molecules/Fieldset/` |
-| FileUpload | `components/molecules/FileUpload/` |
-| FormField | `components/molecules/FormField/` |
-| InputGroup | `components/molecules/InputGroup/` |
-| Navbar | `components/molecules/Navbar/` |
-| NumberInput | `components/molecules/NumberInput/` |
 | Pagination | `components/molecules/Pagination/` |
 | Popover | `components/molecules/Popover/` |
-| RadioGroup | `components/molecules/RadioGroup/` |
 | SearchBar | `components/molecules/SearchBar/` |
-| StatCard | `components/molecules/StatCard/` |
 | Stepper | `components/molecules/Stepper/` |
 | Toast | `components/molecules/Toast/` |
 | Tooltip | `components/molecules/Tooltip/` |
@@ -454,21 +495,11 @@ Opt-in via `schema?: boolean` prop (default `false`). Two levels: Microdata on L
 
 | Component | Location |
 |---|---|
-| Accordion | `components/organisms/Accordion/` |
 | AreaChart | `components/organisms/AreaChart/` |
 | BarChart | `components/organisms/BarChart/` |
-| Carousel | `components/organisms/Carousel/` |
-| Chat | `components/organisms/Chat/` |
-| ColorPicker | `components/organisms/ColorPicker/` |
-| DataTable | `components/organisms/DataTable/` |
-| Datepicker | `components/organisms/Datepicker/` |
-| Drawer | `components/organisms/Drawer/` |
-| Footer | `components/organisms/Footer/` |
-| Form | `components/organisms/Form/` |
 | Header | `components/organisms/Header/` |
 | Modal | `components/organisms/Modal/` |
 | Sidebar | `components/organisms/Sidebar/` |
-| Tabs | `components/organisms/Tabs/` |
 
 **Utility modules (not components):** `useRovingTabindex`, `useFocusTrap`, `useEscapeDismiss`, `useClickOutside` (in `components/utils/keyboard/`), ARIA helpers (`components/utils/accessibility/aria-helpers.ts`), StructuredData (`components/utils/StructuredData/`), i18n helpers (`components/utils/i18n/`), security utilities (`components/utils/security/`).
 
@@ -476,9 +507,11 @@ Opt-in via `schema?: boolean` prop (default `false`). Two levels: Microdata on L
 
 ## Priority Component Build Order
 
-All L1 atoms and L2 molecules are built. Remaining work:
+Most L1 atoms and L2 molecules are built. Remaining work:
 
-**L3 Organisms (remaining):** HeroSection
+**L1 Atoms (remaining):** Button · Chip · Tag
+**L2 Molecules (remaining):** FormField · InputGroup · Navbar
+**L3 Organisms (remaining):** Footer · Accordion · Tabs · DataTable · HeroSection
 **L4 Templates:** DashboardLayout · AuthLayout · LandingLayout
 
 ---

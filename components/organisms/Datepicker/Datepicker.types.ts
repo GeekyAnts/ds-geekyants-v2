@@ -23,7 +23,7 @@ export interface DatepickerProps extends Omit<HTMLAttributes<HTMLDivElement>, 'o
    * Validation error message. When set, switches the input to its error state
    * and replaces the hint text. Announced immediately via `role="alert"`.
    */
-  errorMessage?: string;
+  error?: string;
   /** Height and typography scale. Defaults to 'md'. */
   size?: InputSize;
   /** Input visual style variant. Defaults to 'default'. */
@@ -31,7 +31,7 @@ export interface DatepickerProps extends Omit<HTMLAttributes<HTMLDivElement>, 'o
   /** Disables all interaction. */
   disabled?: boolean;
   /** Shows loading spinner and disables interaction. */
-  isLoading?: boolean;
+  loading?: boolean;
   /** Placeholder text for the input. Defaults to 'YYYY-MM-DD'. */
   placeholder?: string;
   /** First day of week: 0 = Sunday, 1 = Monday. Defaults to 1. */

@@ -69,17 +69,15 @@ level: atom
       <button
         type="button"
         className="bg-[var(--color-action-primary)] text-[var(--color-text-inverse)] px-[var(--spacing-component-lg)] py-[var(--spacing-component-sm)] rounded-[var(--radius-component-md)] text-body-sm transition-default hover:bg-[var(--color-action-primary-hover)]"
-      >
-        Browse items
-      </button>
+      >Browse items</button>
     }
   />
 </ComponentPreview>
 
 ## Dark Mode
 
-<ComponentPreview code={"<div data-theme=\"dark\" className=\"p-8 bg-primary rounded-[var(--radius-component-lg)] max-w-2xl\">\n  <EmptyState\n    title=\"No messages yet\"\n    description=\"When you receive messages, they'll appear here.\"\n    icon={<Bell size={40} />}\n  />\n</div>"}>
-  <div data-theme="dark" className="p-8 bg-primary rounded-[var(--radius-component-lg)] max-w-2xl flex flex-col gap-8">
+<ComponentPreview code={"<div data-theme=\"dark\" className=\"p-8 bg-[var(--color-bg-primary)] rounded-[var(--radius-component-lg)] max-w-2xl\">\n  <EmptyState\n    title=\"No messages yet\"\n    description=\"When you receive messages, they'll appear here.\"\n    icon={<Bell size={40} />}\n  />\n</div>"}>
+  <div data-theme="dark" className="p-8 bg-[var(--color-bg-primary)] rounded-[var(--radius-component-lg)] max-w-2xl flex flex-col gap-8">
     <EmptyState
       title="No messages yet"
       description="When you receive messages, they'll appear here."

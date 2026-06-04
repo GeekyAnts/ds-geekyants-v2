@@ -115,7 +115,7 @@ export const Tag = memo(forwardRef<HTMLElement, TagProps>(
             {leftIcon}
           </span>
         )}
-        <span className="truncate-label min-w-0">{children}</span>
+        <span className="truncate-label">{children}</span>
         {hasRemove && (
           <button
             type="button"

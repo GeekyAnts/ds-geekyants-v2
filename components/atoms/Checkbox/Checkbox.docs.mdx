@@ -8,48 +8,58 @@ level: atom
 
 <ComponentPreview code={"import { useState } from \"react\"\nimport { Checkbox } from \"@geeklego/ui\"\n\nfunction Example() {\n  const [checked, setChecked] = useState(false)\n  return (\n    <Checkbox checked={checked} onChange={(e) => setChecked(e.target.checked)}>\n      Accept terms and conditions\n    </Checkbox>\n  )\n}"}>
   <div className="flex flex-col gap-4">
-    <Checkbox checked={false}>Unchecked</Checkbox>
-    <Checkbox checked>Checked</Checkbox>
-    <Checkbox checked={false} indeterminate>Indeterminate</Checkbox>
+    <Checkbox>Unchecked</Checkbox>
+    <Checkbox defaultChecked>Checked</Checkbox>
+    <Checkbox indeterminate>Indeterminate</Checkbox>
   </div>
 </ComponentPreview>
 
 ## Sizes
 
-<ComponentPreview code={"import { Checkbox } from \"@geeklego/ui\"\n\n<Checkbox size=\"sm\" checked onChange={...}>Small</Checkbox>\n<Checkbox size=\"md\" checked onChange={...}>Medium</Checkbox>\n<Checkbox size=\"lg\" checked onChange={...}>Large</Checkbox>"}>
+<ComponentPreview code={"import { Checkbox } from \"@geeklego/ui\"\n\n<Checkbox size=\"sm\" defaultChecked>Small</Checkbox>\n<Checkbox size=\"md\" defaultChecked>Medium</Checkbox>\n<Checkbox size=\"lg\" defaultChecked>Large</Checkbox>"}>
   <div className="flex flex-col gap-4">
-    <Checkbox size="sm" checked>Small (14 px indicator)</Checkbox>
-    <Checkbox size="md" checked>Medium (16 px indicator)</Checkbox>
-    <Checkbox size="lg" checked>Large (20 px indicator)</Checkbox>
+    <Checkbox size="sm" defaultChecked>Small (14 px indicator)</Checkbox>
+    <Checkbox size="md" defaultChecked>Medium (16 px indicator)</Checkbox>
+    <Checkbox size="lg" defaultChecked>Large (20 px indicator)</Checkbox>
   </div>
 </ComponentPreview>
 
 ## States
 
-<ComponentPreview code={"import { Checkbox } from \"@geeklego/ui\"\n\n<Checkbox checked={false} onChange={...}>Default</Checkbox>\n<Checkbox checked onChange={...}>Checked</Checkbox>\n<Checkbox checked={false} indeterminate onChange={...}>Indeterminate</Checkbox>\n<Checkbox checked={false} disabled>Disabled</Checkbox>\n<Checkbox checked={false} error onChange={...}>Error</Checkbox>\n<Checkbox checked={false} required onChange={...}>Required</Checkbox>"}>
+<ComponentPreview code={"import { Checkbox } from \"@geeklego/ui\"\n\n<Checkbox disabled>Disabled</Checkbox>\n<Checkbox defaultChecked disabled>Disabled checked</Checkbox>\n<Checkbox error>Error</Checkbox>\n<Checkbox defaultChecked error>Error checked</Checkbox>\n<Checkbox required>Required</Checkbox>"}>
   <div className="flex flex-col gap-4">
-    <Checkbox checked={false}>Default (unchecked)</Checkbox>
-    <Checkbox checked>Checked</Checkbox>
-    <Checkbox checked={false} indeterminate>Indeterminate</Checkbox>
-    <Checkbox checked={false} disabled>Disabled unchecked</Checkbox>
-    <Checkbox checked disabled>Disabled checked</Checkbox>
-    <Checkbox checked={false} indeterminate disabled>Disabled indeterminate</Checkbox>
-    <Checkbox checked={false} error>Error unchecked</Checkbox>
-    <Checkbox checked error>Error checked</Checkbox>
-    <Checkbox checked={false} required>Required field</Checkbox>
+    <Checkbox>Default (unchecked)</Checkbox>
+    <Checkbox defaultChecked>Checked</Checkbox>
+    <Checkbox indeterminate>Indeterminate</Checkbox>
+    <Checkbox disabled>Disabled unchecked</Checkbox>
+    <Checkbox defaultChecked disabled>Disabled checked</Checkbox>
+    <Checkbox indeterminate disabled>Disabled indeterminate</Checkbox>
+    <Checkbox error>Error unchecked</Checkbox>
+    <Checkbox defaultChecked error>Error checked</Checkbox>
+    <Checkbox required>Required field</Checkbox>
+  </div>
+</ComponentPreview>
+
+## Long Label
+
+<ComponentPreview code={"<div className=\"flex flex-col gap-6 w-96\">\n  <Checkbox defaultChecked>I understand and agree that by checking this box, I accept the terms and conditions, privacy policy, and cookie preferences as outlined in our comprehensive documentation.</Checkbox>\n  <Checkbox>This is an exceptionally long checkbox label that contains a lot of text and should demonstrate how the component handles layout when the content extends beyond a single line.</Checkbox>\n  <Checkbox required>I confirm that all information provided above is accurate and complete to the best of my knowledge and belief.</Checkbox>\n</div>"}>
+  <div className="flex flex-col gap-6 w-96">
+    <Checkbox defaultChecked>I understand and agree that by checking this box, I accept the terms and conditions, privacy policy, and cookie preferences as outlined in our comprehensive documentation.</Checkbox>
+    <Checkbox>This is an exceptionally long checkbox label that contains a lot of text and should demonstrate how the component handles layout when the content extends beyond a single line.</Checkbox>
+    <Checkbox required>I confirm that all information provided above is accurate and complete to the best of my knowledge and belief.</Checkbox>
   </div>
 </ComponentPreview>
 
 ## Dark Mode
 
-<ComponentPreview code={"<div data-theme=\"dark\" className=\"bg-primary p-8 rounded-[var(--radius-component-lg)] max-w-2xl\">\n  <div className=\"flex flex-col gap-4\">\n    <Checkbox checked={false} onChange={...}>Unchecked</Checkbox>\n    <Checkbox checked onChange={...}>Checked</Checkbox>\n    <Checkbox checked={false} error onChange={...}>Error</Checkbox>\n  </div>\n</div>"}>
-  <div data-theme="dark" className="bg-primary p-8 rounded-[var(--radius-component-lg)] max-w-2xl">
+<ComponentPreview code={"<div data-theme=\"dark\" className=\"bg-[var(--color-bg-primary)] p-8 rounded-[var(--radius-component-lg)] max-w-2xl\">\n  <div className=\"flex flex-col gap-4\">\n    <Checkbox>Unchecked</Checkbox>\n    <Checkbox defaultChecked>Checked</Checkbox>\n    <Checkbox error>Error</Checkbox>\n  </div>\n</div>"}>
+  <div data-theme="dark" className="bg-[var(--color-bg-primary)] p-8 rounded-[var(--radius-component-lg)] max-w-2xl">
     <div className="flex flex-col gap-4">
-      <Checkbox checked={false}>Unchecked in dark mode</Checkbox>
-      <Checkbox checked>Checked in dark mode</Checkbox>
-      <Checkbox checked={false} indeterminate>Indeterminate in dark mode</Checkbox>
-      <Checkbox checked={false} disabled>Disabled in dark mode</Checkbox>
-      <Checkbox checked={false} error>Error in dark mode</Checkbox>
+      <Checkbox>Unchecked in dark mode</Checkbox>
+      <Checkbox defaultChecked>Checked in dark mode</Checkbox>
+      <Checkbox indeterminate>Indeterminate in dark mode</Checkbox>
+      <Checkbox disabled>Disabled in dark mode</Checkbox>
+      <Checkbox error>Error in dark mode</Checkbox>
     </div>
   </div>
 </ComponentPreview>
@@ -59,6 +69,7 @@ level: atom
 <PropsTable
   rows={[
     { name: "checked", type: "boolean", defaultValue: "false", description: "Whether the checkbox is checked. Control via onChange." },
+    { name: "defaultChecked", type: "boolean", defaultValue: "false", description: "Initial checked state for uncontrolled usage." },
     { name: "indeterminate", type: "boolean", defaultValue: "false", description: "Tri-state — partially selected. Visually overrides checked display with a dash." },
     { name: "size", type: "'sm' | 'md' | 'lg'", defaultValue: "'md'", description: "Visual size of the indicator box." },
     { name: "error", type: "boolean", defaultValue: "false", description: "Marks the field as invalid — shifts border to error color." },

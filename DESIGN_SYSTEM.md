@@ -1,6 +1,6 @@
 # Geeklego Site — Design Language Reference
 
-A living reference for the visual design language used in the Geeklego component library. Use this to maintain consistency across pages or port the aesthetic to other apps.
+A living reference for the visual design language used in the Geeklego documentation site. Use this to maintain consistency across pages or port the aesthetic to other apps.
 
 ---
 

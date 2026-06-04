@@ -1,0 +1,198 @@
+---
+title: ProductCard
+description: A product display card combining image, title, price, badge, star rating, and an add-to-cart CTA.
+level: molecule
+---
+
+## Variants
+
+<ComponentPreview code={"import { ProductCard, Badge } from \"@geeklego/ui\"\n\n<div className=\"grid grid-cols-2 gap-[var(--spacing-layout-sm)] max-w-2xl\">\n  <ProductCard image=\"https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=300&fit=crop\" imageAlt=\"Premium watch on a white surface\" title=\"Elevated Card\" price=\"$149.00\" variant=\"elevated\" badge={<Badge variant=\"soft\" color=\"info\" size=\"sm\">elevated</Badge>} />\n  <ProductCard image=\"https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=300&fit=crop\" imageAlt=\"Premium watch on a white surface\" title=\"Outlined Card\" price=\"$99.00\" variant=\"outlined\" badge={<Badge variant=\"soft\" color=\"info\" size=\"sm\">outlined</Badge>} />\n  <ProductCard image=\"https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=300&fit=crop\" imageAlt=\"Premium watch on a white surface\" title=\"Filled Card\" price=\"$79.00\" variant=\"filled\" badge={<Badge variant=\"soft\" color=\"info\" size=\"sm\">filled</Badge>} />\n  <ProductCard image=\"https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=300&fit=crop\" imageAlt=\"Premium watch on a white surface\" title=\"Ghost Card\" price=\"$59.00\" variant=\"ghost\" />\n</div>"}>
+  <div className="grid grid-cols-2 gap-[var(--spacing-layout-sm)] max-w-2xl">
+    <ProductCard
+      image="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=300&fit=crop"
+      imageAlt="Premium watch on a white surface"
+      title="Elevated Card"
+      price="$149.00"
+      variant="elevated"
+      badge={<Badge variant="soft" color="info" size="sm">elevated</Badge>}
+    />
+    <ProductCard
+      image="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=300&fit=crop"
+      imageAlt="Premium watch on a white surface"
+      title="Outlined Card"
+      price="$99.00"
+      variant="outlined"
+      badge={<Badge variant="soft" color="info" size="sm">outlined</Badge>}
+    />
+    <ProductCard
+      image="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=300&fit=crop"
+      imageAlt="Premium watch on a white surface"
+      title="Filled Card"
+      price="$79.00"
+      variant="filled"
+      badge={<Badge variant="soft" color="info" size="sm">filled</Badge>}
+    />
+    <ProductCard
+      image="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=300&fit=crop"
+      imageAlt="Premium watch on a white surface"
+      title="Ghost Card"
+      price="$59.00"
+      variant="ghost"
+    />
+  </div>
+</ComponentPreview>
+
+## Sizes
+
+<ComponentPreview code={"import { ProductCard, Badge } from \"@geeklego/ui\"\n\n<div className=\"grid grid-cols-3 gap-[var(--spacing-layout-sm)] max-w-4xl items-start\">\n  <ProductCard image=\"https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=300&fit=crop\" imageAlt=\"Premium watch on a white surface\" title=\"Size SM - Minimalist Watch\" price=\"$149.00\" size=\"sm\" badge={<Badge variant=\"solid\" color=\"success\" size=\"sm\">New</Badge>} />\n  <ProductCard image=\"https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=300&fit=crop\" imageAlt=\"Premium watch on a white surface\" title=\"Size MD - Minimalist Watch\" price=\"$149.00\" size=\"md\" badge={<Badge variant=\"solid\" color=\"success\" size=\"sm\">New</Badge>} />\n  <ProductCard image=\"https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=300&fit=crop\" imageAlt=\"Premium watch on a white surface\" title=\"Size LG - Minimalist Watch\" price=\"$149.00\" size=\"lg\" badge={<Badge variant=\"solid\" color=\"success\" size=\"sm\">New</Badge>} />\n</div>"}>
+  <div className="grid grid-cols-3 gap-[var(--spacing-layout-sm)] max-w-4xl items-start">
+    <ProductCard
+      image="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=300&fit=crop"
+      imageAlt="Premium watch on a white surface"
+      title="Size SM - Minimalist Watch"
+      price="$149.00"
+      size="sm"
+      badge={<Badge variant="solid" color="success" size="sm">New</Badge>}
+    />
+    <ProductCard
+      image="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=300&fit=crop"
+      imageAlt="Premium watch on a white surface"
+      title="Size MD - Minimalist Watch"
+      price="$149.00"
+      size="md"
+      badge={<Badge variant="solid" color="success" size="sm">New</Badge>}
+    />
+    <ProductCard
+      image="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=300&fit=crop"
+      imageAlt="Premium watch on a white surface"
+      title="Size LG - Minimalist Watch"
+      price="$149.00"
+      size="lg"
+      badge={<Badge variant="solid" color="success" size="sm">New</Badge>}
+    />
+  </div>
+</ComponentPreview>
+
+## Loading
+
+<ComponentPreview code={"import { ProductCard } from \"@geeklego/ui\"\n\n<ProductCard image=\"https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=300&fit=crop\" imageAlt=\"Premium watch on a white surface\" title=\"Premium Minimalist Watch\" price=\"$149.00\" rating={4} ratingCount={128} loading />"}>
+  <ProductCard
+    image="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=300&fit=crop"
+    imageAlt="Premium watch on a white surface"
+    title="Premium Minimalist Watch"
+    price="$149.00"
+    rating={4}
+    ratingCount={128}
+    loading
+  />
+</ComponentPreview>
+
+## Disabled
+
+<ComponentPreview code={"import { ProductCard } from \"@geeklego/ui\"\n\n<ProductCard image=\"https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=300&fit=crop\" imageAlt=\"Premium watch on a white surface\" title=\"Premium Minimalist Watch\" price=\"$149.00\" disabled />"}>
+  <ProductCard
+    image="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=300&fit=crop"
+    imageAlt="Premium watch on a white surface"
+    title="Premium Minimalist Watch"
+    price="$149.00"
+    disabled
+  />
+</ComponentPreview>
+
+## With Link
+
+<ComponentPreview code={"import { ProductCard, Badge } from \"@geeklego/ui\"\n\n<ProductCard image=\"https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=300&fit=crop\" imageAlt=\"Premium watch on a white surface\" title=\"Premium Minimalist Watch\" price=\"$149.00\" href=\"/products/watch\" badge={<Badge variant=\"soft\" color=\"error\" size=\"sm\">Sale</Badge>} />"}>
+  <ProductCard
+    image="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=300&fit=crop"
+    imageAlt="Premium watch on a white surface"
+    title="Premium Minimalist Watch"
+    price="$149.00"
+    href="/products/watch"
+    badge={<Badge variant="soft" color="error" size="sm">Sale</Badge>}
+  />
+</ComponentPreview>
+
+## Dark Mode
+
+<ComponentPreview code={"import { ProductCard, Badge } from \"@geeklego/ui\"\n\n<div\n  data-theme=\"dark\"\n  className=\"flex flex-col gap-6 p-8 bg-[var(--color-bg-primary)] rounded-[var(--radius-component-lg)] max-w-2xl\"\n>\n  <div className=\"grid grid-cols-2 gap-[var(--spacing-layout-sm)]\">\n    <ProductCard image=\"https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=300&fit=crop\" imageAlt=\"Premium watch on a white surface\" title=\"Premium Minimalist Watch\" price=\"$149.00\" variant=\"elevated\" badge={<Badge variant=\"soft\" color=\"error\" size=\"sm\">Sale</Badge>} />\n    <ProductCard image=\"https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=300&fit=crop\" imageAlt=\"Premium watch on a white surface\" title=\"Outlined Card\" price=\"$99.00\" variant=\"outlined\" />\n    <ProductCard image=\"https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=300&fit=crop\" imageAlt=\"Premium watch on a white surface\" title=\"Filled Card\" price=\"$79.00\" variant=\"filled\" />\n    <ProductCard image=\"https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=300&fit=crop\" imageAlt=\"Premium watch on a white surface\" title=\"Ghost Card\" price=\"$59.00\" variant=\"ghost\" />\n  </div>\n</div>"}>
+  <div
+    data-theme="dark"
+    className="flex flex-col gap-6 p-8 bg-[var(--color-bg-primary)] rounded-[var(--radius-component-lg)] max-w-2xl"
+  >
+    <div className="grid grid-cols-2 gap-[var(--spacing-layout-sm)]">
+      <ProductCard
+        image="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=300&fit=crop"
+        imageAlt="Premium watch on a white surface"
+        title="Premium Minimalist Watch"
+        price="$149.00"
+        variant="elevated"
+        badge={<Badge variant="soft" color="error" size="sm">Sale</Badge>}
+      />
+      <ProductCard
+        image="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=300&fit=crop"
+        imageAlt="Premium watch on a white surface"
+        title="Outlined Card"
+        price="$99.00"
+        variant="outlined"
+      />
+      <ProductCard
+        image="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=300&fit=crop"
+        imageAlt="Premium watch on a white surface"
+        title="Filled Card"
+        price="$79.00"
+        variant="filled"
+      />
+      <ProductCard
+        image="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=300&fit=crop"
+        imageAlt="Premium watch on a white surface"
+        title="Ghost Card"
+        price="$59.00"
+        variant="ghost"
+      />
+    </div>
+  </div>
+</ComponentPreview>
+
+## Props
+
+<PropsTable
+  rows={[
+    { name: "image", type: "string", defaultValue: "—", description: "Product image URL." },
+    { name: "imageAlt", type: "string", defaultValue: "—", description: "Alt text for the product image. Required for accessibility." },
+    { name: "title", type: "string", defaultValue: "—", description: "Product name. Rendered as an h3 heading." },
+    { name: "price", type: "string | number", defaultValue: "—", description: "Current price, displayed prominently." },
+    { name: "originalPrice", type: "string | number", defaultValue: "—", description: "Original / was-price. Renders struck-through next to the current price." },
+    { name: "badge", type: "ReactNode", defaultValue: "—", description: "Optional Badge node overlaid on the image (e.g. Sale, New)." },
+    { name: "rating", type: "number", defaultValue: "—", description: "Star rating 0-5. Omit to hide the rating row." },
+    { name: "ratingCount", type: "number", defaultValue: "—", description: "Number of reviews shown alongside the rating." },
+    { name: "ctaLabel", type: "string", defaultValue: "—", description: "Overrides the default Add to cart button label." },
+    { name: "loading", type: "boolean", defaultValue: "false", description: "Shows skeleton overlay on the image and disables interaction." },
+    { name: "disabled", type: "boolean", defaultValue: "false", description: "Mutes the card appearance and disables the CTA button." },
+    { name: "href", type: "string", defaultValue: "—", description: "When provided, wraps the title in a sanitized anchor link." },
+    { name: "variant", type: "'elevated' | 'outlined' | 'filled' | 'ghost'", defaultValue: "'elevated'", description: "Visual style variant." },
+    { name: "size", type: "'sm' | 'md' | 'lg'", defaultValue: "'md'", description: "Overall size controlling padding and typography scale." },
+    { name: "onAddToCart", type: "() => void", defaultValue: "—", description: "Called when the CTA button is activated." },
+    { name: "schema", type: "boolean", defaultValue: "false", description: "Enables Schema.org Product microdata markup." },
+    { name: "i18nStrings", type: "ProductCardI18nStrings", defaultValue: "—", description: "Overrides for system-generated text strings (addToCart, reviewsLabel, etc.)." },
+    { name: "className", type: "string", defaultValue: "—", description: "Additional CSS classes applied to the root article element." },
+  ]}
+/>
+
+## Accessibility
+
+- Semantic `<article>` element for self-contained product content
+- Heading hierarchy uses `<h3>`, assumes placement below a page `<h2>` category heading
+- Title link has `focus-visible` focus ring and is keyboard reachable; `sanitizeHref` strips unsafe protocols
+- CTA button has `aria-label` combining the action label and product title for full screen reader context
+- `aria-busy="true"` set on root and CTA during loading
+- `aria-disabled="true"` set on root when disabled
+- Badge overlay marked `aria-hidden="true"` — decorative
+- Original price uses `<del>` element for semantic meaning
+- Rating rendered via `Rating` atom with accessible radio inputs
+
+### Keyboard Interaction
+
+| Key | Action |
+|-----|--------|
+| Tab | Moves focus to title link (if href set), then CTA button |
+| Enter / Space | Activates focused link or button |

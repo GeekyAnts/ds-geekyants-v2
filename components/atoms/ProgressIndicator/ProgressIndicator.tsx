@@ -1,5 +1,6 @@
 "use client"
 import { forwardRef, memo, useMemo } from 'react';
+import { useComponentI18n } from '../../utils/i18n/useGeeklegoI18n';
 import type { ProgressIndicatorProps, ProgressIndicatorVariant, ProgressIndicatorSize } from './ProgressIndicator.types';
 
 // ── SVG geometry constants ──────────────────────────────────────────────────
@@ -59,17 +60,20 @@ export const ProgressIndicator = memo(forwardRef<HTMLDivElement, ProgressIndicat
       showValue = false,
       label,
       disabled = false,
+      i18nStrings,
       className,
       ...rest
     },
     ref,
   ) => {
+    const i18n = useComponentI18n('progressIndicator', i18nStrings);
+
     // ── Value derivation ────────────────────────────────────────────────────
     const isIndeterminate = value === undefined || value === null;
     const safeValue  = isIndeterminate ? 0 : Math.min(max, Math.max(0, value));
     const percentage = isIndeterminate ? 0 : (safeValue / max) * 100;
     const percentageRounded = Math.round(percentage);
-    const valueText  = isIndeterminate ? undefined : `${percentageRounded}%`;
+    const valueText  = isIndeterminate ? undefined : i18n.valueFormat!(percentageRounded);
 
     // ── SVG stroke dash geometry ────────────────────────────────────────────
     // Indeterminate: show 25% visible arc + rotate the whole SVG.

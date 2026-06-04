@@ -59,7 +59,7 @@ export const ChatHeader = memo(forwardRef<HTMLElement, ChatHeaderProps>(
         />
 
         {/* Participant info */}
-        <div className="flex flex-col gap-[var(--spacing-component-xs)] content-flex min-w-0">
+        <div className="flex flex-col gap-[var(--chat-header-title-gap)] content-flex min-w-0">
           <span className="text-label-md text-[var(--chat-header-title-color)] truncate-label">
             {name}
           </span>

@@ -125,6 +125,37 @@ level: molecule
   </div>
 </ComponentPreview>
 
+## States
+
+| State | Visual |
+|-------|--------|
+| Default | Transparent background, primary text |
+| Hover | Subtle fill (`--dropdown-item-bg-hover`), two-property change (bg + border) |
+| Active | Pressed fill (`--dropdown-item-bg-active`) |
+| Disabled | Muted text, no hover/active response, `cursor-not-allowed` |
+| Destructive | Error-colour text at rest; subtle error-tint background on hover |
+
+## Tokens Used
+
+| Token | Semantic alias | Description |
+|-------|---------------|-------------|
+| `--dropdown-panel-bg` | `--color-surface-raised` | Panel background |
+| `--dropdown-panel-border` | `--color-border-default` | Panel border colour |
+| `--dropdown-panel-shadow` | `--shadow-lg` | Panel elevation shadow |
+| `--dropdown-panel-radius` | `--radius-component-lg` | Panel corner radius |
+| `--dropdown-panel-min-width` | `--content-min-width-md` | Minimum panel width (10rem) |
+| `--dropdown-item-bg-hover` | `--color-action-secondary` | Item hover fill |
+| `--dropdown-item-bg-active` | `--color-state-selected` | Item pressed fill |
+| `--dropdown-item-text` | `--color-text-primary` | Item label colour |
+| `--dropdown-item-text-disabled` | `--color-text-disabled` | Disabled item label colour |
+| `--dropdown-item-text-destructive` | `--color-text-error` | Destructive item label colour |
+| `--dropdown-item-bg-destructive-hover` | `--color-status-error-subtle` | Destructive hover fill (subtle error tint) |
+| `--dropdown-item-icon-color` | `--color-text-secondary` | Item icon colour |
+| `--dropdown-item-icon-color-destructive` | `--color-text-error` | Destructive item icon colour |
+| `--dropdown-item-shortcut-text` | `--color-text-tertiary` | Keyboard shortcut label colour |
+| `--dropdown-group-label-text` | `--color-text-tertiary` | Group heading colour |
+| `--dropdown-separator-color` | `--color-border-subtle` | Separator line colour |
+
 ## Props
 
 ### DropdownMenu
@@ -152,7 +183,7 @@ level: molecule
 | `target` | `string` | Link target attribute (e.g. `"_blank"`). |
 | `rel` | `string` | Link rel attribute. |
 | `disabled` | `boolean` | Non-interactive and visually muted. |
-| `destructive` | `boolean` | Renders the item in the error/destructive colour. |
+| `destructive` | `boolean` | Error-colour text at rest; subtle error-tint background on hover. Use for irreversible actions. |
 
 ### DropdownMenuSeparatorDef
 

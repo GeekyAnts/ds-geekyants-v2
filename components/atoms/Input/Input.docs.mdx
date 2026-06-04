@@ -64,9 +64,9 @@ level: atom
 
 ## Loading
 
-<ComponentPreview code={"import { Input } from \"@geeklego/ui\"\n\n<Input placeholder=\"Validating…\" isLoading />"}>
+<ComponentPreview code={"import { Input } from \"@geeklego/ui\"\n\n<Input placeholder=\"Validating…\" loading />"}>
   <div className="w-80">
-    <Input placeholder="Validating…" isLoading />
+    <Input placeholder="Validating…" loading />
   </div>
 </ComponentPreview>
 
@@ -91,14 +91,14 @@ level: atom
 
 ## Dark Mode
 
-<ComponentPreview code={"<div data-theme=\"dark\" className=\"flex flex-col gap-4 p-8 bg-primary rounded-[var(--radius-component-lg)] max-w-2xl w-96\">\n  <Input variant=\"default\" placeholder=\"Default\" />\n  <Input variant=\"filled\" placeholder=\"Filled\" />\n  <Input placeholder=\"With icon\" leftIcon={<Search size={16} />} />\n  <Input placeholder=\"Error\" error />\n  <Input placeholder=\"Disabled\" disabled />\n</div>"}>
-  <div data-theme="dark" className="flex flex-col gap-4 p-8 bg-primary rounded-[var(--radius-component-lg)] max-w-2xl w-96">
+<ComponentPreview code={"<div data-theme=\"dark\" className=\"flex flex-col gap-4 p-8 bg-[var(--color-bg-primary)] rounded-[var(--radius-component-lg)] max-w-2xl w-96\">\n  <Input variant=\"default\" placeholder=\"Default\" />\n  <Input variant=\"filled\" placeholder=\"Filled\" />\n  <Input placeholder=\"With icon\" leftIcon={<Search size={16} />} />\n  <Input placeholder=\"Error\" error />\n  <Input placeholder=\"Disabled\" disabled />\n</div>"}>
+  <div data-theme="dark" className="flex flex-col gap-4 p-8 bg-[var(--color-bg-primary)] rounded-[var(--radius-component-lg)] max-w-2xl w-96">
     <Input variant="default" placeholder="Default" />
     <Input variant="filled" placeholder="Filled" />
     <Input variant="flushed" placeholder="Flushed" />
     <Input variant="default" placeholder="With icon" leftIcon={<Search size={16} />} />
     <Input variant="default" placeholder="Error state" error />
-    <Input variant="default" placeholder="Loading…" isLoading />
+    <Input variant="default" placeholder="Loading…" loading />
     <Input variant="default" placeholder="Disabled" disabled />
   </div>
 </ComponentPreview>
@@ -110,9 +110,9 @@ level: atom
     { name: "variant", type: "'default' | 'filled' | 'flushed' | 'unstyled'", defaultValue: "'default'", description: "Visual style variant." },
     { name: "size", type: "'sm' | 'md' | 'lg'", defaultValue: "'md'", description: "Height and typography scale." },
     { name: "error", type: "boolean", defaultValue: "false", description: "Error state — shows error border and sets aria-invalid." },
-    { name: "isLoading", type: "boolean", defaultValue: "false", description: "Loading state — shows spinner and disables interaction." },
+    { name: "loading", type: "boolean", defaultValue: "false", description: "Loading state — shows spinner and disables interaction." },
     { name: "leftIcon", type: "ReactNode", defaultValue: "—", description: "Icon displayed on the left side. Decorative; aria-hidden." },
-    { name: "rightIcon", type: "ReactNode", defaultValue: "—", description: "Icon displayed on the right side. Replaced by spinner when isLoading." },
+    { name: "rightIcon", type: "ReactNode", defaultValue: "—", description: "Icon displayed on the right side. Replaced by spinner when loading." },
     { name: "disabled", type: "boolean", defaultValue: "false", description: "Disables interaction." },
     { name: "placeholder", type: "string", defaultValue: "—", description: "Placeholder text." },
     { name: "wrapperClassName", type: "string", defaultValue: "—", description: "Additional class names for the outer wrapper element." },
@@ -125,7 +125,7 @@ level: atom
 - Renders a native `<input>` — full browser and assistive technology support
 - Always associate with a `<label>` via `htmlFor` + `id`, or pass `aria-label` for unlabeled inputs
 - `aria-invalid="true"` set when `error` is true — pair with `aria-describedby` pointing to an error message
-- `aria-busy="true"` set when `isLoading` is true
+- `aria-busy="true"` set when `loading` is true
 - Icon slots are `aria-hidden="true"` — they are decorative
 - `disabled` sets both the HTML `disabled` attribute and `aria-disabled`
 

@@ -114,10 +114,10 @@ level: molecule
 
 ## Loading
 
-<ComponentPreview code={"import { Combobox } from \"@geeklego/ui\"\n\n<Combobox\n  options={[]}\n  isLoading\n  placeholder=\"Loading options…\"\n  className=\"max-w-xs\"\n/>"}>
+<ComponentPreview code={"import { Combobox } from \"@geeklego/ui\"\n\n<Combobox\n  options={[]}\n  loading\n  placeholder=\"Loading options…\"\n  className=\"max-w-xs\"\n/>"}>
   <Combobox
     options={[]}
-    isLoading
+    loading
     placeholder="Loading options…"
     className="max-w-xs"
   />
@@ -205,12 +205,14 @@ level: molecule
     { name: "size", type: "'sm' | 'md' | 'lg'", defaultValue: "'md'", description: "Height and typography size of the input and options." },
     { name: "disabled", type: "boolean", defaultValue: "false", description: "Prevents opening, typing, and selection." },
     { name: "error", type: "boolean", defaultValue: "false", description: "Shows error border on the input." },
-    { name: "isLoading", type: "boolean", defaultValue: "false", description: "Shows a spinner in the input and a loading message in the panel." },
+    { name: "loading", type: "boolean", defaultValue: "false", description: "Shows a spinner in the input and a loading message in the panel." },
     { name: "clearable", type: "boolean", defaultValue: "true", description: "Shows a clear (×) button when a value is selected. Set to false for required fields." },
     { name: "id", type: "string", defaultValue: "—", description: "ID forwarded to the underlying input element." },
     { name: "name", type: "string", defaultValue: "—", description: "Name forwarded to the underlying input for form participation." },
     { name: "required", type: "boolean", defaultValue: "—", description: "Marks the field as required — forwarded as aria-required." },
     { name: "aria-label", type: "string", defaultValue: "—", description: "Accessible label when no visible label element is associated." },
+    { name: "aria-labelledby", type: "string", defaultValue: "—", description: "ID reference to an external element that labels this combobox." },
+    { name: "aria-describedby", type: "string", defaultValue: "—", description: "ID reference to an external description element — combined with internal error description when error is true." },
     { name: "wrapperClassName", type: "string", defaultValue: "—", description: "Class names applied to the outer wrapper div — use to control width." },
     { name: "i18nStrings", type: "ComboboxI18nStrings", defaultValue: "—", description: "Per-instance i18n string overrides for the clear button label, listbox label, empty state, and loading message." },
   ]}

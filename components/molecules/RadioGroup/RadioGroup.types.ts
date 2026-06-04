@@ -32,16 +32,17 @@ export interface RadioGroupProps extends Omit<FieldsetHTMLAttributes<HTMLFieldSe
   size?: RadioSize;
   /** Visual container style. 'boxed' draws a bordered container around the group. Defaults to 'default'. */
   variant?: RadioGroupVariant;
-  /** Error state — shifts Radio indicators to error colour. */
-  error?: boolean;
+  /**
+   * Error message string. When truthy, shifts Radio indicators to error
+   * colour and renders the message below the options.
+   */
+  error?: string;
   /** Marks all options as required. Appends SR-only "(required)" to the legend. */
   required?: boolean;
   /** Group label rendered inside a <legend>. Strongly recommended for accessibility. */
   legend?: ReactNode;
-  /** Helper text shown below the options. Hidden when errorMessage is visible. */
+  /** Helper text shown below the options. Hidden when error is set. */
   hint?: string;
-  /** Error message shown below the options when error=true. */
-  errorMessage?: string;
   /** Per-instance string overrides for i18n. */
   i18nStrings?: RadioGroupI18nStrings;
 }

@@ -13,7 +13,7 @@ const meta: Meta<typeof Button> = {
       options: ['primary', 'secondary', 'outline', 'ghost', 'destructive', 'link'],
     },
     size: { control: 'select', options: ['xs', 'sm', 'md', 'lg', 'xl'] },
-    isLoading: { control: 'boolean' },
+    loading: { control: 'boolean' },
     disabled: { control: 'boolean' },
     iconOnly: { control: 'boolean' },
   },
@@ -88,10 +88,10 @@ export const States: Story = {
       <div>
         <p className="text-label-sm text-secondary mb-3">Loading (dimensions preserved)</p>
         <div className="flex flex-wrap gap-3 items-center">
-          <Button variant="primary" isLoading>Saving changes</Button>
-          <Button variant="secondary" isLoading>Processing</Button>
-          <Button variant="outline" isLoading>Loading</Button>
-          <Button variant="destructive" isLoading>Deleting</Button>
+          <Button variant="primary" loading>Saving changes</Button>
+          <Button variant="secondary" loading>Processing</Button>
+          <Button variant="outline" loading>Loading</Button>
+          <Button variant="destructive" loading>Deleting</Button>
         </div>
       </div>
 
@@ -161,7 +161,7 @@ export const DarkMode: Story = {
       </div>
       <div className="flex flex-wrap gap-3 items-center">
         <Button variant="primary" disabled>Disabled</Button>
-        <Button variant="primary" isLoading>Loading</Button>
+        <Button variant="primary" loading>Loading</Button>
         <Button variant="primary" leftIcon={<Plus size="var(--size-icon-md)" />}>With icon</Button>
         <Button variant="primary" iconOnly leftIcon={<Settings size="var(--size-icon-md)" />}>Settings</Button>
       </div>
@@ -175,7 +175,7 @@ export const Playground: Story = {
     children: 'Click me',
     variant: 'primary',
     size: 'md',
-    isLoading: false,
+    loading: false,
     disabled: false,
     iconOnly: false,
   },
@@ -203,7 +203,7 @@ export const Accessibility: Story = {
       </Button>
 
       {/* Loading: aria-busy communicates async state */}
-      <Button variant="primary" isLoading>
+      <Button variant="primary" loading>
         Saving…
       </Button>
     </div>

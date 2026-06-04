@@ -63,6 +63,7 @@ validate-css-gen.js
 app/roundtrip-analysis.md
 
 # ─── Internal / non-public docs ──────────────────────────────────────────────
+internal/
 COMPONENT-CHECKLIST.md
 PUBLIC-REPO-SETUP.md
 docs/migration-guides.md

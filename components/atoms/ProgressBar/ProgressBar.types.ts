@@ -1,7 +1,7 @@
 import type { HTMLAttributes } from 'react';
 
 export type ProgressBarVariant = 'default' | 'success' | 'warning' | 'error' | 'neutral';
-export type ProgressBarSize = 'xs' | 'sm' | 'md' | 'lg';
+export type ProgressBarSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 
 export interface ProgressBarProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
   /**

@@ -1,5 +1,6 @@
 "use client"
 import {
+  forwardRef,
   memo,
   useCallback,
   useEffect,
@@ -134,15 +135,15 @@ function buildColorValue(c: InternalColor): ColorValue {
 // ─────────────────────────────────────────────────────────────────────────────
 
 const widthClasses: Record<ColorPickerSize, string> = {
-  sm: 'w-[var(--color-picker-width-sm)]',
-  md: 'w-[var(--color-picker-width-md)]',
-  lg: 'w-[var(--color-picker-width-lg)]',
+  sm: 'w-[var(--picker-width-sm)]',
+  md: 'w-[var(--picker-width-md)]',
+  lg: 'w-[var(--picker-width-lg)]',
 };
 
 const spectrumHeightClasses: Record<ColorPickerSize, string> = {
-  sm: 'h-[var(--color-picker-spectrum-height-sm)]',
-  md: 'h-[var(--color-picker-spectrum-height-md)]',
-  lg: 'h-[var(--color-picker-spectrum-height-lg)]',
+  sm: 'h-[var(--picker-spectrum-height-sm)]',
+  md: 'h-[var(--picker-spectrum-height-md)]',
+  lg: 'h-[var(--picker-spectrum-height-lg)]',
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -218,32 +219,27 @@ const ColorPickerSpectrum = memo(({ h, s, v, size, disabled, spectrumLabel, onSV
       onPointerUp={handlePointerUp}
       onKeyDown={handleKeyDown}
       className={[
-        'relative w-full rounded-[var(--color-picker-spectrum-radius)] cursor-crosshair overflow-hidden select-none',
+        'relative w-full rounded-[var(--picker-spectrum-radius)] cursor-crosshair overflow-hidden select-none',
         'focus-visible:outline-none focus-visible:focus-ring',
         spectrumHeightClasses[size],
-        disabled ? 'opacity-[var(--color-swatch-opacity-disabled)] cursor-not-allowed' : '',
+        'color-picker-spectrum-bg',
+        disabled ? 'opacity-[var(--swatch-opacity-disabled)] cursor-not-allowed' : '',
       ].filter(Boolean).join(' ')}
-      // Spectrum background: hue gradient + white-to-transparent + black-to-transparent
-      style={{
-        '--spectrum-hue-color': `hsl(${h}, 100%, 50%)`,
-        background: [
-          'linear-gradient(to bottom, transparent, #000)',
-          'linear-gradient(to right, #fff, var(--spectrum-hue-color))',
-        ].join(', '),
-      } as CSSProperties}
+      // CSS custom property injection — dynamic hue drives the spectrum gradient
+      style={{ '--spectrum-hue-color': `hsl(${h}, 100%, 50%)` } as CSSProperties}
     >
       {/* Draggable thumb */}
       <div
         aria-hidden="true"
-        className="absolute -translate-x-1/2 -translate-y-1/2 rounded-[var(--radius-component-full)] pointer-events-none transition-[left,top] duration-[50ms]"
-        style={{
-          width:  'var(--color-picker-thumb-size)',
-          height: 'var(--color-picker-thumb-size)',
-          left:   `${thumbX}%`,
-          top:    `${thumbY}%`,
-          border: `var(--color-picker-thumb-border-width) solid var(--color-picker-thumb-border)`,
-          boxShadow: `var(--color-picker-thumb-shadow)`,
-        } as CSSProperties}
+        className={[
+          'absolute -translate-x-1/2 -translate-y-1/2 rounded-[var(--radius-component-full)] pointer-events-none',
+          'transition-[left,top] duration-[50ms]',
+          'w-[var(--picker-thumb-size)] h-[var(--picker-thumb-size)] shadow-[var(--picker-thumb-shadow)]',
+          'start-[var(--picker-thumb-x)] top-[var(--picker-thumb-y)]',
+          'color-picker-thumb-ring',
+        ].join(' ')}
+        // CSS custom property injection — dynamic thumb position from pointer tracking
+        style={{ '--picker-thumb-x': `${thumbX}%`, '--picker-thumb-y': `${thumbY}%` } as CSSProperties}
       />
     </div>
   );
@@ -321,25 +317,28 @@ const ColorPickerSlider = memo(({ value, min, max, trackBackground, ariaLabel, d
       onKeyDown={handleKeyDown}
       className={[
         'relative w-full select-none cursor-pointer',
-        'rounded-[var(--color-picker-track-radius)]',
-        'h-[var(--color-picker-track-height)]',
+        'rounded-[var(--picker-track-radius)]',
+        'h-[var(--picker-track-height)]',
         'focus-visible:outline-none focus-visible:focus-ring',
-        disabled ? 'opacity-[var(--color-swatch-opacity-disabled)] cursor-not-allowed' : '',
+        disabled ? 'opacity-[var(--swatch-opacity-disabled)] cursor-not-allowed' : '',
+        'bg-[var(--track-bg)]',
       ].filter(Boolean).join(' ')}
-      style={{ '--track-bg': trackBackground, background: 'var(--track-bg)' } as CSSProperties}
+      // CSS custom property injection — dynamic track color from current hue
+      style={{ '--track-bg': trackBackground } as CSSProperties}
     >
       {/* Thumb */}
       <div
         aria-hidden="true"
-        className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 rounded-[var(--radius-component-full)] pointer-events-none transition-[left] duration-[50ms]"
-        style={{
-          left:      `${pct}%`,
-          width:     'var(--color-picker-slider-thumb-size)',
-          height:    'var(--color-picker-slider-thumb-size)',
-          background:'var(--color-picker-slider-thumb-bg)',
-          border:    `1px solid var(--color-picker-slider-thumb-border)`,
-          boxShadow: 'var(--color-picker-slider-thumb-shadow)',
-        } as CSSProperties}
+        className={[
+          'absolute top-1/2 -translate-y-1/2 -translate-x-1/2 rounded-[var(--radius-component-full)] pointer-events-none',
+          'transition-[left] duration-[50ms]',
+          'w-[var(--picker-slider-thumb-size)] h-[var(--picker-slider-thumb-size)]',
+          'bg-[var(--picker-slider-thumb-bg)] shadow-[var(--picker-slider-thumb-shadow)]',
+          'start-[var(--picker-slider-thumb-x)]',
+          'color-picker-slider-thumb-ring',
+        ].join(' ')}
+        // CSS custom property injection — dynamic thumb position from pointer tracking
+        style={{ '--picker-slider-thumb-x': `${pct}%` } as CSSProperties}
       />
     </div>
   );
@@ -350,7 +349,7 @@ ColorPickerSlider.displayName = 'ColorPickerSlider';
 // Main ColorPicker component
 // ─────────────────────────────────────────────────────────────────────────────
 
-export const ColorPicker = memo(({
+export const ColorPicker = memo(forwardRef<HTMLDivElement, ColorPickerProps>(({
   value: valueProp,
   defaultValue,
   onChange,
@@ -362,7 +361,7 @@ export const ColorPicker = memo(({
   loading = false,
   i18nStrings: i18nProp,
   className,
-}: ColorPickerProps) => {
+}, ref) => {
   const i18n = useComponentI18n('colorPicker', i18nProp);
 
   // ── Unique IDs ───────────────────────────────────────────────────────────────
@@ -375,13 +374,13 @@ export const ColorPicker = memo(({
     if (defaultColorValue) {
       return parseColor(defaultColorValue);
     }
-    // Fallback to CSS variable if available, else use default hex
-    const cssDefault = typeof window !== 'undefined'
-      ? getComputedStyle(document.documentElement)
-          .getPropertyValue('--color-picker-default-color')
-          .trim()
-      : '#6366f1';
-    return parseColor(cssDefault || '#6366f1');
+    if (typeof window !== 'undefined') {
+      const resolved = getComputedStyle(document.documentElement)
+        .getPropertyValue('--picker-default-color')
+        .trim();
+      if (resolved) return parseColor(resolved);
+    }
+    return parseColor('#0ea5e9');
   });
 
   // Sync when controlled value changes externally
@@ -472,13 +471,13 @@ export const ColorPicker = memo(({
   // ── Track backgrounds (computed from current color) ──────────────────────────
   // Hue track uses CSS variable with semantic hue colors
   const hueTrackBg = `linear-gradient(to right,
-    var(--color-hue-red),
-    var(--color-hue-yellow),
-    var(--color-hue-green),
-    var(--color-hue-cyan),
-    var(--color-hue-blue),
-    var(--color-hue-magenta),
-    var(--color-hue-red))`;
+    var(--picker-hue-red),
+    var(--picker-hue-yellow),
+    var(--picker-hue-green),
+    var(--picker-hue-cyan),
+    var(--picker-hue-blue),
+    var(--picker-hue-magenta),
+    var(--picker-hue-red))`;
 
   const rgbNoAlpha = useMemo(() => {
     const { r, g, b } = colorValue;
@@ -487,7 +486,7 @@ export const ColorPicker = memo(({
 
   const alphaTrackBg = useMemo(() =>
     `linear-gradient(to right, transparent, ${rgbNoAlpha}),
-     repeating-linear-gradient(45deg, var(--color-alpha-checker-light) 0px, var(--color-alpha-checker-light) 4px, var(--color-alpha-checker-dark) 4px, var(--color-alpha-checker-dark) 8px)`,
+     repeating-linear-gradient(45deg, var(--picker-alpha-checker-light) 0px, var(--picker-alpha-checker-light) 4px, var(--picker-alpha-checker-dark) 4px, var(--picker-alpha-checker-dark) 8px)`,
     [rgbNoAlpha]);
 
   // ── Hue CSS (used for spectrum gradient background) ──────────────────────────
@@ -507,7 +506,7 @@ export const ColorPicker = memo(({
   }: { value: number | string; label: string; onChange: (v: string) => void; max: number }) => {
     const fieldId = `${baseId}-ch-${label}`;
     return (
-      <div className="flex flex-col items-center gap-[var(--color-picker-label-mt)]">
+      <div className="flex flex-col items-center gap-[var(--picker-label-mt)]">
         <input
           id={fieldId}
           type="text"
@@ -518,19 +517,19 @@ export const ColorPicker = memo(({
           aria-label={label}
           className={[
             'w-full text-center rounded-[var(--radius-component-sm)]',
-            'border border-[var(--color-picker-preview-border)]',
-            'bg-[var(--color-picker-bg)]',
+            'border border-[var(--picker-preview-border)]',
+            'bg-[var(--picker-bg)]',
             'text-body-xs text-[var(--color-text-primary)]',
             'h-[var(--size-component-sm)]',
             'px-[var(--spacing-component-xs)]',
             'focus-visible:outline-none focus-visible:focus-ring-inset',
             'transition-default',
-            isDisabled ? 'opacity-[var(--color-swatch-opacity-disabled)] cursor-not-allowed' : '',
+            isDisabled ? 'opacity-[var(--swatch-opacity-disabled)] cursor-not-allowed' : '',
           ].filter(Boolean).join(' ')}
         />
         <span
           aria-hidden="true"
-          className="text-label-xs text-[var(--color-picker-label-color)] truncate-label"
+          className="text-label-xs text-[var(--picker-label-color)] truncate-label"
         >
           {label}
         </span>
@@ -544,13 +543,13 @@ export const ColorPicker = memo(({
 
   const containerClasses = useMemo(() => [
     'inline-flex flex-col',
-    'rounded-[var(--color-picker-radius)]',
-    'border border-[var(--color-picker-border)]',
-    'bg-[var(--color-picker-bg)]',
-    'shadow-[var(--color-picker-shadow)]',
-    'p-[var(--color-picker-padding)]',
-    'gap-[var(--color-picker-gap)]',
-    'min-w-[var(--color-picker-min-width)]',
+    'rounded-[var(--picker-radius)]',
+    'border border-[var(--picker-border)]',
+    'bg-[var(--picker-bg)]',
+    'shadow-[var(--picker-shadow)]',
+    'p-[var(--picker-padding)]',
+    'gap-[var(--picker-gap)]',
+    'min-w-[var(--picker-min-width)]',
     widthClasses[size],
     'card-shell',
     className,
@@ -568,8 +567,8 @@ export const ColorPicker = memo(({
         aria-busy="true"
         className={containerClasses}
       >
-        <div className={`skeleton rounded-[var(--color-picker-spectrum-radius)] ${spectrumHeightClasses[size]}`} />
-        <div className="skeleton h-[var(--color-picker-track-height)] rounded-[var(--color-picker-track-radius)]" />
+        <div className={`skeleton rounded-[var(--picker-spectrum-radius)] ${spectrumHeightClasses[size]}`} />
+        <div className="skeleton h-[var(--picker-track-height)] rounded-[var(--picker-track-radius)]" />
         <div className="skeleton h-[var(--size-component-sm)] rounded-[var(--radius-component-sm)] w-full" />
       </div>
     );
@@ -588,16 +587,13 @@ export const ColorPicker = memo(({
       >
         <span id={headingId} className="sr-only">{i18n.colorLabel}</span>
 
-        <div className="flex items-center gap-[var(--color-picker-input-gap)]">
+        <div className="flex items-center gap-[var(--picker-input-gap)]">
           {/* Preview swatch */}
           <div
             aria-hidden="true"
-            className="shrink-0 rounded-[var(--color-picker-preview-radius)] border border-[var(--color-picker-preview-border)]"
-            style={{
-              width: 'var(--color-picker-preview-size)',
-              height: 'var(--color-picker-preview-size)',
-              backgroundColor: colorValue.hex,
-            } as CSSProperties}
+            className="shrink-0 rounded-[var(--picker-preview-radius)] border border-[var(--picker-preview-border)] w-[var(--picker-preview-size)] h-[var(--picker-preview-size)] bg-[var(--picker-swatch-value)]"
+            // CSS custom property injection — dynamic swatch color from color picker state
+            style={{ '--picker-swatch-value': colorValue.hex } as CSSProperties}
           />
 
           {/* Hex input */}
@@ -616,12 +612,12 @@ export const ColorPicker = memo(({
               spellCheck={false}
               className={[
                 'w-full rounded-[var(--radius-component-sm)]',
-                'border border-[var(--color-picker-preview-border)]',
+                'border border-[var(--picker-preview-border)]',
                 'bg-transparent text-body-sm text-[var(--color-text-primary)]',
                 'h-[var(--size-component-sm)] px-[var(--spacing-component-sm)]',
                 'focus-visible:outline-none focus-visible:focus-ring-inset',
-                'transition-default uppercase font-[var(--font-family-mono)]',
-                isDisabled ? 'opacity-[var(--color-swatch-opacity-disabled)] cursor-not-allowed' : '',
+                'transition-default uppercase font-[var(--font-family-code)]',
+                isDisabled ? 'opacity-[var(--swatch-opacity-disabled)] cursor-not-allowed' : '',
               ].filter(Boolean).join(' ')}
             />
           </div>
@@ -634,10 +630,10 @@ export const ColorPicker = memo(({
             aria-label={copied ? i18n.copiedLabel : i18n.copyLabel}
             className={[
               'shrink-0 flex items-center justify-center transition-default',
-              'text-[var(--color-picker-copy-color)] hover:text-[var(--color-picker-copy-color-hover)]',
+              'text-[var(--picker-copy-color)] hover:text-[var(--picker-copy-color-hover)]',
               'focus-visible:outline-none focus-visible:focus-ring',
               'rounded-[var(--radius-component-sm)]',
-              isDisabled ? 'opacity-[var(--color-swatch-opacity-disabled)] cursor-not-allowed pointer-events-none' : '',
+              isDisabled ? 'opacity-[var(--swatch-opacity-disabled)] cursor-not-allowed pointer-events-none' : '',
             ].filter(Boolean).join(' ')}
           >
             {copied
@@ -656,6 +652,7 @@ export const ColorPicker = memo(({
 
   return (
     <div
+      ref={ref}
       role="group"
       aria-labelledby={headingId}
       className={containerClasses}
@@ -674,20 +671,17 @@ export const ColorPicker = memo(({
       />
 
       {/* ── Sliders row ── */}
-      <div className="flex items-center gap-[var(--color-picker-input-gap)]">
+      <div className="flex items-center gap-[var(--picker-input-gap)]">
         {/* Preview swatch (current color) */}
         <div
           aria-hidden="true"
-          className="shrink-0 rounded-[var(--color-picker-preview-radius)] border border-[var(--color-picker-preview-border)]"
-          style={{
-            width: 'var(--color-picker-preview-size)',
-            height: 'var(--color-picker-preview-size)',
-            backgroundColor: colorValue.hex,
-          } as CSSProperties}
+          className="shrink-0 rounded-[var(--picker-preview-radius)] border border-[var(--picker-preview-border)] w-[var(--picker-preview-size)] h-[var(--picker-preview-size)] bg-[var(--picker-swatch-value)]"
+          // CSS custom property injection — dynamic swatch color from color picker state
+          style={{ '--picker-swatch-value': colorValue.hex } as CSSProperties}
         />
 
         {/* Hue + alpha stacked */}
-        <div className="flex-1 min-w-0 flex flex-col gap-[var(--color-picker-input-gap)]">
+        <div className="flex-1 min-w-0 flex flex-col gap-[var(--picker-input-gap)]">
           <ColorPickerSlider
             value={internalColor.h}
             min={0}
@@ -712,11 +706,11 @@ export const ColorPicker = memo(({
       </div>
 
       {/* ── Inputs section ── */}
-      <div className="flex items-start gap-[var(--color-picker-input-gap)]">
+      <div className="flex items-start gap-[var(--picker-input-gap)]">
         {format === 'hex' && (
           <>
             {/* Hex field — takes most of the width */}
-            <div className="flex-1 min-w-0 flex flex-col gap-[var(--color-picker-label-mt)]">
+            <div className="flex-1 min-w-0 flex flex-col gap-[var(--picker-label-mt)]">
               <input
                 type="text"
                 value={hexInput}
@@ -731,17 +725,17 @@ export const ColorPicker = memo(({
                 spellCheck={false}
                 className={[
                   'w-full rounded-[var(--radius-component-sm)]',
-                  'border border-[var(--color-picker-preview-border)]',
+                  'border border-[var(--picker-preview-border)]',
                   'bg-transparent text-body-xs text-[var(--color-text-primary)]',
                   'h-[var(--size-component-sm)] px-[var(--spacing-component-sm)]',
                   'focus-visible:outline-none focus-visible:focus-ring-inset',
-                  'transition-default uppercase font-[var(--font-family-mono)]',
-                  isDisabled ? 'opacity-[var(--color-swatch-opacity-disabled)] cursor-not-allowed' : '',
+'transition-default uppercase font-[var(--font-family-code)]',
+                isDisabled ? 'opacity-[var(--swatch-opacity-disabled)] cursor-not-allowed' : '',
                 ].filter(Boolean).join(' ')}
               />
               <span
                 aria-hidden="true"
-                className="text-label-xs text-[var(--color-picker-label-color)] truncate-label"
+                className="text-label-xs text-[var(--picker-label-color)] truncate-label"
               >
                 {i18n.hexLabel}
               </span>
@@ -791,7 +785,7 @@ export const ColorPicker = memo(({
         )}
 
         {/* Copy + format switcher (compact row, compact variant omits format switcher) */}
-        <div className="flex flex-col items-center gap-[var(--color-picker-label-mt)] shrink-0">
+        <div className="flex flex-col items-center gap-[var(--picker-label-mt)] shrink-0">
           <div className="flex items-center gap-[var(--spacing-component-xs)]">
             {/* Copy button */}
             <button
@@ -802,10 +796,10 @@ export const ColorPicker = memo(({
               className={[
                 'flex items-center justify-center h-[var(--size-component-sm)] w-[var(--size-component-sm)]',
                 'rounded-[var(--radius-component-sm)] transition-default',
-                'text-[var(--color-picker-copy-color)] hover:text-[var(--color-picker-copy-color-hover)]',
+                'text-[var(--picker-copy-color)] hover:text-[var(--picker-copy-color-hover)]',
                 'hover:bg-[var(--color-action-secondary)]',
                 'focus-visible:outline-none focus-visible:focus-ring',
-                isDisabled ? 'opacity-[var(--color-swatch-opacity-disabled)] cursor-not-allowed pointer-events-none' : '',
+                isDisabled ? 'opacity-[var(--swatch-opacity-disabled)] cursor-not-allowed pointer-events-none' : '',
               ].filter(Boolean).join(' ')}
             >
               {copied
@@ -814,7 +808,7 @@ export const ColorPicker = memo(({
               }
             </button>
           </div>
-          <span aria-hidden="true" className="text-label-xs text-[var(--color-picker-label-color)]">&nbsp;</span>
+          <span aria-hidden="true" className="text-label-xs text-[var(--picker-label-color)]">&nbsp;</span>
         </div>
       </div>
 
@@ -823,7 +817,7 @@ export const ColorPicker = memo(({
         <div
           role="group"
           aria-label="Color format"
-          className="flex rounded-[var(--radius-component-sm)] overflow-hidden border border-[var(--color-picker-preview-border)]"
+          className="flex rounded-[var(--radius-component-sm)] overflow-hidden border border-[var(--picker-preview-border)]"
         >
           {(['hex', 'rgb', 'hsl'] as ColorFormat[]).map((f) => (
             <button
@@ -836,9 +830,9 @@ export const ColorPicker = memo(({
                 'flex-1 text-label-xs h-[var(--size-component-xs)] transition-default',
                 'focus-visible:outline-none focus-visible:focus-ring',
                 format === f
-                  ? 'bg-[var(--color-action-secondary)] text-[var(--color-text-primary)] font-[var(--font-weight-medium)]'
-                  : 'bg-transparent text-[var(--color-picker-label-color)] hover:bg-[var(--color-action-secondary)] hover:text-[var(--color-text-primary)]',
-                isDisabled ? 'cursor-not-allowed pointer-events-none opacity-[var(--color-swatch-opacity-disabled)]' : '',
+                  ? 'bg-[var(--color-action-secondary)] text-[var(--color-text-primary)] text-label-xs'
+                  : 'bg-transparent text-[var(--picker-label-color)] hover:bg-[var(--color-action-secondary)] hover:text-[var(--color-text-primary)]',
+                isDisabled ? 'cursor-not-allowed pointer-events-none opacity-[var(--swatch-opacity-disabled)]' : '',
               ].filter(Boolean).join(' ')}
             >
               {f.toUpperCase()}
@@ -852,7 +846,7 @@ export const ColorPicker = memo(({
         <div
           role="group"
           aria-label={i18n.presetsLabel}
-          className="flex flex-wrap gap-[var(--color-picker-presets-gap)] pt-[var(--color-picker-presets-pt)] border-t border-[var(--color-picker-presets-border)]"
+          className="flex flex-wrap gap-[var(--picker-presets-gap)] pt-[var(--picker-presets-pt)] border-t border-[var(--picker-presets-border)]"
         >
           {presets.map((p) => (
             <ColorSwatch
@@ -876,5 +870,5 @@ export const ColorPicker = memo(({
       )}
     </div>
   );
-});
+}));
 ColorPicker.displayName = 'ColorPicker';

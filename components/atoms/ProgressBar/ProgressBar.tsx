@@ -17,6 +17,7 @@ const sizeClasses: Record<ProgressBarSize, string> = {
   sm: 'h-[var(--progress-height-sm)]',
   md: 'h-[var(--progress-height-md)]',
   lg: 'h-[var(--progress-height-lg)]',
+  xl: 'h-[var(--progress-height-xl)]',
 };
 
 const RADIUS_CLASS = 'rounded-[var(--progress-track-radius)]';

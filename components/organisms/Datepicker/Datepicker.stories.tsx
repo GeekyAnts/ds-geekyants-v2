@@ -58,9 +58,9 @@ export const States: Story = {
     <div className="flex flex-col gap-[var(--spacing-layout-sm)] w-80">
       <Datepicker label="Default" hint="Normal resting state" />
       <Datepicker label="With value" defaultValue={new Date(2026, 2, 15)} />
-      <Datepicker label="Error" errorMessage="Please select a valid date" />
+      <Datepicker label="Error" error="Please select a valid date" />
       <Datepicker label="Disabled" disabled />
-      <Datepicker label="Loading" isLoading />
+      <Datepicker label="Loading" loading />
       <Datepicker
         label="Min / Max constrained"
         min={new Date(2026, 2, 10)}
@@ -79,7 +79,7 @@ export const DarkMode: Story = {
       <div className="flex flex-col gap-[var(--spacing-layout-sm)] w-80">
         <Datepicker label="Dark mode" hint="Calendar adapts to dark theme" />
         <Datepicker label="With value" defaultValue={new Date(2026, 5, 1)} />
-        <Datepicker label="Error state" errorMessage="Invalid date format" />
+        <Datepicker label="Error state" error="Invalid date format" />
         <Datepicker label="Disabled" disabled />
       </div>
     </div>
@@ -96,7 +96,7 @@ export const Playground: Story = {
     size: 'md',
     variant: 'default',
     disabled: false,
-    isLoading: false,
+    loading: false,
     firstDayOfWeek: 1,
   },
   argTypes: {
@@ -104,10 +104,10 @@ export const Playground: Story = {
     variant: { control: 'select', options: ['default', 'filled', 'flushed', 'unstyled'] },
     firstDayOfWeek: { control: 'radio', options: [0, 1] },
     disabled: { control: 'boolean' },
-    isLoading: { control: 'boolean' },
+    loading: { control: 'boolean' },
     label: { control: 'text' },
     hint: { control: 'text' },
-    errorMessage: { control: 'text' },
+    error: { control: 'text' },
     placeholder: { control: 'text' },
   },
 };
@@ -137,7 +137,7 @@ export const Accessibility: Story = {
           />
           <Datepicker
             label="Error state"
-            errorMessage="Date is required"
+            error="Date is required"
             aria-label="Required date field"
           />
           <Datepicker
@@ -148,7 +148,7 @@ export const Accessibility: Story = {
           />
           <Datepicker
             label="Loading"
-            isLoading
+            loading
             aria-busy={true}
             aria-label="Loading date field"
           />

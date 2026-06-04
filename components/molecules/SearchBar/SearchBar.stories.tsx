@@ -30,8 +30,8 @@ const meta: Meta<typeof SearchBar> = {
     labelHidden: { control: 'boolean' },
     placeholder: { control: 'text' },
     disabled: { control: 'boolean' },
-    isLoading: { control: 'boolean' },
-    error: { control: 'boolean' },
+    loading: { control: 'boolean' },
+    error: { control: 'text' },
     schema: { control: 'boolean' },
     searchUrl: { control: 'text' },
   },
@@ -117,11 +117,11 @@ export const States: Story = {
       </div>
       <div>
         <p className="text-body-sm text-[var(--color-text-secondary)] mb-2">Loading</p>
-        <SearchBar label="Search" labelHidden defaultValue="loading state" isLoading />
+        <SearchBar label="Search" labelHidden defaultValue="loading state" loading />
       </div>
       <div>
         <p className="text-body-sm text-[var(--color-text-secondary)] mb-2">Error</p>
-        <SearchBar label="Search" labelHidden defaultValue="invalid query" error />
+        <SearchBar label="Search" labelHidden defaultValue="invalid query" error="Invalid search query" />
       </div>
       <div>
         <p className="text-body-sm text-[var(--color-text-secondary)] mb-2">Disabled</p>
@@ -165,8 +165,8 @@ export const Playground: Story = {
     variant: 'default',
     size: 'md',
     disabled: false,
-    isLoading: false,
-    error: false,
+    loading: false,
+    error: '',
     schema: false,
   },
 };
@@ -212,7 +212,7 @@ export const Accessibility: Story = {
         label="Search"
         labelHidden
         defaultValue="react components"
-        isLoading
+        loading
       />
 
       {/* Disabled state — aria-disabled + disabled attribute */}
@@ -228,7 +228,7 @@ export const Accessibility: Story = {
         label="Search"
         labelHidden
         defaultValue="!@#$%"
-        error
+        error="Invalid input"
       />
 
       {/* With submit button — button is a separate Tab stop */}

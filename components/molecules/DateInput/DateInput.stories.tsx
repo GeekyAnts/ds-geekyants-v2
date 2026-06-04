@@ -24,9 +24,9 @@ const meta: Meta<typeof DateInput> = {
     },
     disabled: { control: 'boolean' },
     required: { control: 'boolean' },
-    isLoading: { control: 'boolean' },
+    loading: { control: 'boolean' },
     hint: { control: 'text' },
-    errorMessage: { control: 'text' },
+    error: { control: 'text' },
     label: { control: 'text' },
   },
 };
@@ -80,7 +80,7 @@ export const States: Story = {
       />
       <DateInput
         label="Error state"
-        errorMessage="Please enter a valid date"
+        error="Please enter a valid date"
         defaultValue="2026-13-45"
       />
       <DateInput
@@ -92,7 +92,7 @@ export const States: Story = {
       <DateInput
         label="Loading"
         hint="Fetching allowed date range…"
-        isLoading
+        loading
       />
       <DateInput
         label="Required field"
@@ -111,7 +111,7 @@ export const DarkMode: Story = {
         <DateInput label="Date of birth" hint="Use the format MM/DD/YYYY" />
         <DateInput
           label="Start date"
-          errorMessage="Date must be in the future"
+          error="Date must be in the future"
           defaultValue="2020-01-01"
         />
         <DateInput label="End date" disabled defaultValue="2026-12-31" />
@@ -125,12 +125,12 @@ export const Playground: Story = {
   args: {
     label: 'Date of birth',
     hint: 'Use the format MM/DD/YYYY',
-    errorMessage: '',
+    error: '',
     size: 'md',
     variant: 'default',
     disabled: false,
     required: false,
-    isLoading: false,
+    loading: false,
   },
 };
 
@@ -151,7 +151,7 @@ export const Accessibility: Story = {
       <DateInput
         id="start-date-field"
         label="Start date"
-        errorMessage="Date must not be in the past"
+        error="Date must not be in the past"
         required
         aria-invalid="true"
       />

@@ -6,18 +6,16 @@ import {
   Settings,
   Bell,
   Search,
-  Star,
   Layers,
   HelpCircle,
   LogIn,
+  Menu,
 } from 'lucide-react';
 import { Header } from './Header';
 import { NavItem } from '../../atoms/NavItem/NavItem';
 import { Button } from '../../atoms/Button/Button';
 import { Avatar } from '../../atoms/Avatar/Avatar';
 import { Badge } from '../../atoms/Badge/Badge';
-
-// ── Shared building blocks ─────────────────────────────────────────────────
 
 const Logo = () => (
   <span
@@ -37,8 +35,6 @@ const PrimaryNav = ({ schema }: { schema?: boolean }) => (
   </>
 );
 
-// ── Meta ───────────────────────────────────────────────────────────────────
-
 const meta: Meta<typeof Header> = {
   title: 'Organisms/Header',
   component: Header,
@@ -48,7 +44,7 @@ const meta: Meta<typeof Header> = {
     docs: {
       description: {
         component:
-          'Page-level banner landmark (`<header>`) with compound slots for brand, navigation, and actions. Manages responsive mobile menu state internally.',
+          'Page-level banner landmark (`<header>`) with compound slots for brand, navigation, and actions. Supports multiple visual variants and positioning modes.',
       },
     },
   },
@@ -56,8 +52,6 @@ const meta: Meta<typeof Header> = {
 
 export default meta;
 type Story = StoryObj<typeof Header>;
-
-// ── 1. Default ────────────────────────────────────────────────────────────
 
 export const Default: Story = {
   name: 'Default',
@@ -80,29 +74,12 @@ export const Default: Story = {
   ),
 };
 
-// ── 2. Variants ────────────────────────────────────────────────────────────
-
 export const Variants: Story = {
   name: 'Variants',
   render: () => (
-    <div className="flex flex-col gap-[var(--spacing-layout-sm)]">
-      {/* Minimal — brand + single CTA, no nav */}
+    <div className="flex flex-col gap-[var(--spacing-layout-lg)]">
       <div>
-        <p className="text-label-sm text-[var(--color-text-tertiary)] px-4 py-2">Minimal (brand + CTA only)</p>
-        <Header>
-          <Header.Brand href="/">
-            <Logo />
-            <span className="truncate-label text-heading-h5">Geeklego</span>
-          </Header.Brand>
-          <Header.Actions>
-            <Button variant="primary" size="sm">Get started</Button>
-          </Header.Actions>
-        </Header>
-      </div>
-
-      {/* Standard — brand + nav + actions */}
-      <div>
-        <p className="text-label-sm text-[var(--color-text-tertiary)] px-4 py-2">Standard (brand + nav + actions)</p>
+        <p className="text-label-sm text-[var(--color-text-tertiary)] px-4 py-2">Default — surface bg, bottom border</p>
         <Header>
           <Header.Brand href="/">
             <Logo />
@@ -118,95 +95,108 @@ export const Variants: Story = {
         </Header>
       </div>
 
-      {/* App — brand + nav + icon actions + avatar */}
       <div>
-        <p className="text-label-sm text-[var(--color-text-tertiary)] px-4 py-2">App shell (nav + icon actions + avatar)</p>
-        <Header>
-          <Header.Brand href="/">
-            <Logo />
-            <span className="truncate-label text-heading-h5 hidden sm:block">Geeklego</span>
-          </Header.Brand>
-          <Header.Nav>
-            <NavItem href="/" label="Dashboard" isActive />
-            <NavItem href="/settings" label="Settings" />
-            <NavItem href="/help" label="Help" />
-          </Header.Nav>
-          <Header.Actions>
-            <Button
-              variant="ghost"
-              size="sm"
-              iconOnly
-              leftIcon={<Bell size="var(--size-icon-md)" aria-hidden="true" />}
-            >
-              Notifications
-            </Button>
-            <Avatar variant="initials" initials="JD" size="sm" />
-          </Header.Actions>
-        </Header>
+        <p className="text-label-sm text-[var(--color-text-tertiary)] px-4 py-2">Transparent — no bg, no border, blends with page surface</p>
+        <div className="bg-[var(--color-surface-raised)]">
+          <Header variant="transparent">
+            <Header.Brand href="/">
+              <Logo />
+              <span className="truncate-label text-heading-h5">Geeklego</span>
+            </Header.Brand>
+            <Header.Nav>
+              <PrimaryNav />
+            </Header.Nav>
+            <Header.Actions>
+              <Button variant="ghost" size="sm">Sign in</Button>
+              <Button variant="primary" size="sm">Get started</Button>
+            </Header.Actions>
+          </Header>
+        </div>
+      </div>
+
+      <div>
+        <p className="text-label-sm text-[var(--color-text-tertiary)] px-4 py-2">Floating — overlay bg, subtle border, shadow; for fixed headers</p>
+        <div style={{ minHeight: '80px' }}>
+          <Header variant="floating">
+            <Header.Brand href="/">
+              <Logo />
+              <span className="truncate-label text-heading-h5">Geeklego</span>
+            </Header.Brand>
+            <Header.Nav>
+              <PrimaryNav />
+            </Header.Nav>
+            <Header.Actions>
+              <Button variant="ghost" size="sm">Sign in</Button>
+              <Button variant="primary" size="sm">Get started</Button>
+            </Header.Actions>
+          </Header>
+        </div>
       </div>
     </div>
   ),
 };
 
-// ── 3. Sizes ───────────────────────────────────────────────────────────────
-// Header has a single fixed height via --header-height token.
-// This story demonstrates nav density configurations.
-
-export const Sizes: Story = {
-  name: 'Sizes / Nav density',
+export const Positions: Story = {
+  name: 'Positions',
   render: () => (
-    <div className="flex flex-col gap-[var(--spacing-layout-sm)]">
-      {/* Icon + label nav (default) */}
+    <div className="flex flex-col gap-[var(--spacing-layout-lg)]">
       <div>
-        <p className="text-label-sm text-[var(--color-text-tertiary)] px-4 py-2">Icon + label nav items</p>
+        <p className="text-label-sm text-[var(--color-text-tertiary)] px-4 py-2">Sticky (default) — sticks to top on scroll</p>
         <Header>
           <Header.Brand href="/">
             <Logo />
             <span className="truncate-label text-heading-h5">Geeklego</span>
           </Header.Brand>
           <Header.Nav>
-            <NavItem href="/" label="Home" icon={<Home size="var(--size-icon-sm)" />} isActive />
-            <NavItem href="/dashboard" label="Dashboard" icon={<LayoutDashboard size="var(--size-icon-sm)" />} />
-            <NavItem href="/docs" label="Docs" icon={<BookOpen size="var(--size-icon-sm)" />} />
+            <PrimaryNav />
           </Header.Nav>
           <Header.Actions>
-            <Button variant="primary" size="sm">Sign up</Button>
+            <Button variant="primary" size="sm">Get started</Button>
           </Header.Actions>
         </Header>
       </div>
 
-      {/* Label-only nav */}
       <div>
-        <p className="text-label-sm text-[var(--color-text-tertiary)] px-4 py-2">Label-only nav items</p>
-        <Header>
+        <p className="text-label-sm text-[var(--color-text-tertiary)] px-4 py-2">Static — flows in normal document order</p>
+        <Header position="static">
           <Header.Brand href="/">
             <Logo />
             <span className="truncate-label text-heading-h5">Geeklego</span>
           </Header.Brand>
           <Header.Nav>
-            <NavItem href="/" label="Home" isActive />
-            <NavItem href="/dashboard" label="Dashboard" />
-            <NavItem href="/docs" label="Docs" />
-            <NavItem href="/components" label="Components" />
-            <NavItem href="/about" label="About" />
+            <PrimaryNav />
           </Header.Nav>
           <Header.Actions>
-            <Button variant="ghost" size="sm">Log in</Button>
-            <Button variant="primary" size="sm">Sign up</Button>
+            <Button variant="primary" size="sm">Get started</Button>
           </Header.Actions>
         </Header>
+      </div>
+
+      <div>
+        <p className="text-label-sm text-[var(--color-text-tertiary)] px-4 py-2">Fixed — fixed to top, floats above content (use with floating variant)</p>
+        <div style={{ minHeight: '80px' }}>
+          <Header variant="floating" position="fixed">
+            <Header.Brand href="/">
+              <Logo />
+              <span className="truncate-label text-heading-h5">Geeklego</span>
+            </Header.Brand>
+            <Header.Nav>
+              <PrimaryNav />
+            </Header.Nav>
+            <Header.Actions>
+              <Button variant="primary" size="sm">Get started</Button>
+            </Header.Actions>
+          </Header>
+        </div>
       </div>
     </div>
   ),
 };
-
-// ── 4. States ──────────────────────────────────────────────────────────────
 
 export const States: Story = {
   name: 'States',
   render: () => (
     <div className="flex flex-col gap-[var(--spacing-layout-sm)]">
-      {/* Default state */}
       <div>
         <p className="text-label-sm text-[var(--color-text-tertiary)] px-4 py-2">Default (mobile menu closed)</p>
         <Header>
@@ -225,7 +215,6 @@ export const States: Story = {
         </Header>
       </div>
 
-      {/* With badge count on nav item */}
       <div>
         <p className="text-label-sm text-[var(--color-text-tertiary)] px-4 py-2">Nav item with badge notification</p>
         <Header>
@@ -256,7 +245,6 @@ export const States: Story = {
         </Header>
       </div>
 
-      {/* With schema microdata */}
       <div>
         <p className="text-label-sm text-[var(--color-text-tertiary)] px-4 py-2">Schema.org WPHeader microdata (schema=true)</p>
         <Header schema>
@@ -276,8 +264,6 @@ export const States: Story = {
     </div>
   ),
 };
-
-// ── 5. DarkMode ────────────────────────────────────────────────────────────
 
 export const DarkMode: Story = {
   name: 'Dark Mode',
@@ -305,14 +291,14 @@ export const DarkMode: Story = {
   ),
 };
 
-// ── 6. Loading ─────────────────────────────────────────────────────────────
-
 export const Loading: Story = {
   name: 'Loading',
   render: () => (
     <div className="flex flex-col gap-[var(--spacing-layout-sm)]">
       <div>
-        <p className="text-label-sm text-[var(--color-text-tertiary)] px-4 py-2">Loading — skeleton placeholders replace nav content; aria-busy="true" on the header</p>
+        <p className="text-label-sm text-[var(--color-text-tertiary)] px-4 py-2">
+          Loading — skeleton placeholders replace nav content; aria-busy="true" on the header
+        </p>
         <Header loading>
           <Header.Brand href="/">
             <Logo />
@@ -332,7 +318,9 @@ export const Loading: Story = {
       </div>
 
       <div>
-        <p className="text-label-sm text-[var(--color-text-tertiary)] px-4 py-2">Resolved — nav content visible once loading completes</p>
+        <p className="text-label-sm text-[var(--color-text-tertiary)] px-4 py-2">
+          Resolved — nav content visible once loading completes
+        </p>
         <Header>
           <Header.Brand href="/">
             <Logo />
@@ -354,11 +342,11 @@ export const Loading: Story = {
   ),
 };
 
-// ── 7. Playground ──────────────────────────────────────────────────────────
-
 export const Playground: Story = {
   name: 'Playground',
   args: {
+    variant: 'default',
+    position: 'sticky',
     schema: false,
     i18nStrings: {
       navLabel: 'Primary',
@@ -398,25 +386,38 @@ export const Playground: Story = {
   ),
 };
 
-// ── 8. Accessibility ───────────────────────────────────────────────────────
+export const Mobile: Story = {
+  name: 'Mobile',
+  parameters: {
+    viewport: { defaultViewport: 'mobile' },
+  },
+  render: () => (
+    <Header>
+      <Header.Brand href="/">
+        <Logo />
+        <span className="truncate-label text-heading-h5">Geeklego</span>
+      </Header.Brand>
+
+      <Header.Nav>
+        <NavItem href="/" label="Home" isActive />
+        <NavItem href="/dashboard" label="Dashboard" />
+        <NavItem href="/docs" label="Docs" />
+        <NavItem href="/components" label="Components" />
+      </Header.Nav>
+
+      <Header.Actions>
+        <Button variant="ghost" size="sm">Sign in</Button>
+        <Button variant="primary" size="sm">Get started</Button>
+      </Header.Actions>
+    </Header>
+  ),
+};
 
 export const Accessibility: Story = {
   name: 'Accessibility',
   tags: ['a11y'],
   render: () => (
     <div className="flex flex-col gap-[var(--spacing-layout-sm)]">
-      {/*
-        Keyboard: Tab to focus · Enter/Space to activate links/buttons
-                  Escape dismisses mobile menu
-        Screen reader:
-          - <header> announced as "banner" landmark
-          - <nav aria-label="Primary"> announced as "Primary navigation"
-          - Mobile toggle: "Open menu, button" / "Close menu, expanded, button"
-          - NavItem links: "[label], link" / "[label], current page, link"
-          - Brand link: "Geeklego, link"
-      */}
-
-      {/* Full a11y example: all ARIA attributes exercised */}
       <Header
         aria-label="Site header"
         i18nStrings={{
@@ -432,13 +433,9 @@ export const Accessibility: Story = {
         </Header.Brand>
 
         <Header.Nav>
-          {/* Active nav item — aria-current="page" applied by NavItem */}
           <NavItem href="/" label="Home" isActive />
-          {/* Standard nav items */}
           <NavItem href="/dashboard" label="Dashboard" />
-          {/* Disabled nav item */}
           <NavItem href="/beta" label="Beta" disabled />
-          {/* Nav item with notification badge */}
           <NavItem
             href="/inbox"
             label="Inbox"
@@ -451,7 +448,6 @@ export const Accessibility: Story = {
         </Header.Nav>
 
         <Header.Actions>
-          {/* Icon-only button — aria-label on Button via children when iconOnly */}
           <Button
             variant="ghost"
             size="sm"
@@ -460,7 +456,6 @@ export const Accessibility: Story = {
           >
             Help
           </Button>
-          {/* Sign in with explicit label */}
           <Button
             variant="ghost"
             size="sm"
@@ -468,7 +463,6 @@ export const Accessibility: Story = {
           >
             Sign in
           </Button>
-          {/* Avatar with descriptive alt */}
           <Avatar
             variant="initials"
             initials="JD"
@@ -480,8 +474,7 @@ export const Accessibility: Story = {
 
       <div className="px-4">
         <p className="text-body-sm text-[var(--color-text-secondary)]">
-          Resize below 768 px to reveal the mobile menu toggle (☰). Press Escape or
-          click outside to dismiss the mobile panel.
+          Resize below 768 px to reveal the mobile menu toggle. Press Escape or click outside to dismiss the mobile panel.
         </p>
       </div>
     </div>

@@ -2,6 +2,7 @@
 import { forwardRef, memo, useMemo } from 'react';
 import type { LabelProps, LabelSize } from './Label.types';
 import { useComponentI18n } from '../../utils/i18n/useGeeklegoI18n';
+import { VisuallyHidden } from '../../utils/accessibility/VisuallyHidden';
 
 // Hoisted to module scope — static, no prop deps
 const sizeClasses: Record<LabelSize, string> = {
@@ -59,7 +60,7 @@ export const Label = memo(forwardRef<HTMLLabelElement, LabelProps>(
             >
               *
             </span>
-            <span className="sr-only">{i18n.required}</span>
+            <VisuallyHidden>{i18n.required}</VisuallyHidden>
           </>
         )}
 

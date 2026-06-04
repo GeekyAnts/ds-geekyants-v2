@@ -8,8 +8,8 @@ describe('parseComponentTokens', () => {
 
 /* Checkbox — generated 2026-03-23 */
 :root, [data-theme="dark"] {
-  --checkbox-size-sm: var(--size-control-indicator-sm);
-  --checkbox-size-md: var(--size-control-indicator-md);
+  --checkbox-size-sm: var(--control-indicator-size-sm);
+  --checkbox-size-md: var(--control-indicator-size-md);
 }
 
 /* Checkbox — generated 2026-04-24 */

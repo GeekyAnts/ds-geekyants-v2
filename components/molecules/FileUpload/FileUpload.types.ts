@@ -61,10 +61,11 @@ export interface FileUploadProps extends Omit<HTMLAttributes<HTMLDivElement>, 'o
   maxFileSize?: number;
   /** Disables the entire component including the drop zone and remove buttons. */
   disabled?: boolean;
-  /** Puts the drop zone in error visual state (red border). */
-  error?: boolean;
-  /** Error message shown below the drop zone when error is true. */
-  errorMessage?: string;
+  /**
+   * Error message string. When truthy, puts the drop zone in error visual
+   * state (red border) and renders the message below the zone.
+   */
+  error?: string;
   /** Secondary hint text inside the drop zone (e.g. "PNG, JPG up to 5 MB"). */
   hint?: string;
   /**

@@ -27,13 +27,13 @@ level: molecule
 
 ## States
 
-<ComponentPreview code={"import { StatCard } from \"@geeklego/ui\"\nimport { SortAsc, ArrowUp } from \"lucide-react\"\n\n<div className=\"grid grid-cols-2 gap-4 max-w-2xl\">\n  <StatCard label=\"Trend up\" value=\"$8,320\" delta={14.2} deltaLabel=\"vs last month\" />\n  <StatCard label=\"Trend down\" value=\"142\" delta={-6.8} deltaLabel=\"vs last week\" />\n  <StatCard label=\"Neutral (zero delta)\" value=\"1,500\" delta={0} deltaLabel=\"no change\" />\n  <StatCard label=\"No delta\" value=\"$99/mo\" />\n  <StatCard label=\"Loading\" value=\"\u2014\" isLoading />\n  <StatCard label=\"With icon\" value=\"4.9 / 5.0\" delta={0.2} deltaLabel=\"this quarter\" icon={<SortAsc size={16} />} />\n</div>"}>
+<ComponentPreview code={"import { StatCard } from \"@geeklego/ui\"\nimport { SortAsc, ArrowUp } from \"lucide-react\"\n\n<div className=\"grid grid-cols-2 gap-4 max-w-2xl\">\n  <StatCard label=\"Trend up\" value=\"$8,320\" delta={14.2} deltaLabel=\"vs last month\" />\n  <StatCard label=\"Trend down\" value=\"142\" delta={-6.8} deltaLabel=\"vs last week\" />\n  <StatCard label=\"Neutral (zero delta)\" value=\"1,500\" delta={0} deltaLabel=\"no change\" />\n  <StatCard label=\"No delta\" value=\"$99/mo\" />\n  <StatCard label=\"Loading\" value=\"\u2014\" loading />\n  <StatCard label=\"With icon\" value=\"4.9 / 5.0\" delta={0.2} deltaLabel=\"this quarter\" icon={<SortAsc size={16} />} />\n</div>"}>
   <div className="grid grid-cols-2 gap-4 max-w-2xl">
     <StatCard label="Trend up" value="$8,320" delta={14.2} deltaLabel="vs last month" />
     <StatCard label="Trend down" value="142" delta={-6.8} deltaLabel="vs last week" />
     <StatCard label="Neutral (zero delta)" value="1,500" delta={0} deltaLabel="no change" />
     <StatCard label="No delta" value="$99/mo" />
-    <StatCard label="Loading" value="—" isLoading />
+    <StatCard label="Loading" value="—" loading />
     <StatCard label="With icon" value="4.9 / 5.0" delta={0.2} deltaLabel="this quarter" icon={<SortAsc size={16} />} />
   </div>
 </ComponentPreview>
@@ -64,7 +64,7 @@ level: molecule
     { name: "icon", type: "ReactNode", defaultValue: "—", description: "Optional icon displayed in the top-right corner. Pass a Lucide icon node." },
     { name: "variant", type: "'elevated' | 'outlined' | 'filled' | 'ghost'", defaultValue: "'elevated'", description: "Visual container style." },
     { name: "size", type: "'sm' | 'md' | 'lg'", defaultValue: "'md'", description: "Typography and spacing scale." },
-    { name: "isLoading", type: "boolean", defaultValue: "false", description: "Replaces card content with a spinner loading state." },
+    { name: "loading", type: "boolean", defaultValue: "false", description: "Replaces card content with a spinner loading state." },
     { name: "i18nStrings", type: "StatCardI18nStrings", defaultValue: "—", description: "Per-instance string overrides for screen reader trend labels and loading label." },
   ]}
 />

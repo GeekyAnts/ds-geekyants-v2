@@ -57,4 +57,6 @@ export interface VideoProps extends Omit<HTMLAttributes<HTMLElement>, 'onError'>
   'aria-label'?: string;
   /** Emit Schema.org VideoObject Microdata. Defaults to false. */
   schema?: boolean;
+  /** Override localised strings for this instance. */
+  i18nStrings?: import('../../utils/i18n').VideoI18nStrings;
 }

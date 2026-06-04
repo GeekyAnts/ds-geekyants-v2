@@ -1,14 +1,57 @@
 import type { Plugin } from 'vite'
 import fs from 'fs/promises'
 import path from 'path'
+import { exec } from 'child_process'
 import { parseGeeklegoCss } from '../utils/cssParser'
 import { generateCss } from '../utils/cssGenerator'
 import type { GeeklegoTokens } from '../types'
 import type { CategorizationResult } from '../utils/componentTokenParser'
 
+function validateDuplicatesInCss(css: string): Array<{ prop: string; selector: string; line: number; value: string }> {
+  const errors: Array<{ prop: string; selector: string; line: number; value: string }> = []
+  const lines = css.split('\n')
+  let depth = 0
+  let currentBlockProps: Record<string, { line: number; value: string }> = {}
+  let currentSelector = ''
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i]
+    const opens = (line.match(/\{/g) || []).length
+    const closes = (line.match(/\}/g) || []).length
+
+    if (opens > 0 && depth === 0) {
+      currentBlockProps = {}
+      const trimmed = line.trim()
+      const braceIndex = trimmed.indexOf('{')
+      currentSelector = braceIndex > 0 ? trimmed.slice(0, braceIndex).trim() : trimmed
+    }
+    depth += opens
+
+    if (depth >= 1) {
+      const match = line.match(/^\s*(--[\w-]+)\s*:\s*(.*?)\s*;/)
+      if (match) {
+        const prop = match[1]
+        const value = match[2]
+        if (currentBlockProps[prop] !== undefined) {
+          errors.push({ prop, selector: currentSelector, line: i + 1, value })
+        }
+        currentBlockProps[prop] = { line: i, value }
+      }
+    }
+
+    depth -= closes
+    if (closes > 0 && depth === 0) {
+      currentBlockProps = {}
+    }
+  }
+
+  return errors
+}
+
 const DESIGN_SYSTEM_DIR = path.resolve(process.cwd(), 'design-system')
 const GEEKLEGO_CSS = path.join(DESIGN_SYSTEM_DIR, 'geeklego.css')
 const GEEKLEGO_DEFAULT_CSS = path.join(DESIGN_SYSTEM_DIR, 'geeklego.default.css')
+const TOKENS_METADATA = path.join(DESIGN_SYSTEM_DIR, 'tokens.metadata.json')
 const COMPONENT_TOKENS_MARKER = '/* ─── GENERATED COMPONENT TOKENS ──────────────────────────────────────────'
 
 export function tokenApiPlugin(): Plugin {
@@ -153,6 +196,20 @@ export function tokenApiPlugin(): Plugin {
             throw new Error('Component tokens marker not found')
           }
 
+          // Pre-write validation: check for duplicate declarations in the proposed CSS
+          const proposedCss = currentCss.slice(0, markerIndex) + newComponentCss
+          const dupErrors = validateDuplicatesInCss(proposedCss)
+          if (dupErrors.length > 0) {
+            res.setHeader('Content-Type', 'application/json')
+            res.statusCode = 400
+            res.end(JSON.stringify({
+              success: false,
+              error: `Duplicate token declarations found:\n${dupErrors.map((e: any) => `  ${e.prop} in block "${e.selector}" at line ${e.line}`).join('\n')}`,
+              duplicates: dupErrors,
+            }))
+            return
+          }
+
           // Split into top part + old component tokens
           const topPart = currentCss.slice(0, markerIndex)
 
@@ -275,6 +332,103 @@ export function tokenApiPlugin(): Plugin {
         }))
       })
 
+      // Handle GET /api/load-metadata
+      server.middlewares.use('/api/load-metadata', async (req, res, next) => {
+        if (req.method !== 'GET') return next()
+
+        try {
+          const raw = await fs.readFile(TOKENS_METADATA, 'utf-8')
+          const metadata = JSON.parse(raw)
+          res.setHeader('Content-Type', 'application/json')
+          res.end(JSON.stringify({ success: true, metadata }))
+        } catch {
+          res.setHeader('Content-Type', 'application/json')
+          res.end(JSON.stringify({ success: true, metadata: { version: '1.0', lastUpdated: new Date().toISOString(), tokens: {} } }))
+        }
+      })
+
+      // Handle POST /api/save-metadata
+      server.middlewares.use('/api/save-metadata', async (req, res, next) => {
+        if (req.method !== 'POST') return next()
+
+        try {
+          const body = await new Promise<string>((resolve, reject) => {
+            let data = ''
+            req.on('data', chunk => data += chunk)
+            req.on('end', () => resolve(data))
+            req.on('error', reject)
+          })
+
+          const metadata = JSON.parse(body)
+
+          await fs.writeFile(TOKENS_METADATA, JSON.stringify(metadata, null, 2), 'utf-8')
+
+          res.setHeader('Content-Type', 'application/json')
+          res.end(JSON.stringify({ success: true }))
+        } catch (error) {
+          console.error('Error saving metadata:', error)
+          res.setHeader('Content-Type', 'application/json')
+          res.statusCode = 500; res.end(JSON.stringify({
+            success: false,
+            error: error instanceof Error ? error.message : 'Failed to save metadata'
+          }))
+        }
+      })
+
+      // Handle POST /api/merge-metadata
+      server.middlewares.use('/api/merge-metadata', async (req, res, next) => {
+        if (req.method !== 'POST') return next()
+
+        try {
+          const body = await new Promise<string>((resolve, reject) => {
+            let data = ''
+            req.on('data', chunk => data += chunk)
+            req.on('end', () => resolve(data))
+            req.on('error', reject)
+          })
+
+          const { stagedChanges } = JSON.parse(body) as { stagedChanges: Record<string, any> }
+
+          interface TokensMetadata {
+            version: string
+            lastUpdated: string
+            tokens: Record<string, Record<string, unknown>>
+          }
+
+          let existing: TokensMetadata = { version: '1.0', lastUpdated: new Date().toISOString(), tokens: {} as Record<string, Record<string, unknown>> }
+          try {
+            const raw = await fs.readFile(TOKENS_METADATA, 'utf-8')
+            existing = JSON.parse(raw)
+            if (!existing.tokens) existing.tokens = {}
+          } catch {
+            // File doesn't exist, use default
+          }
+
+          for (const [tokenName, changes] of Object.entries(stagedChanges)) {
+            if (!existing.tokens[tokenName]) {
+              existing.tokens[tokenName] = {}
+            }
+            existing.tokens[tokenName] = {
+              ...existing.tokens[tokenName],
+              ...changes,
+            }
+          }
+
+          existing.lastUpdated = new Date().toISOString()
+          await fs.writeFile(TOKENS_METADATA, JSON.stringify(existing, null, 2), 'utf-8')
+
+          res.setHeader('Content-Type', 'application/json')
+          res.end(JSON.stringify({ success: true, metadata: existing }))
+        } catch (error) {
+          console.error('Error merging metadata:', error)
+          res.setHeader('Content-Type', 'application/json')
+          res.statusCode = 500; res.end(JSON.stringify({
+            success: false,
+            error: error instanceof Error ? error.message : 'Failed to merge metadata'
+          }))
+        }
+      })
+
       // Handle POST /api/restore-default
       server.middlewares.use('/api/restore-default', async (req, res, next) => {
         if (req.method !== 'POST') return next()
@@ -314,6 +468,20 @@ export function tokenApiPlugin(): Plugin {
             error: error instanceof Error ? error.message : 'Failed to restore default'
           }))
         }
+      })
+
+      // Handle POST /api/build-css
+      server.middlewares.use('/api/build-css', async (req, res, next) => {
+        if (req.method !== 'POST') return next()
+
+        exec('npm run build:css', { cwd: process.cwd() }, (error, _stdout, stderr) => {
+          if (error) {
+            console.error('Post-export CSS build failed:', stderr)
+          }
+        })
+
+        res.setHeader('Content-Type', 'application/json')
+        res.end(JSON.stringify({ success: true }))
       })
     }
   }

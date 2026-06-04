@@ -79,7 +79,7 @@ level: molecule
 
 ## Loading
 
-<ComponentPreview code={"import { Card, Button } from \"@geeklego/ui\"\n\n<div className=\"max-w-sm\">\n  <Card variant=\"outlined\" aria-busy=\"true\" aria-label=\"Loading card content\">\n    <Card.Body>\n      <div className=\"flex flex-col gap-3\" aria-hidden=\"true\">\n        <div className=\"skeleton h-4 w-3/4 rounded-[var(--radius-component-sm)]\" />\n        <div className=\"skeleton h-4 w-1/2 rounded-[var(--radius-component-sm)]\" />\n        <div className=\"skeleton h-4 w-5/6 rounded-[var(--radius-component-sm)]\" />\n      </div>\n    </Card.Body>\n    <Card.Footer>\n      <Button variant=\"primary\" size=\"sm\" isLoading>Save</Button>\n    </Card.Footer>\n  </Card>\n</div>"}>
+<ComponentPreview code={"import { Card, Button } from \"@geeklego/ui\"\n\n<div className=\"max-w-sm\">\n  <Card variant=\"outlined\" aria-busy=\"true\" aria-label=\"Loading card content\">\n    <Card.Body>\n      <div className=\"flex flex-col gap-3\" aria-hidden=\"true\">\n        <div className=\"skeleton h-4 w-3/4 rounded-[var(--radius-component-sm)]\" />\n        <div className=\"skeleton h-4 w-1/2 rounded-[var(--radius-component-sm)]\" />\n        <div className=\"skeleton h-4 w-5/6 rounded-[var(--radius-component-sm)]\" />\n      </div>\n    </Card.Body>\n    <Card.Footer>\n      <Button variant=\"primary\" size=\"sm\" loading>Save</Button>\n    </Card.Footer>\n  </Card>\n</div>"}>
   <div className="max-w-sm">
     <Card variant="outlined" aria-busy="true" aria-label="Loading card content">
       <Card.Body>
@@ -90,7 +90,7 @@ level: molecule
         </div>
       </Card.Body>
       <Card.Footer>
-        <Button variant="primary" size="sm" isLoading>Save</Button>
+        <Button variant="primary" size="sm" loading>Save</Button>
       </Card.Footer>
     </Card>
   </div>
@@ -144,6 +144,14 @@ level: molecule
     { name: "description", type: "string", defaultValue: "—", description: "Supporting description rendered below the title." },
     { name: "action", type: "ReactNode", defaultValue: "—", description: "Right-aligned action slot — pass a Button or icon button." },
     { name: "children", type: "ReactNode", defaultValue: "—", description: "Custom layout override — replaces the default title/description/action layout when title is absent." },
+  ]}
+/>
+
+### Card.Body
+
+<PropsTable
+  rows={[
+    { name: "children", type: "ReactNode", defaultValue: "—", description: "Body content — the main content area of the card. Required." },
   ]}
 />
 

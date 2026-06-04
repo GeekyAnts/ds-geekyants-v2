@@ -1,5 +1,5 @@
 "use client";
-import { Fragment, memo, useCallback, useEffect, useMemo, useRef } from 'react';
+import { forwardRef, Fragment, memo, useCallback, useEffect, useMemo, useRef } from 'react';
 import { ChatHeader } from '../../molecules/ChatHeader/ChatHeader';
 import { ChatMessage } from '../../molecules/ChatMessage/ChatMessage';
 import { ChatInputBar } from '../../molecules/ChatInputBar/ChatInputBar';
@@ -72,7 +72,7 @@ DateSeparator.displayName = 'Chat.DateSeparator';
 
 // ── Chat root ───────────────────────────────────────────────────────────────
 
-export const Chat = memo(({
+export const Chat = memo(forwardRef<HTMLElement, ChatProps>(({
   messages,
   currentUserId,
   participant,
@@ -84,7 +84,7 @@ export const Chat = memo(({
   headerActions,
   className,
   i18nStrings,
-}: ChatProps) => {
+}, ref) => {
   const i18n = useComponentI18n('chat', i18nStrings);
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -122,7 +122,7 @@ export const Chat = memo(({
   ].join(' '), []);
 
   return (
-    <section role="log" aria-label={i18n.chatLabel} className={rootClasses}>
+    <section ref={ref} role="log" aria-label={i18n.chatLabel} className={rootClasses}>
       {/* Header */}
       <ChatHeader
         name={participant.name}
@@ -190,5 +190,5 @@ export const Chat = memo(({
       />
     </section>
   );
-});
+}));
 Chat.displayName = 'Chat';

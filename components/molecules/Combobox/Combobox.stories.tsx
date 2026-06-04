@@ -59,7 +59,7 @@ const meta: Meta<typeof Combobox> = {
     size:       { control: 'select', options: ['sm', 'md', 'lg'] },
     disabled:   { control: 'boolean' },
     error:      { control: 'boolean' },
-    isLoading:  { control: 'boolean' },
+    loading:  { control: 'boolean' },
     clearable:  { control: 'boolean' },
     placeholder:{ control: 'text' },
   },
@@ -138,7 +138,7 @@ export const States: Story = {
 
       <div className="flex flex-col gap-[var(--spacing-component-sm)]">
         <span className="text-body-sm text-[var(--color-text-secondary)]">Loading</span>
-        <Combobox options={[]} isLoading placeholder="Loading options…" />
+        <Combobox options={[]} loading placeholder="Loading options…" />
       </div>
 
       <div className="flex flex-col gap-[var(--spacing-component-sm)]">
@@ -205,7 +205,7 @@ export const Playground: Story = {
     size: 'md',
     disabled: false,
     error: false,
-    isLoading: false,
+    loading: false,
     clearable: true,
   },
   render: (args) => {

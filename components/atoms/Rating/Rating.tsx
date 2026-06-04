@@ -48,6 +48,18 @@ export const Rating = memo(forwardRef<HTMLDivElement, RatingProps>(
     const ratingName = nameProp ?? generatedName;
     const [hoverValue, setHoverValue] = useState<number | null>(null);
 
+    const isControlled = onChange !== undefined;
+    const [internalValue, setInternalValue] = useState(value);
+    const committedValue = isControlled ? value : internalValue;
+
+    const handleStarChange = useCallback(
+      (starValue: number) => {
+        if (!isControlled) setInternalValue(starValue);
+        onChange?.(starValue);
+      },
+      [isControlled, onChange],
+    );
+
     const { starSize, gap } = sizeMap[size];
 
     const handleMouseLeave = useCallback(() => setHoverValue(null), []);
@@ -97,7 +109,7 @@ export const Rating = memo(forwardRef<HTMLDivElement, RatingProps>(
 
     // hoverValue previews which stars would be filled on click.
     // Falls back to committed value when not hovering.
-    const activeValue = hoverValue ?? value;
+    const activeValue = hoverValue ?? committedValue;
 
     const legendClasses = useMemo(
       () =>
@@ -171,10 +183,10 @@ export const Rating = memo(forwardRef<HTMLDivElement, RatingProps>(
                     type="radio"
                     name={ratingName}
                     value={String(starValue)}
-                    checked={value === starValue}
+                    checked={committedValue === starValue}
                     disabled={disabled}
                     aria-label={i18n.starLabel?.({ value: starValue, max })}
-                    onChange={disabled ? undefined : () => onChange?.(starValue)}
+                    onChange={disabled ? undefined : () => handleStarChange(starValue)}
                     className="peer absolute inset-0 w-full h-full opacity-0 m-0 cursor-[inherit]"
                   />
                   {/* Star icon — decorative; visual state driven by starClass */}

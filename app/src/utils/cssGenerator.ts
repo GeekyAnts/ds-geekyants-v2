@@ -190,6 +190,15 @@ function generateThemeBlock(tokens: GeeklegoTokens): string {
   }
 
   lines.push(`  /* ===========================================================================`)
+  lines.push(`     SIZE SCALE (6, 8, 10, 12, 14, 16)`)
+  lines.push(`     =========================================================================== */`)
+  lines.push(``)
+  for (const [k, v] of Object.entries(p.sizeScale)) {
+    lines.push(`  ${pad(`--size-${k}:`, 24)} ${v};`)
+  }
+
+  lines.push(``)
+  lines.push(`  /* ===========================================================================`)
   lines.push(`     ICON SIZES (xs, sm, md, lg, xl, 2xl)`)
   lines.push(`     =========================================================================== */`)
   lines.push(``)
@@ -328,6 +337,11 @@ function generateThemeBlock(tokens: GeeklegoTokens): string {
     }
     lines.push(``)
   }
+  lines.push(`  /* Size scale */`)
+  for (const [k, v] of Object.entries(p.sizeScale)) {
+    lines.push(`  ${pad(`--size-${k}:`, 24)} ${v};`)
+  }
+  lines.push(``)
   lines.push(`  /* Icon sizes */`)
   for (const [k, v] of Object.entries(p.iconSize)) {
     lines.push(`  ${pad(`--icon-size-${k}:`, 20)} ${v};`)

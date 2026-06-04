@@ -5,14 +5,14 @@
 
 ## Description
 
-A single item in a breadcrumb navigation trail. Renders as an `<li>` containing either an `<a>` (link state) or `<span>` (current/disabled state). The visual treatment is determined by the `href`, `current`, and `disabled` props — no variant enum needed. Supports an optional icon prefix and three typographic sizes.
+A single item in a breadcrumb navigation trail. Renders as an `<li>` containing either an `<a>` (link state) or `<span>` (isActive/disabled state). The visual treatment is determined by the `href`, `isActive`, and `disabled` props — no variant enum needed. Supports an optional icon prefix and three typographic sizes.
 
 ## Props
 
 | Prop | Type | Default | Description |
 |---|---|---|---|
 | `href` | `string` | — | URL this item links to. Renders as `<a>` when provided and not current/disabled. |
-| `current` | `boolean` | `false` | Marks as the current page. Renders non-interactive with `aria-current="page"`. |
+| `isActive` | `boolean` | `false` | Marks as the current page. Renders non-interactive with `aria-current="page"`. |
 | `disabled` | `boolean` | `false` | Disabled state. Non-interactive, visually muted. |
 | `size` | `'sm' \| 'md' \| 'lg'` | `'md'` | Text size. |
 | `leftIcon` | `ReactNode` | — | Optional icon before the label. Use lucide-react icons. |
@@ -87,7 +87,7 @@ import { BreadcrumbItem } from './BreadcrumbItem';
 
 // Current page
 <ol>
-  <BreadcrumbItem current>Dashboard</BreadcrumbItem>
+  <BreadcrumbItem isActive>Dashboard</BreadcrumbItem>
 </ol>
 
 // With icon

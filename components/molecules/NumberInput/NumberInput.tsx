@@ -56,9 +56,9 @@ const containerDisabledClass =
 
 // ── Heights match Input atom sizes exactly ────────────────────────────────────
 const heightClasses: Record<NumberInputSize, string> = {
-  sm: 'h-[var(--input-height-sm)]',
-  md: 'h-[var(--input-height-md)]',
-  lg: 'h-[var(--input-height-lg)]',
+  sm: 'h-[var(--number-input-height-sm)]',
+  md: 'h-[var(--number-input-height-md)]',
+  lg: 'h-[var(--number-input-height-lg)]',
 };
 
 // ── Stepper button widths ─────────────────────────────────────────────────────
@@ -254,7 +254,7 @@ export const NumberInput = memo(
             step={step}
             onChange={onChange}
             readOnly={value !== undefined && !onChange}
-            wrapperClassName="flex-1 min-w-0 h-full"
+            wrapperClassName="content-flex h-full"
             className={[
               'text-center',
               // Hide browser-native spin buttons — our custom steppers replace them

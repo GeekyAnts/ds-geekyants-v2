@@ -49,12 +49,11 @@ export const RadioGroup = memo(
         orientation = 'vertical',
         size = 'md',
         variant = 'default',
-        error = false,
+        error,
         disabled = false,
         required = false,
         legend,
         hint,
-        errorMessage,
         className,
         i18nStrings,
         ...rest
@@ -68,7 +67,7 @@ export const RadioGroup = memo(
       const errorId = useId();
 
       const hasHint = Boolean(hint);
-      const hasError = Boolean(error && errorMessage);
+      const hasError = !!error;
 
       const fieldsetClasses = useMemo(
         () =>
@@ -146,7 +145,7 @@ export const RadioGroup = memo(
                     : undefined
                 }
                 size={size}
-                error={error}
+                error={!!error}
                 disabled={disabled || option.disabled}
                 onChange={onChange ? () => handleChange(option.value) : undefined}
               >
@@ -170,7 +169,7 @@ export const RadioGroup = memo(
               role="alert"
               className="mt-[var(--radiogroup-error-mt)] text-body-sm text-[var(--radiogroup-error-color)] clamp-description"
             >
-              {errorMessage}
+              {error}
             </p>
           )}
         </fieldset>

@@ -36,7 +36,7 @@ export const Variants: Story = {
         },
         {
           label: 'Current',
-          item: <BreadcrumbItem current>Dashboard</BreadcrumbItem>,
+          item: <BreadcrumbItem isActive>Dashboard</BreadcrumbItem>,
         },
         {
           label: 'Disabled',
@@ -90,7 +90,7 @@ export const States: Story = {
         },
         {
           label: 'Current',
-          item: <BreadcrumbItem current>Dashboard</BreadcrumbItem>,
+          item: <BreadcrumbItem isActive>Dashboard</BreadcrumbItem>,
         },
         {
           label: 'Disabled',
@@ -114,7 +114,7 @@ export const DarkMode: Story = {
     >
       {[
         { label: 'Link', item: <BreadcrumbItem href="#">Products</BreadcrumbItem> },
-        { label: 'Current', item: <BreadcrumbItem current>Dashboard</BreadcrumbItem> },
+        { label: 'Current', item: <BreadcrumbItem isActive>Dashboard</BreadcrumbItem> },
         { label: 'Disabled', item: <BreadcrumbItem href="#" disabled>Settings</BreadcrumbItem> },
         {
           label: 'With icon',
@@ -142,7 +142,7 @@ export const Playground: Story = {
   ),
   args: {
     href: '#',
-    current: false,
+    isActive: false,
     disabled: false,
     size: 'md',
     children: 'Products',
@@ -166,7 +166,7 @@ export const Accessibility: Story = {
         <BreadcrumbItem href="/products">Products</BreadcrumbItem>
 
         {/* Current page: aria-current="page", rendered as span */}
-        <BreadcrumbItem current>Laptops</BreadcrumbItem>
+        <BreadcrumbItem isActive>Laptops</BreadcrumbItem>
 
         {/* Disabled: aria-disabled, no interaction */}
         <BreadcrumbItem disabled>Archived</BreadcrumbItem>

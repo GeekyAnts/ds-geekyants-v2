@@ -1,0 +1,112 @@
+{
+  "default": {
+    "title": "Revenue by Channel",
+    "infoLabel": "Breakdown of total revenue by acquisition channel",
+    "metric": "$246,890",
+    "delta": 8.3,
+    "deltaLabel": "from last quarter",
+    "dateStart": "Q1 2026",
+    "dateEnd": "Q2 2026",
+    "series": [
+      { "name": "Direct", "value": 86 },
+      { "name": "Email", "value": 52 },
+      { "name": "Social", "value": 45 },
+      { "name": "Paid", "value": 30 },
+      { "name": "Affiliate", "value": 20 },
+      { "name": "Organic", "value": 8 },
+      { "name": "Other", "value": 5 }
+    ],
+    "period": "quarterly",
+    "description": "Direct sales continue to lead revenue, with email campaigns showing strong growth this quarter."
+  },
+  "delta_states": {
+    "positive": {
+      "title": "Revenue Growth",
+      "metric": "$48,290",
+      "delta": 12.4,
+      "deltaLabel": "from last month",
+      "series": [
+        { "name": "Products", "value": 210 },
+        { "name": "Services", "value": 145 },
+        { "name": "Subscriptions", "value": 98 },
+        { "name": "Licensing", "value": 47 }
+      ]
+    },
+    "negative": {
+      "title": "Budget Allocation",
+      "metric": "$1.2M",
+      "delta": -4.7,
+      "deltaLabel": "from last year",
+      "series": [
+        { "name": "Engineering", "value": 480 },
+        { "name": "Marketing", "value": 320 },
+        { "name": "Operations", "value": 200 },
+        { "name": "Sales", "value": 150 },
+        { "name": "Admin", "value": 50 }
+      ]
+    },
+    "neutral": {
+      "title": "Market Share",
+      "metric": "32%",
+      "delta": 0,
+      "deltaLabel": "unchanged",
+      "series": [
+        { "name": "Us", "value": 32 },
+        { "name": "Competitor A", "value": 28 },
+        { "name": "Competitor B", "value": 24 },
+        { "name": "Competitor C", "value": 16 }
+      ]
+    }
+  },
+  "edge_cases": {
+    "single_segment": {
+      "title": "Single Segment",
+      "metric": "100",
+      "series": [{ "name": "All", "value": 100 }]
+    },
+    "two_segments": {
+      "title": "Split Decision",
+      "metric": "200",
+      "series": [
+        { "name": "Option A", "value": 140 },
+        { "name": "Option B", "value": 60 }
+      ]
+    },
+    "seven_segments": {
+      "title": "All Series",
+      "metric": "700",
+      "donut": true,
+      "series": [
+        { "name": "A", "value": 200 },
+        { "name": "B", "value": 150 },
+        { "name": "C", "value": 120 },
+        { "name": "D", "value": 90 },
+        { "name": "E", "value": 70 },
+        { "name": "F", "value": 40 },
+        { "name": "G", "value": 30 }
+      ]
+    },
+    "large_values": {
+      "title": "Budget Breakdown",
+      "metric": "$12.5M",
+      "series": [
+        { "name": "R&D", "value": 4200000 },
+        { "name": "Sales", "value": 3100000 },
+        { "name": "Marketing", "value": 2800000 },
+        { "name": "Operations", "value": 1500000 },
+        { "name": "Admin", "value": 900000 }
+      ]
+    },
+    "equal_segments": {
+      "title": "Equal Split",
+      "metric": "500",
+      "series": [
+        { "name": "Team A", "value": 100 },
+        { "name": "Team B", "value": 100 },
+        { "name": "Team C", "value": 100 },
+        { "name": "Team D", "value": 100 },
+        { "name": "Team E", "value": 100 }
+      ]
+    }
+  }
+}

@@ -1,5 +1,5 @@
 "use client"
-import { memo, useMemo } from 'react';
+import { forwardRef, memo, useMemo } from 'react';
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import type { StatCardProps, StatCardVariant, StatCardSize, StatCardTrend } from './StatCard.types';
 import { Badge } from '../../atoms/Badge/Badge';
@@ -53,7 +53,7 @@ const TrendIcon = ({ trend, size }: { trend: StatCardTrend; size: string }) => {
   return <Minus size={size} aria-hidden="true" />;
 };
 
-export const StatCard = memo(
+export const StatCard = memo(forwardRef<HTMLElement, StatCardProps>(
   ({
     label,
     value,
@@ -63,11 +63,11 @@ export const StatCard = memo(
     icon,
     variant = 'elevated',
     size = 'md',
-    isLoading = false,
+    loading = false,
     className,
     i18nStrings,
     ...rest
-  }: StatCardProps) => {
+  }, ref) => {
     const i18n = useComponentI18n('statCard', i18nStrings);
 
     // Derive trend direction from delta if not explicitly set
@@ -101,10 +101,10 @@ export const StatCard = memo(
     );
 
     // Loading state — same card dimensions, content replaced by spinner
-    if (isLoading) {
+    if (loading) {
       return (
-        <article className={cardClasses} aria-busy="true" aria-label={label} {...rest}>
-          <div className="flex items-center justify-center min-h-[var(--spacing-16)]">
+        <article className={cardClasses} aria-busy="true" aria-label={label ? `${label} metric card` : 'Metric card'} {...rest}>
+          <div className="flex items-center justify-center min-h-[var(--size-fixed-16)]">
             <Spinner size="md" label={i18n.loadingLabel} />
           </div>
         </article>
@@ -112,20 +112,22 @@ export const StatCard = memo(
     }
 
     return (
-      <article className={cardClasses} {...rest}>
-        {/* Header row: label (dt) + optional icon */}
+      <article className={cardClasses} aria-label={label ? `${label} metric card` : 'Metric card'} {...rest}>
+        {/* Header row: optional label (dt) + optional icon */}
         <div className="card-header-row">
-          <dl className="flex-1 min-w-0">
-            <div className="card-header-title">
-              <dt
-                className={[
-                  labelTextClasses[size],
-                  'text-[var(--stat-card-label-color)] font-medium truncate-label',
-                ].join(' ')}
-              >
-                {label}
-              </dt>
-            </div>
+          <dl className="content-flex">
+            {label && (
+              <div className="card-header-title">
+                <dt
+                  className={[
+                    labelTextClasses[size],
+                    'text-[var(--stat-card-label-color)] font-medium truncate-label',
+                  ].join(' ')}
+                >
+                  {label}
+                </dt>
+              </div>
+            )}
 
             {/* Value */}
             <dd
@@ -186,5 +188,5 @@ export const StatCard = memo(
       </article>
     );
   },
-);
+));
 StatCard.displayName = 'StatCard';

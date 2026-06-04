@@ -59,20 +59,20 @@ Action bar with a top border. Renders at the bottom of the panel. Accepts any `H
 
 | Size | Width |
 |---|---|
-| `sm` | `--size-overlay-sm` (24 rem) |
-| `md` | `--size-overlay-md` (32 rem) |
-| `lg` | `--size-overlay-lg` (40 rem) |
-| `xl` | `--size-overlay-xl` (48 rem) |
+| `sm` | `--overlay-size-sm` (24 rem) |
+| `md` | `--overlay-size-md` (32 rem) |
+| `lg` | `--overlay-size-lg` (40 rem) |
+| `xl` | `--overlay-size-xl` (48 rem) |
 | `full` | 100% viewport width, full height, no radius |
 
 ### Top / Bottom placement (controls height)
 
 | Size | Height |
 |---|---|
-| `sm` | `--size-overlay-height-sm` (12 rem) |
-| `md` | `--size-overlay-height-md` (20 rem) |
-| `lg` | `--size-overlay-height-lg` (28 rem) |
-| `xl` | `--size-overlay-height-xl` (40 rem) |
+| `sm` | `--overlay-height-size-sm` (12 rem) |
+| `md` | `--overlay-height-size-md` (20 rem) |
+| `lg` | `--overlay-height-size-lg` (28 rem) |
+| `xl` | `--overlay-height-size-xl` (40 rem) |
 | `full` | 100% viewport height, full width, no radius |
 
 ---
@@ -190,8 +190,8 @@ function Example() {
 | `--drawer-border-color` | `var(--color-border-default)` | Panel border |
 | `--drawer-border-width` | `var(--border-container)` | Panel border width |
 | `--drawer-radius` | `var(--radius-component-lg)` | Inner corner radius |
-| `--drawer-width-sm/md/lg/xl` | `var(--size-overlay-sm/md/lg/xl)` | Left/right widths |
-| `--drawer-height-sm/md/lg/xl` | `var(--size-overlay-height-sm/md/lg/xl)` | Top/bottom heights |
+| `--drawer-width-sm/md/lg/xl` | `var(--overlay-size-sm/md/lg/xl)` | Left/right widths |
+| `--drawer-height-sm/md/lg/xl` | `var(--overlay-height-size-sm/md/lg/xl)` | Top/bottom heights |
 | `--drawer-header-px` | `var(--spacing-component-xl)` | Header horizontal padding |
 | `--drawer-header-py` | `var(--spacing-component-lg)` | Header vertical padding |
 | `--drawer-header-gap` | `var(--spacing-component-sm)` | Header title-to-button gap |

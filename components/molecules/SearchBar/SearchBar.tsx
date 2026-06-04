@@ -119,11 +119,10 @@ export const SearchBar = memo(
         onClear,
         searchButton,
         disabled = false,
-        isLoading = false,
-        error = false,
+        loading = false,
+        error,
         label,
         labelHidden = false,
-        errorMessage,
         placeholder,
         id: idProp,
         schema = false,
@@ -158,8 +157,8 @@ export const SearchBar = memo(
       const [internalValue, setInternalValue] = useState(defaultValue ?? '');
       const currentValue = isControlled ? valueProp : internalValue;
 
-      const isDisabled = disabled || isLoading;
-      const showClear = Boolean(currentValue) && !isLoading && !isDisabled;
+      const isDisabled = disabled || loading;
+      const showClear = Boolean(currentValue) && !loading && !isDisabled;
 
       const sz = sizeMap[size];
 
@@ -220,7 +219,7 @@ export const SearchBar = memo(
             sz.text,
             'text-[var(--search-bar-text)]',
             sz.ps,
-            showClear || isLoading ? sz.peClear : sz.pe,
+            showClear || loading ? sz.peClear : sz.pe,
             isDisabled
               ? 'placeholder:text-[var(--search-bar-text-disabled)] text-[var(--search-bar-text-disabled)] cursor-not-allowed pointer-events-none'
               : 'placeholder:text-[var(--search-bar-text-placeholder)]',
@@ -229,7 +228,7 @@ export const SearchBar = memo(
           ]
             .filter(Boolean)
             .join(' '),
-        [sz, showClear, isLoading, isDisabled, className],
+        [sz, showClear, loading, isDisabled, className],
       );
 
       const iconClass = useMemo(
@@ -314,14 +313,14 @@ export const SearchBar = memo(
                   placeholder={resolvedPlaceholder}
                   disabled={isDisabled}
                   aria-disabled={isDisabled || undefined}
-                  aria-busy={isLoading || undefined}
-                  {...getErrorFieldProps(error, `${inputId}-error`)}
+                  aria-busy={loading || undefined}
+                  {...getErrorFieldProps(!!error, `${inputId}-error`)}
                   className={inputClasses}
                   {...rest}
                 />
 
                 {/* Right: clear button (interactive) or loading spinner (decorative) */}
-                {isLoading ? (
+                {loading ? (
                   <span
                     className={[
                       'absolute inset-y-0 flex items-center pointer-events-none',
@@ -355,7 +354,7 @@ export const SearchBar = memo(
                 role="alert"
                 className="text-body-sm text-[var(--color-text-error)]"
               >
-                {errorMessage}
+                {error}
               </span>
             )}
           </div>

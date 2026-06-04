@@ -29,10 +29,21 @@ const selectedSegmentClassMap: Record<SegmentedControlVariant, string> = {
   ].join(' '),
 };
 
-// ── Unselected segment — same across both variants ────────────────────────────
-const UNSELECTED_CLASSES =
-  'bg-[var(--segmented-segment-bg)] text-[var(--segmented-segment-text)] border border-transparent ' +
-  'hover:bg-[var(--segmented-segment-bg-hover)] hover:text-[var(--segmented-segment-text-hover)]';
+// ── Unselected segment — variant-specific per visual strategy ────────────────
+const unselectedSegmentClassMap: Record<SegmentedControlVariant, string> = {
+  default: [
+    'bg-[var(--segmented-default-segment-bg)] text-[var(--segmented-default-segment-text)]',
+    'border border-[var(--segmented-default-segment-border)]',
+    'hover:bg-[var(--segmented-default-segment-bg-hover)] hover:text-[var(--segmented-default-segment-text-hover)]',
+    'active:bg-[var(--segmented-default-segment-bg-active)] active:text-[var(--segmented-default-segment-text-active)] active:border-[var(--segmented-default-segment-border-active)]',
+  ].join(' '),
+  outline: [
+    'bg-[var(--segmented-outline-segment-bg)] text-[var(--segmented-outline-segment-text)]',
+    'border border-[var(--segmented-outline-segment-border)]',
+    'hover:bg-[var(--segmented-outline-segment-bg-hover)] hover:text-[var(--segmented-outline-segment-text-hover)]',
+    'active:bg-[var(--segmented-outline-segment-bg-active)] active:text-[var(--segmented-outline-segment-text-active)] active:border-[var(--segmented-outline-segment-border-active)]',
+  ].join(' '),
+};
 
 // ── Per-segment disabled — muted, no hover/active response ───────────────────
 const SEGMENT_DISABLED_CLASSES =
@@ -164,7 +175,7 @@ export const SegmentedControl = memo(
                 ? SEGMENT_DISABLED_CLASSES
                 : isSelected
                   ? selectedSegmentClassMap[variant]
-                  : UNSELECTED_CLASSES,
+                  : unselectedSegmentClassMap[variant],
             ]
               .filter(Boolean)
               .join(' ');

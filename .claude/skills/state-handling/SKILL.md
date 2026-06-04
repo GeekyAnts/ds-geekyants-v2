@@ -71,12 +71,12 @@ loading?: boolean;
 
 ```tsx
 // Button loading — content hidden, skeleton preserves dimensions
-{isLoading ? (
+{loading ? (
   <span className="absolute inset-0 flex items-center justify-center">
     <Spinner size="sm" variant="inverse" />
   </span>
 ) : null}
-<span className={isLoading ? 'invisible' : ''}>
+<span className={loading ? 'invisible' : ''}>
   {children}
 </span>
 ```
@@ -106,7 +106,7 @@ Always add loading tokens to `geeklego.css` **before** writing the component:
 disabled?: boolean;
 
 // Component
-const isDisabled = disabled || isLoading;
+const isDisabled = disabled || loading;
 
 // ARIA — use getDisabledProps() from aria-helpers.ts
 {...getDisabledProps(isDisabled)}
@@ -219,7 +219,7 @@ aria-current={isActive ? 'page' : undefined}
 Full code examples and token chains → `.claude/skills/state-handling/references/patterns.md`
 
 Existing components with loading state:
-- `Button` — inline Spinner (`isLoading`)
+- `Button` — inline Spinner (`loading`)
 - `Item` — full Skeleton (`loading`)
 - `AreaChart` — Skeleton box (`loading`)
 - `BarChart` — Skeleton box (`loading`)

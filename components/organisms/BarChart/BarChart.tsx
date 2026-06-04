@@ -5,6 +5,7 @@ import { Button } from '../../atoms/Button/Button';
 import { Select } from '../../atoms/Select/Select';
 import { Divider } from '../../atoms/Divider/Divider';
 import { Skeleton } from '../../atoms/Skeleton/Skeleton';
+import { StatCard } from '../../molecules/StatCard/StatCard';
 import type { BarChartProps } from './BarChart.types';
 import { useComponentI18n } from '../../utils/i18n/useGeeklegoI18n';
 import { getLoadingProps } from '../../utils/accessibility/aria-helpers';
@@ -50,8 +51,6 @@ export const BarChart = memo(forwardRef<HTMLDivElement, BarChartProps>(
     const deltaLabel = deltaLabelProp ?? i18n.deltaLabel;
 
     const total = useMemo(() => series.reduce((sum, s) => sum + s.value, 0), [series]);
-    const isDeltaPositive = delta !== undefined && delta > 0;
-    const isDeltaNegative = delta !== undefined && delta < 0;
 
     const periodOptions = useMemo(
       () => periods.map((p) => ({ value: p.toLowerCase(), label: p })),
@@ -79,6 +78,7 @@ export const BarChart = memo(forwardRef<HTMLDivElement, BarChartProps>(
     return (
       <div
         ref={ref}
+        // CSS custom property injection — passes min-width override to .card-shell
         style={{ '--card-shell-min-width': 'var(--barchart-min-width)' } as React.CSSProperties}
         className={[
           'card-shell',
@@ -123,40 +123,23 @@ export const BarChart = memo(forwardRef<HTMLDivElement, BarChartProps>(
               variant="default"
               size="sm"
               aria-label={i18n.periodSelectorLabel}
-              className="flex-shrink-0 w-[8rem]"
+              className="flex-shrink-0 w-[var(--barchart-select-width)]"
             />
           )}
         </div>
 
-        {/* ── Metric + delta ──────────────────────────────────────────────── */}
+        {/* ── Metric + delta (delegated to StatCard molecule) ──────────────── */}
         {metric !== undefined && (
           <div className="card-metric-row">
-            <span className="text-display-md text-[var(--barchart-metric-color)]">{metric}</span>
-
-            {delta !== undefined && (
-              <div className="flex items-center gap-[var(--spacing-component-xs)]">
-                <span
-                  className={[
-                    'text-body-sm-semibold',
-                    isDeltaPositive && 'text-[var(--barchart-delta-positive-color)]',
-                    isDeltaNegative && 'text-[var(--barchart-delta-negative-color)]',
-                    !isDeltaPositive &&
-                      !isDeltaNegative &&
-                      'text-[var(--barchart-delta-context-color)]',
-                  ]
-                    .filter(Boolean)
-                    .join(' ')}
-                >
-                  {isDeltaPositive ? '+' : ''}
-                  {delta}%
-                </span>
-                {deltaLabel && (
-                  <span className="text-body-sm text-[var(--barchart-delta-context-color)] truncate-label">
-                    {deltaLabel}
-                  </span>
-                )}
-              </div>
-            )}
+            <StatCard
+              variant="ghost"
+              size="sm"
+              label={title}
+              value={metric}
+              delta={delta}
+              deltaLabel={deltaLabel}
+              className="content-flex"
+            />
           </div>
         )}
 
@@ -212,13 +195,13 @@ export const BarChart = memo(forwardRef<HTMLDivElement, BarChartProps>(
           <div className="relative w-full">
             {/* Tooltip */}
             {tooltip !== null && (
-              // data-driven — inline style intentional
               <div
                 role="tooltip"
-                style={{ left: tooltip.x, bottom: 'calc(var(--barchart-bar-height) + 8px)' }}
+                // data-driven left from getBoundingClientRect; bottom is a static CSS expression
+                style={{ left: tooltip.x } as React.CSSProperties}
                 className={[
                   'absolute z-[var(--layer-popover)]',
-                  '-translate-x-1/2',
+                  '-translate-x-1/2 bottom-[calc(var(--barchart-bar-height)+var(--spacing-component-sm))]',
                   'pointer-events-none',
                   'px-[var(--spacing-component-md)] py-[var(--spacing-component-sm)]',
                   'rounded-[var(--barchart-tooltip-radius)]',
@@ -247,11 +230,11 @@ export const BarChart = memo(forwardRef<HTMLDivElement, BarChartProps>(
               {series.map((s, i) => {
                 const bgClass = SERIES_BG_CLASSES[i % SERIES_BG_CLASSES.length];
                 return (
-                  // data-driven — inline style intentional
+                  // data-driven — flexGrow from data value; must be inline since it's runtime ratio
                   <div
                     key={s.name}
                     role="presentation"
-                    style={{ flexGrow: s.value }}
+                    style={{ flexGrow: s.value } as React.CSSProperties}
                     className={[
                       bgClass,
                       'h-[var(--barchart-bar-height)]',

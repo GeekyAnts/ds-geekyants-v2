@@ -9,11 +9,11 @@ const directionClasses: Record<StackDirection, string> = {
 
 const gapClasses: Record<StackGap, string> = {
   none: '',
-  xs:   'gap-[var(--spacing-layout-xs)]',
-  sm:   'gap-[var(--spacing-layout-sm)]',
-  md:   'gap-[var(--spacing-layout-md)]',
-  lg:   'gap-[var(--spacing-layout-lg)]',
-  xl:   'gap-[var(--spacing-layout-xl)]',
+  xs:   'gap-[var(--stack-gap-xs)]',
+  sm:   'gap-[var(--stack-gap-sm)]',
+  md:   'gap-[var(--stack-gap-md)]',
+  lg:   'gap-[var(--stack-gap-lg)]',
+  xl:   'gap-[var(--stack-gap-xl)]',
 };
 
 const alignClasses: Record<StackAlign, string> = {

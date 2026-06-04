@@ -34,9 +34,12 @@ export interface SearchBarProps
   /** Disables the input and clear button. */
   disabled?: boolean;
   /** Shows a loading spinner in place of the clear button. aria-busy is set. */
-  isLoading?: boolean;
-  /** Applies error border styling and sets aria-invalid on the input. */
-  error?: boolean;
+  loading?: boolean;
+  /**
+   * Error message string. When truthy, applies error border styling,
+   * sets aria-invalid, and renders the message below the field.
+   */
+  error?: string;
 
   /**
    * Visible label rendered above the field.
@@ -47,8 +50,6 @@ export interface SearchBarProps
   label?: string;
   /** Hides the visible label (sr-only). The label value still becomes the landmark aria-label. */
   labelHidden?: boolean;
-  /** Error message displayed below the field. The input's aria-describedby points to this. */
-  errorMessage?: string;
 
   /**
    * URL template for the JSON-LD SearchAction Schema.org block.

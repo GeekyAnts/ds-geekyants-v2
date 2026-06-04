@@ -87,7 +87,7 @@ level: molecule
 
 ## Error
 
-<ComponentPreview code={"import { RadioGroup } from \"@geeklego/ui\"\n\n<RadioGroup\n  legend=\"Plan\"\n  options={[\n    { value: \"starter\", label: \"Starter\" },\n    { value: \"pro\", label: \"Pro\" },\n    { value: \"enterprise\", label: \"Enterprise\" },\n  ]}\n  error\n  errorMessage=\"Please select a plan to continue.\"\n  variant=\"boxed\"\n/>"}>
+<ComponentPreview code={"import { RadioGroup } from \"@geeklego/ui\"\n\n<RadioGroup\n  legend=\"Plan\"\n  options={[\n    { value: \"starter\", label: \"Starter\" },\n    { value: \"pro\", label: \"Pro\" },\n    { value: \"enterprise\", label: \"Enterprise\" },\n  ]}\n  error=\"Please select a plan to continue.\"\n  variant=\"boxed\"\n/>"}>
   <RadioGroup
     legend="Plan"
     options={[
@@ -95,8 +95,7 @@ level: molecule
       { value: "pro", label: "Pro" },
       { value: "enterprise", label: "Enterprise" },
     ]}
-    error
-    errorMessage="Please select a plan to continue."
+  error="Please select a plan to continue."
     variant="boxed"
   />
 </ComponentPreview>
@@ -144,7 +143,7 @@ level: molecule
 
 ## Dark Mode
 
-<ComponentPreview code={"import { RadioGroup } from \"@geeklego/ui\"\n\n<div\n  data-theme=\"dark\"\n  className=\"flex flex-col gap-8 p-8 bg-[var(--color-bg-primary)] rounded-[var(--radius-component-lg)] max-w-2xl\"\n>\n  <RadioGroup\n    legend=\"Select a plan\"\n    options={[\n      { value: \"starter\", label: \"Starter\" },\n      { value: \"pro\", label: \"Pro\" },\n      { value: \"enterprise\", label: \"Enterprise\" },\n    ]}\n    value=\"pro\"\n  />\n  <RadioGroup\n    legend=\"Select a plan\"\n    options={[\n      { value: \"starter\", label: \"Starter\" },\n      { value: \"pro\", label: \"Pro\" },\n      { value: \"enterprise\", label: \"Enterprise\" },\n    ]}\n    value=\"enterprise\"\n    variant=\"boxed\"\n  />\n  <RadioGroup\n    legend=\"Plan\"\n    options={[\n      { value: \"starter\", label: \"Starter\" },\n      { value: \"pro\", label: \"Pro\" },\n      { value: \"enterprise\", label: \"Enterprise\" },\n    ]}\n    error\n    errorMessage=\"Please select a plan to continue.\"\n    variant=\"boxed\"\n  />\n</div>"}>
+<ComponentPreview code={"import { RadioGroup } from \"@geeklego/ui\"\n\n<div\n  data-theme=\"dark\"\n  className=\"flex flex-col gap-8 p-8 bg-[var(--color-bg-primary)] rounded-[var(--radius-component-lg)] max-w-2xl\"\n>\n  <RadioGroup\n    legend=\"Select a plan\"\n    options={[\n      { value: \"starter\", label: \"Starter\" },\n      { value: \"pro\", label: \"Pro\" },\n      { value: \"enterprise\", label: \"Enterprise\" },\n    ]}\n    value=\"pro\"\n  />\n  <RadioGroup\n    legend=\"Select a plan\"\n    options={[\n      { value: \"starter\", label: \"Starter\" },\n      { value: \"pro\", label: \"Pro\" },\n      { value: \"enterprise\", label: \"Enterprise\" },\n    ]}\n    value=\"enterprise\"\n    variant=\"boxed\"\n  />\n  <RadioGroup\n    legend=\"Plan\"\n    options={[\n      { value: \"starter\", label: \"Starter\" },\n      { value: \"pro\", label: \"Pro\" },\n      { value: \"enterprise\", label: \"Enterprise\" },\n    ]}\n    error=\"Please select a plan to continue.\"\n    variant=\"boxed\"\n  />\n</div>"}>
   <div
     data-theme="dark"
     className="flex flex-col gap-8 p-8 bg-[var(--color-bg-primary)] rounded-[var(--radius-component-lg)] max-w-2xl"
@@ -175,8 +174,7 @@ level: molecule
         { value: "pro", label: "Pro" },
         { value: "enterprise", label: "Enterprise" },
       ]}
-      error
-      errorMessage="Please select a plan to continue."
+      error="Please select a plan to continue."
       variant="boxed"
     />
   </div>
@@ -195,10 +193,9 @@ level: molecule
     { name: "orientation", type: "'vertical' | 'horizontal'", defaultValue: "'vertical'", description: "Direction the options are laid out." },
     { name: "size", type: "'sm' | 'md' | 'lg'", defaultValue: "'md'", description: "Size of each Radio indicator and label." },
     { name: "variant", type: "'default' | 'boxed'", defaultValue: "'default'", description: "Visual container style. boxed draws a bordered container around the group." },
-    { name: "error", type: "boolean", defaultValue: "false", description: "Error state — shifts Radio indicators to error colour." },
+    { name: "error", type: "string", defaultValue: "—", description: "Error message string. When truthy, shifts Radio indicators to error colour and renders the message below the options." },
     { name: "required", type: "boolean", defaultValue: "false", description: "Marks all options as required. Appends SR-only text to the legend." },
-    { name: "hint", type: "string", defaultValue: "—", description: "Helper text shown below the options. Hidden when errorMessage is visible." },
-    { name: "errorMessage", type: "string", defaultValue: "—", description: "Error message shown below the options when error is true." },
+    { name: "hint", type: "string", defaultValue: "—", description: "Helper text shown below the options. Hidden when error is set." },
     { name: "disabled", type: "boolean", defaultValue: "false", description: "Disables all options via the native fieldset disabled attribute." },
     { name: "i18nStrings", type: "RadioGroupI18nStrings", defaultValue: "—", description: "Per-instance string overrides. Supports required (SR-only required label)." },
   ]}

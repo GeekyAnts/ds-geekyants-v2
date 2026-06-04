@@ -64,22 +64,22 @@ The `onChange` callback receives a `ColorValue` object:
 
 | Token | Purpose |
 |---|---|
-| `--color-picker-bg` | Container background |
-| `--color-picker-border` | Container border |
-| `--color-picker-radius` | Container corner radius |
-| `--color-picker-shadow` | Container drop shadow |
-| `--color-picker-padding` | Internal padding |
-| `--color-picker-width-sm/md/lg` | Picker width by size |
-| `--color-picker-spectrum-height-sm/md/lg` | Spectrum height by size |
-| `--color-picker-thumb-size` | Spectrum draggable thumb size |
-| `--color-picker-thumb-shadow` | Spectrum thumb shadow |
-| `--color-picker-track-height` | Hue/alpha slider track height |
-| `--color-picker-slider-thumb-size` | Slider thumb dimensions |
-| `--color-picker-slider-thumb-shadow` | Slider thumb shadow |
-| `--color-picker-label-color` | Channel input label color |
-| `--color-picker-presets-gap` | Gap between preset swatches |
-| `--color-picker-copy-color` | Copy icon default color |
-| `--color-picker-copy-color-hover` | Copy icon hover color |
+| `--picker-bg` | Container background |
+| `--picker-border` | Container border |
+| `--picker-radius` | Container corner radius |
+| `--picker-shadow` | Container drop shadow |
+| `--picker-padding` | Internal padding |
+| `--picker-width-sm/md/lg` | Picker width by size |
+| `--picker-spectrum-height-sm/md/lg` | Spectrum height by size |
+| `--picker-thumb-size` | Spectrum draggable thumb size |
+| `--picker-thumb-shadow` | Spectrum thumb shadow |
+| `--picker-track-height` | Hue/alpha slider track height |
+| `--picker-slider-thumb-size` | Slider thumb dimensions |
+| `--picker-slider-thumb-shadow` | Slider thumb shadow |
+| `--picker-label-color` | Channel input label color |
+| `--picker-presets-gap` | Gap between preset swatches |
+| `--picker-copy-color` | Copy icon default color |
+| `--picker-copy-color-hover` | Copy icon hover color |
 
 ## Accessibility
 

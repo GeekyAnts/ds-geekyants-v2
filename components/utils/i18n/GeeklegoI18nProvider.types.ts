@@ -304,6 +304,21 @@ export interface DataTableI18nStrings {
   selectRowLabel?: (rowIndex: number) => string;
 }
 
+export interface CalendarI18nStrings {
+  /** aria-label for the previous month button. Default: "Previous month" */
+  prevMonthLabel?: string;
+  /** aria-label for the next month button. Default: "Next month" */
+  nextMonthLabel?: string;
+  /** Screen reader cue appended to today's date aria-label. Default: "Today" */
+  todayLabel?: string;
+  /** Localized month names (12 entries, January-first). Default: English months. */
+  monthNames?: string[];
+  /** Localized full weekday names (7 entries, ordered by firstDayOfWeek). Default: English weekdays. */
+  weekdayNames?: string[];
+  /** Localized short weekday abbreviations (7 entries, ordered by firstDayOfWeek). Default: English 2-letter abbreviations. */
+  weekdayNamesShort?: string[];
+}
+
 export interface DatepickerI18nStrings {
   /** aria-label for the calendar trigger button. Default: "Open calendar" */
   triggerLabel?: string;
@@ -319,6 +334,17 @@ export interface DatepickerI18nStrings {
   weekdayNames?: string[];
   /** Localized short weekday abbreviations (7 entries, ordered by firstDayOfWeek). Default: English 2-letter abbreviations. */
   weekdayNamesShort?: string[];
+}
+
+export interface ProductCardI18nStrings {
+  /** Label for the add-to-cart button when no ctaLabel prop is provided. Default: "Add to cart" */
+  addToCart?: string;
+  /** SR-only suffix for the review count. Default: "reviews" */
+  reviewsLabel?: string;
+  /** SR-only prefix for the current price aria-label. Default: "Sale price" */
+  salePriceLabel?: string;
+  /** SR-only prefix for the original price aria-label. Default: "Original price" */
+  originalPriceLabel?: string;
 }
 
 export interface CarouselI18nStrings {
@@ -373,6 +399,30 @@ export interface ColorPickerI18nStrings {
   copiedLabel?: string;
 }
 
+export interface ThemeSwitcherI18nStrings {
+  /** aria-label for the group landmark. Default: "Theme" */
+  groupLabel?: string;
+  /** Label for the system theme option. Default: "System theme" */
+  systemLabel?: string;
+  /** Label for the light theme option. Default: "Light theme" */
+  lightLabel?: string;
+  /** Label for the dark theme option. Default: "Dark theme" */
+  darkLabel?: string;
+}
+
+export interface VideoI18nStrings {
+  /** Fallback text shown when the browser does not support <video>. Default: "Your browser does not support the video element." */
+  fallbackText?: string;
+}
+
+export interface ProgressIndicatorI18nStrings {
+  /**
+   * Format the percentage value for the aria-valuetext attribute.
+   * Receives the rounded percentage. Default: (v) => `${v}%`
+   */
+  valueFormat?: (value: number) => string;
+}
+
 export interface RadioGroupI18nStrings {
   /** SR-only text appended to legend when required=true. Default: "(required)" */
   required?: string;
@@ -391,11 +441,6 @@ export interface SpinnerI18nStrings {
 export interface SkeletonI18nStrings {
   /** aria-label text for the loading placeholder. Default: "Loading" */
   ariaLabel?: string;
-}
-
-export interface SkipLinkI18nStrings {
-  /** Default label text. Default: "Skip to main content" */
-  label?: string;
 }
 
 export interface InputGroupI18nStrings {
@@ -431,6 +476,33 @@ export interface StatCardI18nStrings {
   trendUpLabel?: string;
   /** SR-only prefix for negative trend delta. Default: "Trending down" */
   trendDownLabel?: string;
+}
+
+export interface PieChartI18nStrings {
+  /** Context text shown next to the delta value. Default: "from last period" */
+  deltaLabel?: string;
+  /** aria-label for the period selector dropdown. Default: "Select time period" */
+  periodSelectorLabel?: string;
+  /** aria-label for the colour legend region. Default: "Chart legend" */
+  legendLabel?: string;
+  /**
+   * aria-label for the SVG pie chart element.
+   * Receives the chart title. Default: (title) => `${title} distribution`
+   */
+  chartLabel?: (title: string) => string;
+  /**
+   * Caption for the SR-only data table.
+   * Receives the chart title. Default: (title) => `${title} — data breakdown`
+   */
+  tableCaption?: (title: string) => string;
+  /** Column header for segment names. Default: "Segment" */
+  columnSegment?: string;
+  /** Column header for numeric values. Default: "Value" */
+  columnValue?: string;
+  /** Column header for percentage share. Default: "Share" */
+  columnShare?: string;
+  /** Row header for the totals row in the SR data table. Default: "Total" */
+  totalLabel?: string;
 }
 
 export interface AreaChartI18nStrings {
@@ -496,6 +568,7 @@ export interface ChatI18nStrings {
 export interface GeeklegoI18nStrings {
   label?: LabelI18nStrings;
   navbar?: NavbarI18nStrings;
+  productCard?: ProductCardI18nStrings;
   carousel?: CarouselI18nStrings;
   colorPicker?: ColorPickerI18nStrings;
   radioGroup?: RadioGroupI18nStrings;
@@ -503,7 +576,7 @@ export interface GeeklegoI18nStrings {
   select?: SelectI18nStrings;
   spinner?: SpinnerI18nStrings;
   skeleton?: SkeletonI18nStrings;
-  skiplink?: SkipLinkI18nStrings;
+
   inputGroup?: InputGroupI18nStrings;
   treeItem?: TreeItemI18nStrings;
   treeView?: TreeViewI18nStrings;
@@ -519,6 +592,7 @@ export interface GeeklegoI18nStrings {
   sidebar?: SidebarI18nStrings;
   barChart?: BarChartI18nStrings;
   areaChart?: AreaChartI18nStrings;
+  pieChart?: PieChartI18nStrings;
   fileInput?: FileInputI18nStrings;
   fileUpload?: FileUploadI18nStrings;
   searchBar?: SearchBarI18nStrings;
@@ -538,11 +612,15 @@ export interface GeeklegoI18nStrings {
   accordion?: AccordionI18nStrings;
   tabs?: TabsI18nStrings;
   dataTable?: DataTableI18nStrings;
+  calendar?: CalendarI18nStrings;
   datepicker?: DatepickerI18nStrings;
   typingIndicator?: TypingIndicatorI18nStrings;
   chatHeader?: ChatHeaderI18nStrings;
   chatInputBar?: ChatInputBarI18nStrings;
   chat?: ChatI18nStrings;
+  themeSwitcher?: ThemeSwitcherI18nStrings;
+  video?: VideoI18nStrings;
+  progressIndicator?: ProgressIndicatorI18nStrings;
 }
 
 // ── Formatters ─────────────────────────────────────────────────────────────
@@ -650,6 +728,17 @@ export const DEFAULT_STRINGS: GeeklegoI18nStrings = {
     columnPeriod: 'Period',
     emptyState: 'No data available',
   },
+  pieChart: {
+    deltaLabel: 'from last period',
+    periodSelectorLabel: 'Select time period',
+    legendLabel: 'Chart legend',
+    chartLabel: (title) => `${title} distribution`,
+    tableCaption: (title) => `${title} — data breakdown`,
+    columnSegment: 'Segment',
+    columnValue: 'Value',
+    columnShare: 'Share',
+    totalLabel: 'Total',
+  },
   fileInput: {
     placeholder: 'No file chosen',
     browseLabel: 'Browse',
@@ -715,12 +804,6 @@ export const DEFAULT_STRINGS: GeeklegoI18nStrings = {
   spinner: {
     label: 'Loading…',
   },
-  skeleton: {
-    ariaLabel: 'Loading',
-  },
-  skiplink: {
-    label: 'Skip to main content',
-  },
   inputGroup: {
     placeholder: 'Search…',
   },
@@ -782,6 +865,11 @@ export const DEFAULT_STRINGS: GeeklegoI18nStrings = {
     nextMonthLabel: 'Next month',
     todayLabel: 'Today',
   },
+  calendar: {
+    prevMonthLabel: 'Previous month',
+    nextMonthLabel: 'Next month',
+    todayLabel: 'Today',
+  },
   colorPicker: {
     colorLabel: 'Color',
     spectrumLabel: 'Color spectrum. Use arrow keys to adjust saturation and brightness.',
@@ -816,6 +904,24 @@ export const DEFAULT_STRINGS: GeeklegoI18nStrings = {
     loadingLabel: 'Loading messages',
     todayLabel: 'Today',
     yesterdayLabel: 'Yesterday',
+  },
+  productCard: {
+    addToCart: 'Add to cart',
+    reviewsLabel: 'reviews',
+    salePriceLabel: 'Sale price',
+    originalPriceLabel: 'Original price',
+  },
+  themeSwitcher: {
+    groupLabel: 'Theme',
+    systemLabel: 'System theme',
+    lightLabel: 'Light theme',
+    darkLabel: 'Dark theme',
+  },
+  video: {
+    fallbackText: 'Your browser does not support the video element.',
+  },
+  progressIndicator: {
+    valueFormat: (v) => `${v}%`,
   },
 };
 

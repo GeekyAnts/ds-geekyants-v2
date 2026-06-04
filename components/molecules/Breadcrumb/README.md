@@ -5,13 +5,13 @@
 
 ## Description
 
-A navigation trail that shows the user's location within the app hierarchy. Composes `BreadcrumbItem` atoms into an accessible `<nav>` + `<ol>` structure with automatic separator rendering between items. The last item in the `items` array is always treated as the current page — no explicit `current` marking required.
+A navigation trail that shows the user's location within the app hierarchy. Composes `BreadcrumbItem` atoms into an accessible `<nav>` + `<ol>` structure with automatic separator rendering between items. The last item in the `items` array is always treated as the current page — no explicit `isActive` marking required.
 
 ## Props
 
 | Prop | Type | Default | Description |
 |---|---|---|---|
-| `items` | `BreadcrumbItemData[]` | — | Required. Ordered list of breadcrumb items. Last item auto-marked as current. |
+| `items` | `BreadcrumbItemData[]` | — | Required. Ordered list of breadcrumb items. Last item auto-marked as active. |
 | `separator` | `ReactNode` | `<ChevronRight />` | Custom separator rendered between items. |
 | `size` | `'sm' \| 'md' \| 'lg'` | `'md'` | Text size applied uniformly to all items. |
 
@@ -21,7 +21,7 @@ A navigation trail that shows the user's location within the app hierarchy. Comp
 |---|---|---|---|
 | `label` | `string` | — | Visible label text. |
 | `href` | `string` | — | URL for the link. Omit for non-navigable items. |
-| `current` | `boolean` | auto | Marks as current page. Auto-applied to the last item. |
+| `isActive` | `boolean` | auto | Marks as current page. Auto-applied to the last item. |
 | `disabled` | `boolean` | `false` | Disabled state. |
 | `icon` | `ReactNode` | — | Optional icon before the label. |
 

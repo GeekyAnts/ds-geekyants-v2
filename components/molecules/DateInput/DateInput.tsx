@@ -1,15 +1,9 @@
 "use client"
 import { forwardRef, memo, useId, useMemo } from 'react';
 import { Input } from '../../atoms/Input/Input';
-import { Label } from '../../atoms/Label/Label';
+import { FormField } from '../FormField/FormField';
+import { useComponentI18n } from '../../utils/i18n/useGeeklegoI18n';
 import type { DateInputProps } from './DateInput.types';
-
-// Static class strings — hoisted to avoid re-creation per render
-const HINT_CLASSES =
-  'text-body-sm text-[var(--date-input-hint-text)] clamp-description';
-
-const ERROR_CLASSES =
-  'text-body-sm text-[var(--date-input-error-text)] clamp-description';
 
 export const DateInput = memo(
   forwardRef<HTMLInputElement, DateInputProps>(
@@ -17,59 +11,45 @@ export const DateInput = memo(
       {
         label,
         hint,
-        errorMessage,
+        error,
         size = 'md',
         variant = 'default',
-        isLoading = false,
+        loading = false,
         disabled,
         required,
         id: idProp,
+        i18nStrings,
         className,
         wrapperClassName,
         ...rest
       },
       ref,
     ) => {
+      const i18n = useComponentI18n('dateInput', i18nStrings);
+
       const generatedId = useId();
       const fieldId = idProp ?? generatedId;
-      const hintId = `${fieldId}-hint`;
-      const errorId = `${fieldId}-error`;
-      const hasError = Boolean(errorMessage);
-      const isDisabled = disabled || isLoading;
+      const hasError = Boolean(error);
+      const resolvedPlaceholder = rest.placeholder ?? i18n.placeholder;
 
-      // aria-describedby: include hint when no error, include error when present
       const describedBy = useMemo(() => {
         const ids: string[] = [];
-        if (hint && !hasError) ids.push(hintId);
-        if (hasError) ids.push(errorId);
+        if (hint && !hasError) ids.push(`${fieldId}-hint`);
+        if (hasError) ids.push(`${fieldId}-error`);
         return ids.length > 0 ? ids.join(' ') : undefined;
-      }, [hint, hasError, hintId, errorId]);
-
-      const wrapperClasses = useMemo(
-        () =>
-          [
-            'flex flex-col gap-[var(--date-input-gap)] w-full',
-            wrapperClassName,
-          ]
-            .filter(Boolean)
-            .join(' '),
-        [wrapperClassName],
-      );
+      }, [hint, hasError, fieldId]);
 
       return (
-        <div className={wrapperClasses}>
-          {/* Label — linked via htmlFor; mirrors disabled/error state */}
-          <Label
-            htmlFor={fieldId}
-            required={required}
-            disabled={isDisabled}
-            hasError={hasError}
-            size={size === 'sm' ? 'sm' : 'md'}
-          >
-            {label}
-          </Label>
-
-          {/* Native date input via Input atom — type locked to "date" */}
+        <FormField
+          label={label}
+          htmlFor={fieldId}
+          hint={hint}
+          error={error}
+          required={required}
+          disabled={disabled || loading}
+          size={size === 'sm' ? 'sm' : 'md'}
+          className={wrapperClassName}
+        >
           <Input
             ref={ref}
             type="date"
@@ -77,28 +57,15 @@ export const DateInput = memo(
             size={size}
             variant={variant}
             error={hasError}
-            isLoading={isLoading}
+            loading={loading}
             disabled={disabled}
             required={required}
+            placeholder={resolvedPlaceholder}
             aria-describedby={describedBy}
             className={className}
             {...rest}
           />
-
-          {/* Hint text — visible only when no error is present */}
-          {hint && !hasError && (
-            <p id={hintId} className={HINT_CLASSES}>
-              {hint}
-            </p>
-          )}
-
-          {/* Error message — role="alert" announces it immediately on mount */}
-          {hasError && (
-            <p id={errorId} role="alert" className={ERROR_CLASSES}>
-              {errorMessage}
-            </p>
-          )}
-        </div>
+        </FormField>
       );
     },
   ),

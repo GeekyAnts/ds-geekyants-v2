@@ -119,7 +119,7 @@ export const Input = memo(forwardRef<HTMLInputElement, InputProps>(
       variant = 'default',
       size = 'md',
       error = false,
-      isLoading = false,
+      loading = false,
       leftIcon,
       rightIcon,
       disabled,
@@ -133,9 +133,9 @@ export const Input = memo(forwardRef<HTMLInputElement, InputProps>(
   ) => {
     const generatedId = useId();
     const inputId = idProp ?? generatedId;
-    const isDisabled = disabled || isLoading;
+    const isDisabled = disabled || loading;
     const hasLeftIcon = Boolean(leftIcon);
-    const hasRightIcon = Boolean(rightIcon) || isLoading;
+    const hasRightIcon = Boolean(rightIcon) || loading;
     const sz = sizeMap[size];
 
     // Wrapper: owns border, bg, radius, shadow, hover/focus-within visual state
@@ -203,7 +203,7 @@ export const Input = memo(forwardRef<HTMLInputElement, InputProps>(
           disabled={isDisabled}
           aria-disabled={isDisabled || undefined}
           aria-required={required || undefined}
-          aria-busy={isLoading || undefined}
+          aria-busy={loading || undefined}
           {...getErrorFieldProps(error, `${inputId}-error`)}
           className={inputClasses}
           {...rest}
@@ -212,7 +212,7 @@ export const Input = memo(forwardRef<HTMLInputElement, InputProps>(
         {/* Right icon slot or spinner — both decorative in this slot */}
         {hasRightIcon && (
           <span className={iconRightClass} aria-hidden="true">
-            {isLoading ? (
+            {loading ? (
               <Loader2 size={sz.iconSize} className="animate-spin" />
             ) : (
               rightIcon

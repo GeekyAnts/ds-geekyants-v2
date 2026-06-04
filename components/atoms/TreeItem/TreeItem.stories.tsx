@@ -12,7 +12,7 @@ const meta: Meta<typeof TreeItem> = {
     isExpanded: { control: 'boolean' },
     isSelected: { control: 'boolean' },
     isDisabled: { control: 'boolean' },
-    isLoading: { control: 'boolean' },
+    loading: { control: 'boolean' },
     hasChildren: { control: 'boolean' },
     badge: { control: 'text' },
     label: { control: 'text' },
@@ -120,7 +120,7 @@ export const States: Story = {
       <TreeItem id="s-expanded" label="Expanded" icon={<FolderOpen size="var(--size-icon-sm)" />} hasChildren isExpanded />
       <TreeItem id="s-selected" label="Selected" icon={<Folder size="var(--size-icon-sm)" />} isSelected />
       <TreeItem id="s-sel-exp" label="Selected + expanded" icon={<FolderOpen size="var(--size-icon-sm)" />} hasChildren isExpanded isSelected />
-      <TreeItem id="s-loading" label="Loading children…" icon={<Folder size="var(--size-icon-sm)" />} hasChildren isLoading />
+      <TreeItem id="s-loading" label="Loading children…" icon={<Folder size="var(--size-icon-sm)" />} hasChildren loading />
       <TreeItem id="s-disabled" label="Disabled" icon={<Folder size="var(--size-icon-sm)" />} hasChildren isDisabled />
       <TreeItem id="s-dis-sel" label="Disabled + selected" icon={<Folder size="var(--size-icon-sm)" />} isSelected isDisabled />
     </ul>
@@ -154,7 +154,7 @@ export const Playground: Story = {
     isExpanded: false,
     isSelected: false,
     isDisabled: false,
-    isLoading: false,
+    loading: false,
     size: 'md',
     level: 1,
     setsize: 1,

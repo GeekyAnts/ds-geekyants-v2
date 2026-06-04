@@ -119,7 +119,6 @@ const safeProps = getSafeExternalLinkProps(href, target, rel);
 
 | Component | Fix needed | Notes |
 |---|---|---|
-| `SkipLink` | `sanitizeHref` only | Fragment-only hrefs — no external link risk |
 | `Item` | `getSafeExternalLinkProps` | Destructure `target`/`rel` from `rest` cast; also add them to `ItemProps` |
 | `BreadcrumbItem` | `sanitizeHref` only | Navigation — always same-tab; add `useMemo` to React imports |
 | `NavItem` | `sanitizeHref` only | No explicit `target` prop — `target` from rest is lower risk |
@@ -157,7 +156,6 @@ Run through this checklist before presenting work as complete.
 - [ ] `Item` extracts `target`/`rel` from `rest` before constructing safe anchor props
 
 ### Backward compatibility
-- [ ] `href="#main-content"` on SkipLink still works — fragments pass through unchanged
 - [ ] `Link external={true}` still sets `rel="noopener noreferrer"` — only href changes
 - [ ] `Item href="/dashboard"` still renders as `<a>` — relative paths pass through unchanged
 - [ ] New `target`/`rel` props on Item are optional (no breaking change)
