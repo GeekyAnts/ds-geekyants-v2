@@ -3,7 +3,6 @@
   "version": "0.1.0",
   "private": false,
   "license": "MIT",
-  "type": "module",
   "description": "A React component library built on a design-system-first architecture with Tailwind CSS v4. 58 production-ready components: atoms, molecules, and organisms.",
   "keywords": [
     "react",
@@ -23,7 +22,8 @@
   },
   "author": "Geeklego",
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
   },
   "exports": {
     ".": {
@@ -50,16 +50,15 @@
     }
   },
   "scripts": {
-    "predev": "node -e \"try{require('esbuild')}catch(e){console.error('\\nesbuild binary mismatch — attempting auto-fix...\\n');try{require('child_process').execSync('pnpm rebuild esbuild',{stdio:'inherit'})}catch(e2){console.error('\\nAuto-fix failed. Run manually:\\n  pnpm store prune\\n  rm -rf node_modules packages/geeklego/node_modules apps/geeklego-site/node_modules\\n  pnpm install\\n');process.exit(1)}}\"",
     "dev": "vite --config vite.config.ts app",
-    "dev:all": "concurrently -n \"tokens,storybook\" -c \"cyan,magenta\" --delay 2 \"vite --config vite.config.ts app\" \"storybook dev -p 6006\"",
-    "prestorybook": "node -e \"try{require('esbuild')}catch(e){console.error('\\nesbuild binary mismatch — attempting auto-fix...\\n');try{require('child_process').execSync('pnpm rebuild esbuild',{stdio:'inherit'})}catch(e2){console.error('\\nAuto-fix failed. Run manually:\\n  pnpm store prune\\n  rm -rf node_modules packages/geeklego/node_modules apps/geeklego-site/node_modules\\n  pnpm install\\n');process.exit(1)}}\"",
+    "build": "npm run build:css",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build",
+    "lint": "eslint",
+    "build:css": "pnpm --filter @geeklego/ui build:css",
+    "sync-build": "npm run build:css",
     "validate-tokens": "npx tsx scripts/validate-tokens.ts",
-    "lint-css": "stylelint --config .stylelintrc.mjs design-system/geeklego.css",
-    "build": "tsup && npm run build:css",
-    "build:css": "tailwindcss -i ./design-system/geeklego.css -o ./dist/geeklego.css --minify"
+    "build-storybook": "storybook build",
+    "lint-css": "stylelint --config .stylelintrc.mjs design-system/geeklego.css"
   },
   "peerDependencies": {
     "lucide-react": ">=0.400.0 || >=1.0.0",
@@ -73,19 +72,20 @@
     "@storybook/react-vite": "^10.2.19",
     "@tailwindcss/cli": "^4.2.4",
     "@tailwindcss/vite": "^4.2.1",
+    "@types/diff": "^7.0.2",
     "@types/node": "^22.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^4.3.4",
     "@vitest/browser-playwright": "^4.1.0",
     "@vitest/coverage-v8": "^4.1.0",
-    "autoprefixer": "^10.4.27",
-    "concurrently": "^9.2.1",
+    "diff": "^9.0.0",
+    "eslint": "^9.39.4",
     "playwright": "^1.58.2",
     "storybook": "^10.2.19",
     "stylelint": "^16.0.0",
     "tailwindcss": "^4.2.1",
-    "tsup": "^8.5.1",
+    "turbo": "^2.5.0",
     "typescript": "^5.7.0",
     "vite": "^6.0.0",
     "vitest": "^4.1.0"
@@ -96,5 +96,13 @@
     "last 2 Safari versions",
     "last 2 Edge versions",
     "not dead"
-  ]
+  ],
+  "packageManager": "pnpm@9.15.0",
+  "pnpm": {
+    "overrides": {
+      "postcss@<8.5.10": ">=8.5.10",
+      "fast-uri@<3.1.2": ">=3.1.2",
+      "vite@<6.4.2": ">=6.4.2"
+    }
+  }
 }
