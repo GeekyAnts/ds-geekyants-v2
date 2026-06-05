@@ -1,5 +1,8 @@
+"use client";
+
 import { forwardRef, memo, useMemo } from 'react';
 import type { FormFieldProps, FormFieldLabelPosition } from './FormField.types';
+import { useComponentI18n } from '../../utils/i18n/useGeeklegoI18n';
 import { Label } from '../../atoms/Label/Label';
 
 // ── Hoisted static strings ──────────────────────────────────────────────────
@@ -35,12 +38,15 @@ export const FormField = memo(
         disabled = false,
         labelPosition = 'top',
         size = 'md',
+        i18nStrings,
         children,
         className,
         ...rest
       },
       ref,
     ) => {
+      const i18n = useComponentI18n('formField', i18nStrings);
+
       const isInline = labelPosition === 'left';
 
       // Deterministic IDs derived from htmlFor — consumers wire via aria-describedby
@@ -69,6 +75,7 @@ export const FormField = memo(
             optional={optional}
             disabled={disabled}
             hasError={!!error}
+            i18nStrings={i18nStrings}
             className={labelClass}
           >
             {label}

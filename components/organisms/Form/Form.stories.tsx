@@ -259,7 +259,7 @@ export const States: Story = {
                 </Form.Field>
               </Fieldset>
               <Form.Actions align="end" separator>
-                <Button type="submit" isLoading={loading} disabled={loading}>
+                <Button type="submit" loading={loading} disabled={loading}>
                   {loading ? 'Saving…' : 'Save changes'}
                 </Button>
               </Form.Actions>
@@ -412,7 +412,7 @@ export const Validation: Story = {
           </Fieldset>
           <Form.Actions align="end" separator>
             <Button type="button" variant="outline" disabled>Cancel</Button>
-            <Button type="submit" isLoading disabled>Submitting…</Button>
+            <Button type="submit" loading disabled>Submitting…</Button>
           </Form.Actions>
         </Form>
       </div>
@@ -444,7 +444,7 @@ export const Playground: Story = {
         </Form.Field>
         <Form.Actions align="end" separator>
           <Button type="button" variant="outline">Cancel</Button>
-          <Button type="submit" isLoading={args.loading} disabled={args.loading}>
+          <Button type="submit" loading={args.loading} disabled={args.loading}>
             {args.loading ? 'Submitting…' : 'Submit'}
           </Button>
         </Form.Actions>

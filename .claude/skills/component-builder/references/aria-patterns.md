@@ -47,7 +47,7 @@ Before hand-writing `aria-expanded`, `aria-controls`, `aria-disabled`, or `aria-
 |---|---|---|
 | Expand/collapse trigger + panel | `getDisclosureProps(isExpanded, panelId)` | `[triggerProps, panelProps]` tuple with `aria-expanded`, `aria-controls`, `id`, `role` |
 | Active/disabled nav item | `getNavigationItemProps({ isActive, disabled })` | `aria-current`, `aria-disabled`, `tabIndex` |
-| Loading spinner container | `getLoadingProps(isLoading)` | `{ 'aria-busy': true }` or `{}` |
+| Loading spinner container | `getLoadingProps(loading)` | `{ 'aria-busy': true }` or `{}` |
 | Disabled interactive element | `getDisabledProps(isDisabled)` | `{ 'aria-disabled': true, disabled: true }` or `{}` |
 | Form field error state | `getErrorFieldProps(hasError, errorId)` | `{ 'aria-invalid': 'true', 'aria-describedby': errorId }` or `{}` |
 | Decorative/meaningful icon | `getIconProps(isDecorative, label?)` | `{ 'aria-hidden': true }` or `{ role: 'img', 'aria-label': label }` |

@@ -25,7 +25,7 @@ const meta: Meta<typeof FileUpload> = {
       options: ['sm', 'md', 'lg'],
     },
     disabled: { control: 'boolean' },
-    error: { control: 'boolean' },
+    error: { control: 'text' },
     multiple: { control: 'boolean' },
   },
 };
@@ -136,7 +136,7 @@ export const States: Story = {
       </div>
       <div>
         <p className="text-body-sm text-[var(--color-text-secondary)] mb-[var(--spacing-component-sm)]">Zone error state</p>
-        <FileUpload error errorMessage="Only PNG and JPG files are accepted." hint="PNG, JPG up to 10 MB" />
+        <FileUpload error="Only PNG and JPG files are accepted." hint="PNG, JPG up to 10 MB" />
       </div>
       <div>
         <p className="text-body-sm text-[var(--color-text-secondary)] mb-[var(--spacing-component-sm)]">Disabled</p>
@@ -171,8 +171,7 @@ export const Playground: Story = {
     size:        'md',
     multiple:    false,
     disabled:    false,
-    error:       false,
-    errorMessage: '',
+    error:       '',
     hint:        'PNG, JPG, PDF up to 10 MB',
     accept:      '',
   },
@@ -219,8 +218,7 @@ export const Accessibility: Story = {
 
       {/* Error state — role="alert" on error message */}
       <FileUpload
-        error
-        errorMessage="Only PNG and JPG files are accepted."
+        error="Only PNG and JPG files are accepted."
         i18nStrings={{ inputLabel: 'File upload (error state)' }}
       />
 

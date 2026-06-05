@@ -23,7 +23,7 @@
     "default":          { "id": "s-default",  "label": "Default"                              },
     "expanded":         { "id": "s-exp",      "label": "Expanded",           "isExpanded": true, "hasChildren": true },
     "selected":         { "id": "s-sel",      "label": "Selected",           "isSelected": true  },
-    "loading":          { "id": "s-load",     "label": "Loading children…",  "isLoading": true,  "hasChildren": true },
+    "loading":          { "id": "s-load",     "label": "Loading children…",  "loading": true,  "hasChildren": true },
     "disabled":         { "id": "s-dis",      "label": "Disabled",           "isDisabled": true  },
     "disabledSelected": { "id": "s-dis-sel",  "label": "Disabled + selected","isDisabled": true, "isSelected": true  }
   },

@@ -77,6 +77,7 @@ export const Default: Story = {
   args: {
     isOpen: false,
     onClose: () => {},
+    size: "lg"
   },
 };
 

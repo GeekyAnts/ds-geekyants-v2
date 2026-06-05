@@ -54,6 +54,10 @@ function collectPrimitiveNames(primitives: GeeklegoTokens['primitives']): Set<st
   for (const k of Object.keys(primitives.zIndex)) names.add(`--z-index-${k}`)
   for (const k of Object.keys(primitives.duration)) names.add(`--duration-${k}`)
   for (const k of Object.keys(primitives.easing)) names.add(`--ease-${k}`)
+  // New primitives - sizeScale
+  if (primitives.sizeScale) {
+    for (const k of Object.keys(primitives.sizeScale)) names.add(`--size-${k}`)
+  }
   // New primitives - iconSize
   if (primitives.iconSize) {
     for (const k of Object.keys(primitives.iconSize)) names.add(`--icon-size-${k}`)

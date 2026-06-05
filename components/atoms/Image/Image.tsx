@@ -2,6 +2,7 @@
 import { forwardRef, memo, useCallback, useMemo, useState } from 'react';
 import { ImageOff } from 'lucide-react';
 import type { ImageProps, ImageRadius, ImageFit, ImageAspectRatio } from './Image.types';
+import { VisuallyHidden } from '../../utils/accessibility/VisuallyHidden';
 
 // ── Static class maps (hoisted — never recreated per render) ──────────────────
 
@@ -127,7 +128,7 @@ export const Image = memo(forwardRef<HTMLImageElement, ImageProps>(
         {fallbackContent}
         {/* Hidden accessible text for error state — sighted users see the fallback icon */}
         {status === 'error' && alt && (
-          <span className="sr-only">{alt} — failed to load</span>
+          <VisuallyHidden>{alt} — failed to load</VisuallyHidden>
         )}
       </>
     );

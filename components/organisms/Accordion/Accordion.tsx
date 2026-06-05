@@ -1,5 +1,5 @@
 "use client"
-import { memo, useState, useId, useMemo, useCallback } from 'react';
+import { forwardRef, memo, useState, useId, useMemo, useCallback } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { getDisclosureProps, getDisabledProps, getIconProps, getLoadingProps } from '../../utils/accessibility';
 import { useComponentI18n } from '../../utils/i18n/useGeeklegoI18n';
@@ -60,7 +60,7 @@ const sizeClasses: Record<AccordionSize, SizeMap> = {
 
 // ── Accordion ────────────────────────────────────────────────────────────────
 
-export const Accordion = memo(({
+export const Accordion = memo(forwardRef<HTMLDivElement, AccordionProps>(({
   items,
   variant = 'default',
   mode = 'single',
@@ -74,7 +74,7 @@ export const Accordion = memo(({
   loadingCount = 3,
   i18nStrings,
   className,
-}: AccordionProps) => {
+}, ref) => {
   const i18n = useComponentI18n('accordion', i18nStrings);
   const baseId = useId();
 
@@ -125,6 +125,7 @@ export const Accordion = memo(({
 
   return (
     <div
+      ref={ref}
       className={containerClasses}
       {...(schema && { itemScope: true, itemType: 'https://schema.org/FAQPage' })}
     >
@@ -154,7 +155,7 @@ export const Accordion = memo(({
       })}
     </div>
   );
-});
+}));
 Accordion.displayName = 'Accordion';
 
 // ── AccordionItemInner (internal compound slot) ──────────────────────────────
@@ -214,7 +215,7 @@ const AccordionItemInner = memo(({
   ].filter(Boolean).join(' '), [sizes, item.disabled]);
 
   const panelGridClasses = useMemo(() => [
-    'grid transition-default',
+    'grid overflow-hidden transition-default',
     isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
   ].join(' '), [isOpen]);
 
@@ -259,11 +260,11 @@ const AccordionItemInner = memo(({
         <div
           {...panelProps}
           aria-labelledby={triggerId}
-          className={[sizes.panelPx, sizes.panelPb, 'overflow-hidden'].join(' ')}
+          className="overflow-hidden min-h-0"
           inert={isOpen ? undefined : true}
         >
           <div
-            className="text-body-md text-[var(--accordion-panel-text)]"
+            className={[sizes.panelPx, sizes.panelPb, 'text-body-md text-[var(--accordion-panel-text)]'].join(' ')}
             {...(schema && { itemScope: true, itemType: 'https://schema.org/Answer', itemProp: 'acceptedAnswer' })}
           >
             {item.content}

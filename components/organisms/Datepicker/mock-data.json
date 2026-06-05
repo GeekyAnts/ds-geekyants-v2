@@ -26,7 +26,7 @@
     },
     "error": {
       "label": "Error state",
-      "errorMessage": "Please select a valid date"
+      "error": "Please select a valid date"
     },
     "disabled": {
       "label": "Disabled state",
@@ -34,7 +34,7 @@
     },
     "loading": {
       "label": "Loading state",
-      "isLoading": true
+      "loading": true
     },
     "constrained": {
       "label": "Constrained range",
@@ -54,7 +54,7 @@
     },
     "very_long_error": {
       "label": "Date",
-      "errorMessage": "The date you entered is not valid. Please enter a date in YYYY-MM-DD format within the allowed range of January 1, 2020 to December 31, 2030."
+      "error": "The date you entered is not valid. Please enter a date in YYYY-MM-DD format within the allowed range of January 1, 2020 to December 31, 2030."
     },
     "min_max_same_day": {
       "label": "Single day",

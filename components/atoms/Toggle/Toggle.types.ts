@@ -3,16 +3,16 @@ import type { ButtonHTMLAttributes, ReactNode } from 'react';
 export type ToggleVariant = 'default' | 'outline' | 'ghost';
 export type ToggleSize = 'sm' | 'md' | 'lg';
 
-export interface ToggleProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'onClick'> {
+export interface ToggleProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'onClick' | 'onChange'> {
   /**
-   * Whether the toggle is pressed (active). Use for controlled mode.
-   * Leave undefined for uncontrolled — use `defaultPressed` instead.
+   * Whether the toggle is checked (active). Use for controlled mode.
+   * Leave undefined for uncontrolled — use `defaultChecked` instead.
    */
-  pressed?: boolean;
-  /** Initial pressed state in uncontrolled mode. Defaults to `false`. */
-  defaultPressed?: boolean;
-  /** Called when the pressed state changes, with the new boolean value. */
-  onPressedChange?: (pressed: boolean) => void;
+  checked?: boolean;
+  /** Initial checked state in uncontrolled mode. Defaults to `false`. */
+  defaultChecked?: boolean;
+  /** Called when the checked state changes, with the new boolean value. */
+  onChange?: (checked: boolean) => void;
   /**
    * Visual treatment strategy. Defaults to `'default'`.
    * - `default`  — muted fill at rest, brand-tinted fill when pressed.

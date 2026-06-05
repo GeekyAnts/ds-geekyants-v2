@@ -46,7 +46,7 @@ export const Breadcrumb = memo(forwardRef<HTMLElement, BreadcrumbProps>(
               <Fragment key={item.href ?? item.label}>
                 <BreadcrumbItem
                   href={item.href}
-                  current={isLast || item.current}
+                  isActive={isLast || item.isActive}
                   disabled={item.disabled}
                   size={size}
                   leftIcon={item.icon}

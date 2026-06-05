@@ -91,7 +91,7 @@ export const ChatInputBar = memo(forwardRef<HTMLFormElement, ChatInputBarProps>(
           maxLength={maxLength}
           disabled={disabled}
           aria-label={i18n.sendLabel}
-          className="flex-1 min-w-0 max-h-[var(--chat-input-bar-textarea-max-height)] overflow-y-auto"
+          className="content-flex max-h-[var(--chat-input-bar-textarea-max-height)] overflow-y-auto"
         />
 
         {/* Send button */}

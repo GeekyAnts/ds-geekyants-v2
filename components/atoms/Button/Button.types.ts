@@ -9,7 +9,7 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   /** Component height and typography scale. Defaults to 'md'. */
   size?: ButtonSize;
   /** Replaces content with a centered spinner and disables interaction. Preserves button dimensions. */
-  isLoading?: boolean;
+  loading?: boolean;
   /** Icon node rendered before the label. Omitted during loading. */
   leftIcon?: ReactNode;
   /** Icon node rendered after the label. Omitted during loading. */

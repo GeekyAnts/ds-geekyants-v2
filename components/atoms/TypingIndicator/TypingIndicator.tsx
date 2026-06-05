@@ -1,6 +1,7 @@
 "use client";
 import { forwardRef, memo, useMemo } from 'react';
 import type { TypingIndicatorProps } from './TypingIndicator.types';
+import { VisuallyHidden } from '../../utils/accessibility/VisuallyHidden';
 
 export const TypingIndicator = memo(
   forwardRef<HTMLDivElement, TypingIndicatorProps>(
@@ -39,7 +40,7 @@ export const TypingIndicator = memo(
           className={classes}
           {...rest}
         >
-          <span className="sr-only">{srText}</span>
+          <VisuallyHidden>{srText}</VisuallyHidden>
           <span className={dotBase} aria-hidden="true" />
           <span
             className={`${dotBase} [animation-delay:var(--typing-indicator-dot-delay-2)]`}

@@ -29,6 +29,7 @@ export type {
   SidebarI18nStrings,
   BarChartI18nStrings,
   AreaChartI18nStrings,
+  PieChartI18nStrings,
   FileInputI18nStrings,
   FileUploadI18nStrings,
   SearchBarI18nStrings,
@@ -57,4 +58,10 @@ export type {
   TreeViewI18nStrings,
   SpinnerI18nStrings,
   InputGroupI18nStrings,
+  CalendarI18nStrings,
+  NumberInputI18nStrings,
+  StatCardI18nStrings,
+  ThemeSwitcherI18nStrings,
+  VideoI18nStrings,
+  ProgressIndicatorI18nStrings,
 } from './GeeklegoI18nProvider.types';

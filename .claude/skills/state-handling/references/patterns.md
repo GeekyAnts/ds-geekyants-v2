@@ -94,7 +94,7 @@ Component:  --spinner-default-color → var(--color-action-primary)
 
 ```typescript
 /** Shows a spinner and prevents interaction while the action is in progress. */
-isLoading?: boolean;
+loading?: boolean;
 ```
 
 ### Component implementation
@@ -103,22 +103,22 @@ isLoading?: boolean;
 import { Spinner } from '../Spinner/Spinner';
 import { getLoadingProps } from '../../utils/accessibility/aria-helpers';
 
-const isDisabled = disabled || isLoading;
+const isDisabled = disabled || loading;
 
 <button
   disabled={isDisabled}
   aria-disabled={isDisabled || undefined}
-  {...getLoadingProps(isLoading)}
+  {...getLoadingProps(loading)}
   className={['relative', ...classes].join(' ')}
 >
   {/* Spinner overlaid absolutely — preserves button width */}
-  {isLoading && (
+  {loading && (
     <span className="absolute inset-0 flex items-center justify-center">
       <Spinner size="sm" variant="inverse" />
     </span>
   )}
   {/* Ghost content preserves layout dimensions */}
-  <span className={isLoading ? 'invisible' : ''}>
+  <span className={loading ? 'invisible' : ''}>
     {children}
   </span>
 </button>
@@ -159,7 +159,7 @@ disabled?: boolean;
 ```tsx
 import { getDisabledProps } from '../../utils/accessibility/aria-helpers';
 
-const isDisabled = disabled || isLoading;
+const isDisabled = disabled || loading;
 
 <button
   {...getDisabledProps(isDisabled)}  // sets aria-disabled="true" and disabled attribute
@@ -337,7 +337,7 @@ All semantic tokens available for state styling (from `geeklego.css`):
 | AreaChart data loading | `<AreaChart loading>` | `loading` | Box skeleton at chart height |
 | BarChart data loading | `<BarChart loading>` | `loading` | Box skeleton at chart height |
 | Avatar user not loaded | `<Avatar loading>` | `loading` | Circle skeleton matching size |
-| Button form submit | `<Button isLoading>` | `isLoading` | Inline spinner, same dimensions |
+| Button form submit | `<Button loading>` | `loading` | Inline spinner, same dimensions |
 | List item loading | `<Item loading>` | `loading` | Full item skeleton |
 | Page section loading | Use `<Skeleton variant="box">` directly | — | Box placeholder |
 | Standalone text line | Use `<Skeleton variant="text">` | — | Text line placeholder |

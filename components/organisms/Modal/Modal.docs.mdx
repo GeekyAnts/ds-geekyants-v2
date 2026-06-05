@@ -6,18 +6,42 @@ level: organism
 
 ## Variants
 
-<ComponentPreview code={"import { useState } from \"react\"\nimport { Modal, Button } from \"@geeklego/ui\"\nimport { AlertTriangle, Trash2 } from \"lucide-react\"\n\nexport function Demo() {\n  const [open, setOpen] = useState<null | 'info' | 'confirm' | 'danger' | 'scroll'>(null)\n  return (\n    <>\n      <div className=\"flex flex-wrap gap-3\">\n        <Button variant=\"secondary\" onClick={() => setOpen('info')}>Info modal</Button>\n        <Button variant=\"secondary\" onClick={() => setOpen('confirm')}>Confirm modal</Button>\n        <Button variant=\"destructive\" onClick={() => setOpen('danger')}>Destructive modal</Button>\n        <Button variant=\"outline\" onClick={() => setOpen('scroll')}>Scrollable modal</Button>\n      </div>\n      <Modal isOpen={open === 'info'} onClose={() => setOpen(null)} title=\"Information\">\n        <Modal.Body>This is an informational dialog. It presents content that requires the user's attention before continuing.</Modal.Body>\n        <Modal.Footer>\n          <Button variant=\"primary\" onClick={() => setOpen(null)}>Understood</Button>\n        </Modal.Footer>\n      </Modal>\n      <Modal isOpen={open === 'confirm'} onClose={() => setOpen(null)} title=\"Confirm action\">\n        <Modal.Body>Do you want to proceed with this action?</Modal.Body>\n        <Modal.Footer>\n          <Button variant=\"ghost\" onClick={() => setOpen(null)}>Cancel</Button>\n          <Button variant=\"primary\" onClick={() => setOpen(null)}>Confirm</Button>\n        </Modal.Footer>\n      </Modal>\n      <Modal isOpen={open === 'danger'} onClose={() => setOpen(null)} title=\"Danger zone\">\n        <Modal.Body>\n          <div className=\"flex gap-3\">\n            <span aria-hidden=\"true\" className=\"text-[var(--color-status-error)] shrink-0 mt-0.5\">\n              <AlertTriangle size={16} />\n            </span>\n            <p>This action is permanent and cannot be undone.</p>\n          </div>\n        </Modal.Body>\n        <Modal.Footer>\n          <Button variant=\"ghost\" onClick={() => setOpen(null)}>Cancel</Button>\n          <Button variant=\"destructive\" onClick={() => setOpen(null)}>\n            <span aria-hidden=\"true\"><Trash2 size={14} /></span>\n            Delete permanently\n          </Button>\n        </Modal.Footer>\n      </Modal>\n    </>\n  )\n}"}>
-  <div className="relative flex flex-col bg-[var(--modal-bg)] border border-[var(--modal-border-color)] rounded-[var(--modal-radius)] shadow-[var(--modal-shadow)] overflow-hidden max-w-md w-full">
-    <header className="flex items-center justify-between card-header-row gap-[var(--modal-header-gap)] px-[var(--modal-header-px)] py-[var(--modal-header-py)] border-b border-[var(--modal-header-border)] shrink-0">
-      <div className="card-header-title">
-        <h2 className="text-heading-h4 text-[var(--modal-title-color)] truncate-label content-flex">Information</h2>
-      </div>
-      <Button variant="ghost" size="sm" aria-label="Close"><X size={14} /></Button>
-    </header>
-    <Modal.Body>This is an informational dialog. It presents content that requires the user's attention before continuing.</Modal.Body>
-    <Modal.Footer>
-      <Button variant="primary">Understood</Button>
-    </Modal.Footer>
+<ComponentPreview code={"import { useState } from \"react\"\nimport { Modal, Button } from \"@geeklego/ui\"\nimport { AlertTriangle } from \"lucide-react\"\n\nfunction ModalVariantsDemo() {\n  const [open, setOpen] = useState<\"info\" | \"danger\" | null>(null)\n  return (\n    <>\n      <div className=\"flex flex-wrap gap-3\">\n        <Button variant=\"secondary\" onClick={() => setOpen(\"info\")}>Info modal</Button>\n        <Button variant=\"destructive\" onClick={() => setOpen(\"danger\")}>Destructive modal</Button>\n      </div>\n      <Modal isOpen={open === \"info\"} onClose={() => setOpen(null)} title=\"Information\">\n        <Modal.Body>This is an informational dialog.</Modal.Body>\n        <Modal.Footer>\n          <Button variant=\"primary\" onClick={() => setOpen(null)}>Understood</Button>\n        </Modal.Footer>\n      </Modal>\n      <Modal isOpen={open === \"danger\"} onClose={() => setOpen(null)} title=\"Danger zone\">\n        <Modal.Body>\n          <div className=\"flex gap-3\">\n            <span aria-hidden=\"true\" className=\"text-[var(--color-status-error)] shrink-0 mt-0.5\">\n              <AlertTriangle size={16} />\n            </span>\n            <p>This action is permanent and cannot be undone.</p>\n          </div>\n        </Modal.Body>\n        <Modal.Footer>\n          <Button variant=\"ghost\" onClick={() => setOpen(null)}>Cancel</Button>\n          <Button variant=\"destructive\" onClick={() => setOpen(null)}>Delete permanently</Button>\n        </Modal.Footer>\n      </Modal>\n    </>\n  )\n}"}>
+  <div className="flex flex-wrap gap-3">
+    <ModalDemo buttonLabel="Info modal" buttonVariant="secondary" title="Information">
+      <Modal.Body>This is an informational dialog. It presents content that requires your attention before continuing.</Modal.Body>
+      <Modal.Footer>
+        <Button variant="primary">Understood</Button>
+      </Modal.Footer>
+    </ModalDemo>
+    <ModalDemo buttonLabel="Confirm modal" buttonVariant="secondary" title="Confirm action">
+      <Modal.Body>Do you want to proceed with this action?</Modal.Body>
+      <Modal.Footer>
+        <Button variant="ghost">Cancel</Button>
+        <Button variant="primary">Confirm</Button>
+      </Modal.Footer>
+    </ModalDemo>
+    <ModalDemo buttonLabel="Destructive modal" buttonVariant="destructive" title="Danger zone">
+      <Modal.Body>
+        <div className="flex gap-3">
+          <span aria-hidden="true" className="text-[var(--color-status-error)] shrink-0 mt-0.5"><AlertTriangle size={16} /></span>
+          <p>This action is permanent and cannot be undone.</p>
+        </div>
+      </Modal.Body>
+      <Modal.Footer>
+        <Button variant="ghost">Cancel</Button>
+        <Button variant="destructive">Delete permanently</Button>
+      </Modal.Footer>
+    </ModalDemo>
+    <ModalDemo buttonLabel="Scrollable modal" buttonVariant="outline" title="Long content">
+      <Modal.Body>
+        <p className="mb-4">Paragraph 1: The modal body scrolls independently when content overflows.</p>
+        <p className="mb-4">Paragraph 2: The header and footer remain fixed.</p>
+      </Modal.Body>
+      <Modal.Footer>
+        <Button variant="primary">Close</Button>
+      </Modal.Footer>
+    </ModalDemo>
   </div>
 </ComponentPreview>
 
@@ -25,16 +49,38 @@ level: organism
 
 The `size` prop controls the max-width of the dialog panel. `full` fills the entire viewport.
 
-<ComponentPreview code={"import { useState } from \"react\"\nimport { Modal, Button } from \"@geeklego/ui\"\n\nexport function Demo() {\n  const [size, setSize] = useState<null | 'sm' | 'md' | 'lg' | 'xl' | 'full'>(null)\n  return (\n    <>\n      <div className=\"flex flex-wrap gap-3\">\n        <Button variant=\"outline\" onClick={() => setSize('sm')}>sm</Button>\n        <Button variant=\"outline\" onClick={() => setSize('md')}>md</Button>\n        <Button variant=\"outline\" onClick={() => setSize('lg')}>lg</Button>\n        <Button variant=\"outline\" onClick={() => setSize('xl')}>xl</Button>\n        <Button variant=\"outline\" onClick={() => setSize('full')}>full</Button>\n      </div>\n      {(['sm', 'md', 'lg', 'xl', 'full'] as const).map(s => (\n        <Modal key={s} isOpen={size === s} onClose={() => setSize(null)} size={s} title={`${s.toUpperCase()} modal`}>\n          <Modal.Body>This is a {s} modal. The panel width is controlled by the size prop.</Modal.Body>\n          <Modal.Footer>\n            <Button variant=\"primary\" onClick={() => setSize(null)}>Got it</Button>\n          </Modal.Footer>\n        </Modal>\n      ))}\n    </>\n  )\n}"}>
-  <div className="flex flex-col gap-2">
-    <div className="flex flex-wrap items-center gap-2">
-      <span className="inline-flex items-center px-[var(--spacing-component-sm)] py-[var(--spacing-component-xs)] rounded-[var(--radius-component-sm)] border border-[var(--color-border-default)] text-body-sm">sm</span>
-      <span className="inline-flex items-center px-[var(--spacing-component-sm)] py-[var(--spacing-component-xs)] rounded-[var(--radius-component-sm)] border border-[var(--color-border-default)] text-body-sm">md (default)</span>
-      <span className="inline-flex items-center px-[var(--spacing-component-sm)] py-[var(--spacing-component-xs)] rounded-[var(--radius-component-sm)] border border-[var(--color-border-default)] text-body-sm">lg</span>
-      <span className="inline-flex items-center px-[var(--spacing-component-sm)] py-[var(--spacing-component-xs)] rounded-[var(--radius-component-sm)] border border-[var(--color-border-default)] text-body-sm">xl</span>
-      <span className="inline-flex items-center px-[var(--spacing-component-sm)] py-[var(--spacing-component-xs)] rounded-[var(--radius-component-sm)] border border-[var(--color-border-default)] text-body-sm">full</span>
-    </div>
-    <p className="text-body-sm text-[var(--color-text-secondary)]">Interactive — trigger opens a portal overlay. See the code tab for the full controlled pattern.</p>
+<ComponentPreview code={"import { Modal, Button } from \"@geeklego/ui\"\n\n<Modal isOpen onClose={() => {}} title=\"Modal title\" size=\"md\">\n  <Modal.Body>The size prop controls the panel width.</Modal.Body>\n  <Modal.Footer>\n    <Button variant=\"primary\">Got it</Button>\n  </Modal.Footer>\n</Modal>"}>
+  <div className="flex flex-wrap gap-3">
+    <ModalDemo buttonLabel="sm" size="sm" title="SM modal">
+      <Modal.Body>Small modal panel.</Modal.Body>
+      <Modal.Footer>
+        <Button variant="primary">Got it</Button>
+      </Modal.Footer>
+    </ModalDemo>
+    <ModalDemo buttonLabel="md" size="md" title="MD modal">
+      <Modal.Body>Medium modal panel (default).</Modal.Body>
+      <Modal.Footer>
+        <Button variant="primary">Got it</Button>
+      </Modal.Footer>
+    </ModalDemo>
+    <ModalDemo buttonLabel="lg" size="lg" title="LG modal">
+      <Modal.Body>Large modal panel.</Modal.Body>
+      <Modal.Footer>
+        <Button variant="primary">Got it</Button>
+      </Modal.Footer>
+    </ModalDemo>
+    <ModalDemo buttonLabel="xl" size="xl" title="XL modal">
+      <Modal.Body>Extra large modal panel.</Modal.Body>
+      <Modal.Footer>
+        <Button variant="primary">Got it</Button>
+      </Modal.Footer>
+    </ModalDemo>
+    <ModalDemo buttonLabel="full" size="full" title="Full modal">
+      <Modal.Body>Full viewport modal panel.</Modal.Body>
+      <Modal.Footer>
+        <Button variant="primary">Got it</Button>
+      </Modal.Footer>
+    </ModalDemo>
   </div>
 </ComponentPreview>
 
@@ -42,80 +88,118 @@ The `size` prop controls the max-width of the dialog panel. `full` fills the ent
 
 When `loading={true}` the body content is replaced with skeleton rows while the header and footer remain in place.
 
-<ComponentPreview code={"import { useState } from \"react\"\nimport { Modal, Button } from \"@geeklego/ui\"\n\nexport function Demo() {\n  const [open, setOpen] = useState(false)\n  return (\n    <>\n      <Button variant=\"outline\" onClick={() => setOpen(true)}>Loading state</Button>\n      <Modal isOpen={open} onClose={() => setOpen(false)} title=\"Loading content\" loading={true}>\n        <Modal.Body>This content is hidden during loading.</Modal.Body>\n        <Modal.Footer>\n          <Button variant=\"primary\" onClick={() => setOpen(false)}>OK</Button>\n        </Modal.Footer>\n      </Modal>\n    </>\n  )\n}"}>
-  <div className="relative flex flex-col bg-[var(--modal-bg)] border border-[var(--modal-border-color)] rounded-[var(--modal-radius)] shadow-[var(--modal-shadow)] overflow-hidden max-w-md w-full">
-    <header className="flex items-center justify-between card-header-row gap-[var(--modal-header-gap)] px-[var(--modal-header-px)] py-[var(--modal-header-py)] border-b border-[var(--modal-header-border)] shrink-0">
-      <div className="card-header-title">
-        <h2 className="text-heading-h4 text-[var(--modal-title-color)] truncate-label content-flex">Loading content</h2>
-      </div>
-      <Button variant="ghost" size="sm" aria-label="Close"><X size={14} /></Button>
-    </header>
-    <div className="flex flex-col gap-[var(--spacing-component-md)] px-[var(--modal-body-px)] py-[var(--modal-body-py)] grow overflow-y-auto">
-      <div className="skeleton h-[var(--size-component-sm)] w-3/4 rounded-[var(--radius-component-sm)]" />
-      <div className="skeleton h-[var(--size-component-xs)] w-full rounded-[var(--radius-component-sm)]" />
-      <div className="skeleton h-[var(--size-component-xs)] w-5/6 rounded-[var(--radius-component-sm)]" />
-      <div className="skeleton h-[var(--size-component-xs)] w-4/5 rounded-[var(--radius-component-sm)]" />
-    </div>
-  </div>
+<ComponentPreview code={"import { Modal, Button } from \"@geeklego/ui\"\n\n<Modal isOpen onClose={() => {}} title=\"Loading content\" loading>\n  <Modal.Body>This content is hidden during loading.</Modal.Body>\n  <Modal.Footer>\n    <Button variant=\"primary\">OK</Button>\n  </Modal.Footer>\n</Modal>"}>
+  <ModalDemo buttonLabel="Open loading modal" buttonVariant="outline" title="Loading content" loading>
+    <Modal.Body>This content is replaced with a skeleton during loading.</Modal.Body>
+    <Modal.Footer>
+      <Button variant="primary">OK</Button>
+    </Modal.Footer>
+  </ModalDemo>
 </ComponentPreview>
 
 ## No Title
 
 When no `title` prop is provided the header omits the `<h2>` and the dialog uses `aria-label` from `i18nStrings.dialogLabel` as its accessible name.
 
-<ComponentPreview code={"import { useState } from \"react\"\nimport { Modal, Button } from \"@geeklego/ui\"\n\nexport function Demo() {\n  const [open, setOpen] = useState(false)\n  return (\n    <>\n      <Button variant=\"outline\" onClick={() => setOpen(true)}>No title</Button>\n      <Modal isOpen={open} onClose={() => setOpen(false)}>\n        <Modal.Body>When no title prop is provided, the dialog uses aria-label as its accessible name.</Modal.Body>\n        <Modal.Footer>\n          <Button variant=\"ghost\" onClick={() => setOpen(false)}>Cancel</Button>\n          <Button variant=\"primary\" onClick={() => setOpen(false)}>OK</Button>\n        </Modal.Footer>\n      </Modal>\n    </>\n  )\n}"}>
-  <div className="relative flex flex-col bg-[var(--modal-bg)] border border-[var(--modal-border-color)] rounded-[var(--modal-radius)] shadow-[var(--modal-shadow)] overflow-hidden max-w-md w-full">
-    <header className="flex items-center justify-between card-header-row gap-[var(--modal-header-gap)] px-[var(--modal-header-px)] py-[var(--modal-header-py)] border-b border-[var(--modal-header-border)] shrink-0">
-      <div />
-      <Button variant="ghost" size="sm" aria-label="Close"><X size={14} /></Button>
-    </header>
-    <Modal.Body>When no `title` prop is provided, the dialog uses `aria-label` as its accessible name.</Modal.Body>
+<ComponentPreview code={"<Modal isOpen onClose={() => {}}>\n  <Modal.Body>When no title prop is provided, the dialog uses aria-label as its accessible name.</Modal.Body>\n  <Modal.Footer>\n    <Button variant=\"ghost\">Cancel</Button>\n    <Button variant=\"primary\">OK</Button>\n  </Modal.Footer>\n</Modal>"}>
+  <ModalDemo buttonLabel="Open modal without title" buttonVariant="outline">
+    <Modal.Body>When no title prop is provided, the dialog uses aria-label as its accessible name.</Modal.Body>
     <Modal.Footer>
       <Button variant="ghost">Cancel</Button>
       <Button variant="primary">OK</Button>
     </Modal.Footer>
-  </div>
+  </ModalDemo>
 </ComponentPreview>
 
 ## Backdrop Disabled
 
 Setting `closeOnBackdropClick={false}` suppresses backdrop-click dismissal. Only the close button or Escape key will close the modal.
 
-<ComponentPreview code={"import { useState } from \"react\"\nimport { Modal, Button } from \"@geeklego/ui\"\n\nexport function Demo() {\n  const [open, setOpen] = useState(false)\n  return (\n    <>\n      <Button variant=\"outline\" onClick={() => setOpen(true)}>No backdrop close</Button>\n      <Modal isOpen={open} onClose={() => setOpen(false)} title=\"Backdrop disabled\" closeOnBackdropClick={false}>\n        <Modal.Body>Clicking outside this modal does not close it. Only the close button or Escape key work.</Modal.Body>\n        <Modal.Footer>\n          <Button variant=\"primary\" onClick={() => setOpen(false)}>Close</Button>\n        </Modal.Footer>\n      </Modal>\n    </>\n  )\n}"}>
-  <div className="relative flex flex-col bg-[var(--modal-bg)] border border-[var(--modal-border-color)] rounded-[var(--modal-radius)] shadow-[var(--modal-shadow)] overflow-hidden max-w-md w-full">
-    <header className="flex items-center justify-between card-header-row gap-[var(--modal-header-gap)] px-[var(--modal-header-px)] py-[var(--modal-header-py)] border-b border-[var(--modal-header-border)] shrink-0">
-      <div className="card-header-title">
-        <h2 className="text-heading-h4 text-[var(--modal-title-color)] truncate-label content-flex">Backdrop disabled</h2>
-      </div>
-      <Button variant="ghost" size="sm" aria-label="Close"><X size={14} /></Button>
-    </header>
+<ComponentPreview code={"<Modal isOpen onClose={() => {}} title=\"Backdrop disabled\" closeOnBackdropClick={false}>\n  <Modal.Body>Clicking outside this modal does not close it. Only the close button or Escape key work.</Modal.Body>\n  <Modal.Footer>\n    <Button variant=\"primary\">Close</Button>\n  </Modal.Footer>\n</Modal>"}>
+  <ModalDemo buttonLabel="Open modal with backdrop disabled" buttonVariant="outline" title="Backdrop disabled" closeOnBackdropClick={false}>
     <Modal.Body>Clicking outside this modal does not close it. Only the close button or Escape key work.</Modal.Body>
     <Modal.Footer>
       <Button variant="primary">Close</Button>
     </Modal.Footer>
+  </ModalDemo>
+</ComponentPreview>
+
+## Edge Cases
+
+### No Footer
+
+When no `<Modal.Footer>` is provided, the modal panel renders without a footer section. Dismissal relies on the header close button.
+
+<ComponentPreview code={"<Modal isOpen onClose={() => {}} title=\"Notification\">\n  <Modal.Body>This modal has no footer. Use the close button in the header to dismiss.</Modal.Body>\n</Modal>"}>
+  <div className="bg-[var(--modal-bg)] border border-[var(--modal-border-color)] rounded-[var(--modal-radius)] w-full max-w-[var(--modal-width-sm)] overflow-hidden shadow-[var(--modal-shadow)]" role="presentation">
+    <div className="flex items-center justify-between gap-[var(--modal-header-gap)] px-[var(--modal-header-px)] py-[var(--modal-header-py)] border-b border-[var(--modal-header-border)]">
+      <h2 className="text-heading-h6 text-[var(--modal-title-color)] truncate-label">Notification</h2>
+      <button className="inline-flex items-center justify-center w-6 h-6 rounded-[var(--radius-component-sm)] text-[var(--color-text-tertiary)] hover:bg-[var(--color-state-hover)] focus-ring shrink-0" aria-hidden="true" type="button">&times;</button>
+    </div>
+    <div className="px-[var(--modal-body-px)] py-[var(--modal-body-py)] text-[var(--modal-body-text-color)] text-body-md">
+      This modal has no footer. Use the close button in the header to dismiss.
+    </div>
+  </div>
+</ComponentPreview>
+
+### Long Title
+
+Very long titles are truncated with an ellipsis. The close button remains visible and accessible.
+
+<ComponentPreview code={"<Modal isOpen onClose={() => {}} title=\"This is an extremely long modal title that should truncate gracefully\">\n  <Modal.Body>The title above is truncated with an ellipsis.</Modal.Body>\n  <Modal.Footer>\n    <Button variant=\"primary\">OK</Button>\n  </Modal.Footer>\n</Modal>"}>
+  <div className="bg-[var(--modal-bg)] border border-[var(--modal-border-color)] rounded-[var(--modal-radius)] w-full max-w-[var(--modal-width-md)] overflow-hidden shadow-[var(--modal-shadow)]" role="presentation">
+    <div className="flex items-center justify-between gap-[var(--modal-header-gap)] px-[var(--modal-header-px)] py-[var(--modal-header-py)] border-b border-[var(--modal-header-border)]">
+      <h2 className="text-heading-h6 text-[var(--modal-title-color)] truncate-label">This is an extremely long modal title that should truncate gracefully without breaking the header layout</h2>
+      <button className="inline-flex items-center justify-center w-6 h-6 rounded-[var(--radius-component-sm)] text-[var(--color-text-tertiary)] hover:bg-[var(--color-state-hover)] focus-ring shrink-0" aria-hidden="true" type="button">&times;</button>
+    </div>
+    <div className="px-[var(--modal-body-px)] py-[var(--modal-body-py)] text-[var(--modal-body-text-color)] text-body-md">
+      The title above is truncated with an ellipsis. The close button remains visible and accessible.
+    </div>
+    <div className="flex items-center justify-end gap-[var(--modal-footer-gap)] px-[var(--modal-footer-px)] py-[var(--modal-footer-py)] border-t border-[var(--modal-footer-border)]">
+      <button className="inline-flex items-center justify-center px-[var(--spacing-component-md)] h-[var(--size-component-md)] rounded-[var(--radius-component-md)] text-button-md text-[var(--color-text-primary)] bg-[var(--color-surface-raised)] border border-[var(--color-border-strong)]" type="button">OK</button>
+    </div>
+  </div>
+</ComponentPreview>
+
+### Loading State
+
+Setting `loading={true}` replaces the body content with skeleton placeholders while the header and footer remain intact.
+
+<ComponentPreview code={"<Modal isOpen onClose={() => {}} title=\"Loading content\" loading>\n  <Modal.Body>This content is hidden while loading.</Modal.Body>\n  <Modal.Footer>\n    <Button variant=\"ghost\">Cancel</Button>\n    <Button variant=\"primary\">Submit</Button>\n  </Modal.Footer>\n</Modal>"}>
+  <div className="bg-[var(--modal-bg)] border border-[var(--modal-border-color)] rounded-[var(--modal-radius)] w-full max-w-[var(--modal-width-md)] overflow-hidden shadow-[var(--modal-shadow)]" role="presentation">
+    <div className="flex items-center justify-between gap-[var(--modal-header-gap)] px-[var(--modal-header-px)] py-[var(--modal-header-py)] border-b border-[var(--modal-header-border)]">
+      <h2 className="text-heading-h6 text-[var(--modal-title-color)] truncate-label">Loading content</h2>
+      <button className="inline-flex items-center justify-center w-6 h-6 rounded-[var(--radius-component-sm)] text-[var(--color-text-tertiary)] hover:bg-[var(--color-state-hover)] focus-ring shrink-0" aria-hidden="true" type="button">&times;</button>
+    </div>
+    <div className="px-[var(--modal-body-px)] py-[var(--modal-body-py)]">
+      <div className="flex flex-col gap-[var(--spacing-component-md)]">
+        <div className="skeleton h-[var(--size-component-sm)] w-3/4 rounded-[var(--radius-component-sm)]" />
+        <div className="skeleton h-[var(--size-component-xs)] w-full rounded-[var(--radius-component-sm)]" />
+        <div className="skeleton h-[var(--size-component-xs)] w-5/6 rounded-[var(--radius-component-sm)]" />
+        <div className="skeleton h-[var(--size-component-xs)] w-4/5 rounded-[var(--radius-component-sm)]" />
+      </div>
+    </div>
+    <div className="flex items-center justify-end gap-[var(--modal-footer-gap)] px-[var(--modal-footer-px)] py-[var(--modal-footer-py)] border-t border-[var(--modal-footer-border)]">
+      <button className="inline-flex items-center justify-center px-[var(--spacing-component-md)] h-[var(--size-component-md)] rounded-[var(--radius-component-md)] text-button-md text-[var(--color-text-secondary)] bg-[var(--color-bg-secondary)] border border-[var(--color-border-default)]" type="button">Cancel</button>
+      <button className="inline-flex items-center justify-center px-[var(--spacing-component-md)] h-[var(--size-component-md)] rounded-[var(--radius-component-md)] text-button-md text-[var(--color-text-inverse)] bg-[var(--color-action-primary)]" type="button">Submit</button>
+    </div>
   </div>
 </ComponentPreview>
 
 ## Dark Mode
 
-<ComponentPreview code={"import { useState } from \"react\"\nimport { Modal, Button } from \"@geeklego/ui\"\n\nexport function Demo() {\n  const [open, setOpen] = useState(false)\n  return (\n    <div\n      data-theme=\"dark\"\n      className=\"flex flex-col gap-6 p-8 bg-[var(--color-bg-primary)] rounded-[var(--radius-component-lg)] max-w-2xl\"\n    >\n      <Button variant=\"primary\" onClick={() => setOpen(true)}>Open in dark mode</Button>\n      <Modal isOpen={open} onClose={() => setOpen(false)} title=\"Dark mode modal\">\n        <Modal.Body>Tokens cascade correctly in dark mode. The backdrop, panel, text, and footer all use theme-aware semantics.</Modal.Body>\n        <Modal.Footer>\n          <Button variant=\"ghost\" onClick={() => setOpen(false)}>Cancel</Button>\n          <Button variant=\"primary\" onClick={() => setOpen(false)}>Confirm</Button>\n        </Modal.Footer>\n      </Modal>\n    </div>\n  )\n}"}>
+<ComponentPreview code={"<div data-theme=\"dark\">\n  <Modal isOpen onClose={() => {}} title=\"Dark mode modal\">\n    <Modal.Body>Tokens cascade correctly in dark mode.</Modal.Body>\n    <Modal.Footer>\n      <Button variant=\"ghost\">Cancel</Button>\n      <Button variant=\"primary\">Confirm</Button>\n    </Modal.Footer>\n  </Modal>\n</div>"}>
   <div
     data-theme="dark"
     className="flex flex-col gap-6 p-8 bg-[var(--color-bg-primary)] rounded-[var(--radius-component-lg)] max-w-2xl"
   >
-    <div className="relative flex flex-col bg-[var(--modal-bg)] border border-[var(--modal-border-color)] rounded-[var(--modal-radius)] shadow-[var(--modal-shadow)] overflow-hidden w-full">
-      <header className="flex items-center justify-between card-header-row gap-[var(--modal-header-gap)] px-[var(--modal-header-px)] py-[var(--modal-header-py)] border-b border-[var(--modal-header-border)] shrink-0">
-        <div className="card-header-title">
-          <h2 className="text-heading-h4 text-[var(--modal-title-color)] truncate-label content-flex">Dark mode modal</h2>
-        </div>
-        <Button variant="ghost" size="sm" aria-label="Close"><X size={14} /></Button>
-      </header>
+    <ModalDemo buttonLabel="Open in dark mode" buttonVariant="primary" title="Dark mode modal">
       <Modal.Body>Tokens cascade correctly in dark mode. The backdrop, panel, text, and footer all use theme-aware semantics.</Modal.Body>
       <Modal.Footer>
         <Button variant="ghost">Cancel</Button>
         <Button variant="primary">Confirm</Button>
       </Modal.Footer>
-    </div>
+    </ModalDemo>
   </div>
 </ComponentPreview>
 
@@ -132,6 +216,22 @@ Setting `closeOnBackdropClick={false}` suppresses backdrop-click dismissal. Only
     { name: "className", type: "string", defaultValue: "—", description: "Additional CSS classes applied to the dialog panel element." },
     { name: "children", type: "ReactNode", defaultValue: "—", description: "Modal content. Compose Modal.Body and Modal.Footer inside." },
     { name: "i18nStrings", type: "ModalI18nStrings", defaultValue: "—", description: "Per-instance i18n string overrides for the close button label and dialog fallback label." },
+  ]}
+/>
+
+### Modal.Body
+
+<PropsTable
+  rows={[
+    { name: "children", type: "ReactNode", defaultValue: "—", description: "Body content rendered inside the modal panel. Scrollable when panel height is constrained." },
+  ]}
+/>
+
+### Modal.Footer
+
+<PropsTable
+  rows={[
+    { name: "children", type: "ReactNode", defaultValue: "—", description: "Footer content — typically action buttons." },
   ]}
 />
 

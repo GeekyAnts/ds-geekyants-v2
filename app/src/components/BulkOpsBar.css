@@ -1,0 +1,106 @@
+.ed-bulk-ops-bar {
+  position: sticky;
+  bottom: 0;
+  z-index: 40;
+  background: var(--ed-surface-elevated);
+  border-top: 1px solid var(--ed-border-strong);
+  padding: 10px 24px;
+  transform: translateY(100%);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.ed-bulk-ops-bar--visible {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.ed-bulk-ops-bar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ed-bulk-ops-bar-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ed-bulk-ops-count {
+  font-family: 'Inter Variable', 'Inter Display', system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ed-text-primary);
+}
+
+.ed-bulk-ops-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ed-bulk-ops-action {
+  position: relative;
+}
+
+.ed-bulk-ops-popover {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  right: 0;
+  min-width: 240px;
+  background: var(--ed-surface-elevated);
+  border: 1px solid var(--ed-border-strong);
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+}
+
+.ed-bulk-ops-popover-row {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.ed-bulk-ops-popover-row > * {
+  flex: 1;
+}
+
+.ed-bulk-ops-confirm {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  right: 0;
+  min-width: 200px;
+  background: var(--ed-surface-elevated);
+  border: 1px solid var(--ed-border-strong);
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+}
+
+.ed-bulk-ops-confirm-text {
+  font-family: 'Inter Variable', 'Inter Display', system-ui, sans-serif;
+  font-size: 13px;
+  color: var(--ed-text-secondary);
+  line-height: 1.4;
+}
+
+.ed-bulk-ops-confirm-actions {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ed-bulk-ops-bar {
+    transition: none;
+  }
+}

@@ -8,51 +8,51 @@ level: atom
 
 <ComponentPreview code={"import { Radio } from \"@geeklego/ui\"\nimport { useState } from \"react\"\n\nfunction RadioGroup() {\n  const [picked, setPicked] = useState(\"b\")\n  return (\n    <div className=\"flex flex-col gap-4\">\n      <Radio name=\"group\" value=\"a\" checked={picked === \"a\"} onChange={() => setPicked(\"a\")}>\n        Option A\n      </Radio>\n      <Radio name=\"group\" value=\"b\" checked={picked === \"b\"} onChange={() => setPicked(\"b\")}>\n        Option B\n      </Radio>\n      <Radio name=\"group\" value=\"c\" checked={picked === \"c\"} onChange={() => setPicked(\"c\")}>\n        Option C\n      </Radio>\n    </div>\n  )\n}"}>
   <div className="flex flex-col gap-4">
-      <Radio name="variants-demo" value="a" checked={false}>Unselected option</Radio>
-      <Radio name="variants-demo" value="b" checked>Selected option</Radio>
-      <Radio name="variants-demo" value="c" checked={false}>Another option</Radio>
-    </div>
+    <Radio name="variants-demo" value="a">Unselected option</Radio>
+    <Radio name="variants-demo" value="b" defaultChecked>Selected option</Radio>
+    <Radio name="variants-demo" value="c">Another option</Radio>
+  </div>
 </ComponentPreview>
 
 ## Sizes
 
-<ComponentPreview code={"import { Radio } from \"@geeklego/ui\"\n\n<Radio name=\"size\" value=\"sm\" size=\"sm\">Small</Radio>\n<Radio name=\"size\" value=\"md\" size=\"md\">Medium</Radio>\n<Radio name=\"size\" value=\"lg\" size=\"lg\">Large</Radio>"}>
+<ComponentPreview code={"import { Radio } from \"@geeklego/ui\"\n\n<Radio name=\"size\" value=\"sm\" size=\"sm\" defaultChecked>Small</Radio>\n<Radio name=\"size\" value=\"md\" size=\"md\" defaultChecked>Medium</Radio>\n<Radio name=\"size\" value=\"lg\" size=\"lg\" defaultChecked>Large</Radio>"}>
   <div className="flex flex-col gap-4">
-      <Radio name="size-demo" value="sm" size="sm" checked={false}>Small (14px indicator)</Radio>
-      <Radio name="size-demo" value="md" size="md" checked>Medium (16px indicator)</Radio>
-      <Radio name="size-demo" value="lg" size="lg" checked={false}>Large (20px indicator)</Radio>
-    </div>
+    <Radio name="size-demo" value="sm" size="sm">Small (14px indicator)</Radio>
+    <Radio name="size-demo" value="md" size="md" defaultChecked>Medium (16px indicator)</Radio>
+    <Radio name="size-demo" value="lg" size="lg">Large (20px indicator)</Radio>
+  </div>
 </ComponentPreview>
 
 ## Disabled
 
 <ComponentPreview code={"import { Radio } from \"@geeklego/ui\"\n\n<Radio name=\"field\" value=\"a\" disabled>Disabled unselected</Radio>\n<Radio name=\"field\" value=\"b\" defaultChecked disabled>Disabled selected</Radio>"}>
   <div className="flex flex-col gap-4">
-      <Radio name="disabled-demo" value="a" checked={false} disabled>Disabled unselected</Radio>
-      <Radio name="disabled-demo" value="b" checked disabled>Disabled selected</Radio>
-    </div>
+    <Radio name="disabled-demo" value="a" disabled>Disabled unselected</Radio>
+    <Radio name="disabled-demo" value="b" defaultChecked disabled>Disabled selected</Radio>
+  </div>
 </ComponentPreview>
 
 ## Error
 
 <ComponentPreview code={"import { Radio } from \"@geeklego/ui\"\n\n<Radio name=\"payment\" value=\"card\" error aria-describedby=\"payment-error\">\n  Credit card\n</Radio>\n<p id=\"payment-error\" role=\"alert\">Please select a payment method.</p>"}>
   <div className="flex flex-col gap-4">
-      <Radio name="error-demo" value="a" checked={false} error>Error unselected</Radio>
-      <Radio name="error-demo" value="b" checked error>Error selected</Radio>
-    </div>
+    <Radio name="error-demo" value="a" error>Error unselected</Radio>
+    <Radio name="error-demo" value="b" defaultChecked error>Error selected</Radio>
+  </div>
 </ComponentPreview>
 
 ## Dark Mode
 
-<ComponentPreview code={"<div data-theme=\"dark\" className=\"bg-primary p-8 rounded-[var(--radius-component-lg)] max-w-2xl\">\n  <Radio name=\"dark\" value=\"a\">Unselected</Radio>\n  <Radio name=\"dark\" value=\"b\" defaultChecked>Selected</Radio>\n  <Radio name=\"dark\" value=\"c\" disabled>Disabled</Radio>\n  <Radio name=\"dark\" value=\"d\" error>Error</Radio>\n</div>"}>
-  <div data-theme="dark" className="bg-primary p-8 rounded-[var(--radius-component-lg)] max-w-2xl">
-      <div className="flex flex-col gap-4">
-        <Radio name="dark-demo" value="a" checked={false}>Unselected in dark mode</Radio>
-        <Radio name="dark-demo" value="b" checked>Selected in dark mode</Radio>
-        <Radio name="dark-disabled" value="c" checked={false} disabled>Disabled in dark mode</Radio>
-        <Radio name="dark-error" value="d" checked={false} error>Error in dark mode</Radio>
-      </div>
+<ComponentPreview code={"<div data-theme=\"dark\" className=\"bg-[var(--color-bg-primary)] p-8 rounded-[var(--radius-component-lg)] max-w-2xl\">\n  <Radio name=\"dark\" value=\"a\">Unselected</Radio>\n  <Radio name=\"dark\" value=\"b\" defaultChecked>Selected</Radio>\n  <Radio name=\"dark\" value=\"c\" disabled>Disabled</Radio>\n  <Radio name=\"dark\" value=\"d\" error>Error</Radio>\n</div>"}>
+  <div data-theme="dark" className="bg-[var(--color-bg-primary)] p-8 rounded-[var(--radius-component-lg)] max-w-2xl">
+    <div className="flex flex-col gap-4">
+      <Radio name="dark-demo" value="a">Unselected in dark mode</Radio>
+      <Radio name="dark-demo" value="b" defaultChecked>Selected in dark mode</Radio>
+      <Radio name="dark-disabled" value="c" disabled>Disabled in dark mode</Radio>
+      <Radio name="dark-error" value="d" error>Error in dark mode</Radio>
     </div>
+  </div>
 </ComponentPreview>
 
 ## Props

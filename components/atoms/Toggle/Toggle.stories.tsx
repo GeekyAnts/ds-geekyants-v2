@@ -30,13 +30,13 @@ const meta: Meta<typeof Toggle> = {
       options: ['sm', 'md', 'lg'],
       description: 'Height and typography scale',
     },
-    pressed: {
+    checked: {
       control: 'boolean',
-      description: 'Controlled pressed state',
+      description: 'Controlled checked state',
     },
-    defaultPressed: {
+    defaultChecked: {
       control: 'boolean',
-      description: 'Initial pressed state (uncontrolled)',
+      description: 'Initial checked state (uncontrolled)',
     },
     disabled: {
       control: 'boolean',
@@ -53,7 +53,7 @@ export const Default: Story = {
     children: 'Bold',
     variant: 'default',
     size: 'md',
-    defaultPressed: false,
+    defaultChecked: false,
   },
 };
 
@@ -67,21 +67,21 @@ export const Variants: Story = {
         <p className="text-body-sm text-[var(--color-text-tertiary)] mb-3">Default — muted fill at rest, accent tint when pressed</p>
         <div className="flex items-center gap-3">
           <Toggle variant="default">Unpressed</Toggle>
-          <Toggle variant="default" pressed>Pressed</Toggle>
+          <Toggle variant="default" checked>Pressed</Toggle>
         </div>
       </div>
       <div>
         <p className="text-body-sm text-[var(--color-text-tertiary)] mb-3">Outline — border always visible, fill appears on press</p>
         <div className="flex items-center gap-3">
           <Toggle variant="outline">Unpressed</Toggle>
-          <Toggle variant="outline" pressed>Pressed</Toggle>
+          <Toggle variant="outline" checked>Pressed</Toggle>
         </div>
       </div>
       <div>
         <p className="text-body-sm text-[var(--color-text-tertiary)] mb-3">Ghost — invisible at rest, fill only on hover/press</p>
         <div className="flex items-center gap-3">
           <Toggle variant="ghost">Unpressed</Toggle>
-          <Toggle variant="ghost" pressed>Pressed</Toggle>
+          <Toggle variant="ghost" checked>Pressed</Toggle>
         </div>
       </div>
     </div>
@@ -108,9 +108,9 @@ export const States: Story = {
         <p className="text-body-sm text-[var(--color-text-tertiary)] mb-3">Text toggle</p>
         <div className="flex items-center gap-3">
           <Toggle variant="outline">Unpressed</Toggle>
-          <Toggle variant="outline" pressed>Pressed</Toggle>
+          <Toggle variant="outline" checked>Pressed</Toggle>
           <Toggle variant="outline" disabled>Disabled</Toggle>
-          <Toggle variant="outline" pressed disabled>Pressed + Disabled</Toggle>
+          <Toggle variant="outline" checked disabled>Pressed + Disabled</Toggle>
         </div>
       </div>
       <div>
@@ -119,7 +119,7 @@ export const States: Story = {
           <Toggle variant="outline" aria-label="Bold">
             <span aria-hidden="true"><Bold size="var(--size-icon-sm)" /></span>
           </Toggle>
-          <Toggle variant="outline" pressed aria-label="Bold (active)">
+          <Toggle variant="outline" checked aria-label="Bold (active)">
             <span aria-hidden="true"><Bold size="var(--size-icon-sm)" /></span>
           </Toggle>
           <Toggle variant="outline" disabled aria-label="Bold (disabled)">
@@ -134,7 +134,7 @@ export const States: Story = {
             <span aria-hidden="true"><Grid2x2 size="var(--size-icon-sm)" /></span>
             Grid
           </Toggle>
-          <Toggle variant="outline" pressed>
+          <Toggle variant="outline" checked>
             <span aria-hidden="true"><List size="var(--size-icon-sm)" /></span>
             List
           </Toggle>
@@ -150,18 +150,18 @@ export const DarkMode: Story = {
     <div data-theme="dark" className="bg-primary p-8 rounded-lg max-w-2xl">
       <div className="flex flex-wrap items-center gap-3 mb-4">
         <Toggle variant="default">Default</Toggle>
-        <Toggle variant="default" pressed>Default Pressed</Toggle>
+        <Toggle variant="default" checked>Default Pressed</Toggle>
         <Toggle variant="outline">Outline</Toggle>
-        <Toggle variant="outline" pressed>Outline Pressed</Toggle>
+        <Toggle variant="outline" checked>Outline Pressed</Toggle>
         <Toggle variant="ghost">Ghost</Toggle>
-        <Toggle variant="ghost" pressed>Ghost Pressed</Toggle>
+        <Toggle variant="ghost" checked>Ghost Pressed</Toggle>
         <Toggle variant="outline" disabled>Disabled</Toggle>
       </div>
       <div className="flex items-center gap-3">
         <Toggle variant="outline" aria-label="Bold">
           <span aria-hidden="true"><Bold size="var(--size-icon-sm)" /></span>
         </Toggle>
-        <Toggle variant="outline" pressed aria-label="Italic (active)">
+        <Toggle variant="outline" checked aria-label="Italic (active)">
           <span aria-hidden="true"><Italic size="var(--size-icon-sm)" /></span>
         </Toggle>
         <Toggle variant="outline" aria-label="Underline">
@@ -175,8 +175,8 @@ export const DarkMode: Story = {
 // ── 6. EdgeCases ─────────────────────────────────────────────────────────────
 export const EdgeCases: Story = {
   render: () => {
-    const [pressed1, setPressed1] = useState(false);
-    const [pressed2, setPressed2] = useState(false);
+    const [checked1, setChecked1] = useState(false);
+    const [checked2, setChecked2] = useState(false);
     return (
       <div className="flex flex-col gap-[var(--spacing-layout-md)]">
         {/* Text toggle - long text */}
@@ -205,7 +205,7 @@ export const EdgeCases: Story = {
         <div className="flex flex-col gap-[var(--spacing-component-sm)]">
           <p className="text-body-sm font-semibold">Icon with text</p>
           <div className="flex gap-2">
-            <Toggle variant="outline" pressed aria-label="Bookmark">
+            <Toggle variant="outline" checked aria-label="Bookmark">
               <span aria-hidden="true"><Bookmark size="var(--size-icon-sm)" /></span>
               <span className="hidden sm:inline">Save</span>
             </Toggle>
@@ -216,11 +216,11 @@ export const EdgeCases: Story = {
         <div className="flex flex-col gap-[var(--spacing-component-sm)]">
           <p className="text-body-sm font-semibold">Controlled toggle</p>
           <Toggle
-            pressed={pressed1}
-            onPressedChange={setPressed1}
+            checked={checked1}
+            onChange={setChecked1}
             variant="default"
           >
-            {pressed1 ? 'Enabled' : 'Disabled'}
+            {checked1 ? 'Enabled' : 'Disabled'}
           </Toggle>
         </div>
 
@@ -229,9 +229,9 @@ export const EdgeCases: Story = {
           <p className="text-body-sm font-semibold">Disabled variants</p>
           <div className="flex gap-2">
             <Toggle variant="default" disabled>Default off</Toggle>
-            <Toggle variant="default" disabled pressed>Default on</Toggle>
+            <Toggle variant="default" disabled checked>Default on</Toggle>
             <Toggle variant="outline" disabled>Outline off</Toggle>
-            <Toggle variant="ghost" disabled pressed>Ghost on</Toggle>
+            <Toggle variant="ghost" disabled checked>Ghost on</Toggle>
           </div>
         </div>
       </div>
@@ -244,12 +244,12 @@ export const EdgeCases: Story = {
 export const Playground: Story = {
   render: (args) => {
     // eslint-disable-next-line react-hooks/rules-of-hooks
-    const [isPressed, setIsPressed] = useState(args.defaultPressed ?? false);
+    const [isChecked, setIsChecked] = useState(args.defaultChecked ?? false);
     return (
       <Toggle
         {...args}
-        pressed={isPressed}
-        onPressedChange={setIsPressed}
+        checked={isChecked}
+        onChange={setIsChecked}
       >
         Toggle me
       </Toggle>
@@ -258,7 +258,7 @@ export const Playground: Story = {
   args: {
     variant: 'default',
     size: 'md',
-    defaultPressed: false,
+    defaultChecked: false,
     disabled: false,
   },
 };
@@ -278,7 +278,7 @@ export const Accessibility: Story = {
           <Toggle variant="outline" aria-label="Bold">
             <span aria-hidden="true"><Bold size="var(--size-icon-sm)" /></span>
           </Toggle>
-          <Toggle variant="outline" pressed aria-label="Italic (currently active)">
+          <Toggle variant="outline" checked aria-label="Italic (currently active)">
             <span aria-hidden="true"><Italic size="var(--size-icon-sm)" /></span>
           </Toggle>
           <Toggle variant="outline" aria-label="Underline">
@@ -294,7 +294,7 @@ export const Accessibility: Story = {
         </p>
         <div className="flex items-center gap-3">
           <Toggle variant="outline">Grid view</Toggle>
-          <Toggle variant="outline" pressed>List view (active)</Toggle>
+          <Toggle variant="outline" checked>List view (active)</Toggle>
         </div>
       </div>
 
@@ -304,7 +304,7 @@ export const Accessibility: Story = {
           Toolbar group: Tab to each button, Space/Enter to toggle
         </p>
         <div role="toolbar" aria-label="Text alignment" className="flex items-center gap-1">
-          <Toggle variant="ghost" aria-label="Align left" pressed>
+          <Toggle variant="ghost" aria-label="Align left" checked>
             <span aria-hidden="true"><AlignLeft size="var(--size-icon-sm)" /></span>
           </Toggle>
           <Toggle variant="ghost" aria-label="Align center">
@@ -325,7 +325,7 @@ export const Accessibility: Story = {
           <Toggle variant="outline" disabled aria-disabled>
             Unavailable
           </Toggle>
-          <Toggle variant="outline" pressed disabled aria-disabled>
+          <Toggle variant="outline" checked disabled aria-disabled>
             Locked active
           </Toggle>
         </div>

@@ -4,7 +4,7 @@
     "size": "md",
     "children": "Get started",
     "disabled": false,
-    "isLoading": false
+    "loading": false
   },
   "variants": [
     { "variant": "primary",     "size": "md", "children": "Primary" },
@@ -23,13 +23,13 @@
   ],
   "states": {
     "loading": {
-      "variant": "primary", "size": "md", "children": "Saving changes", "isLoading": true
+      "variant": "primary", "size": "md", "children": "Saving changes", "loading": true
     },
     "disabled": {
       "variant": "primary", "size": "md", "children": "Disabled", "disabled": true
     },
     "destructive_loading": {
-      "variant": "destructive", "size": "md", "children": "Deleting", "isLoading": true
+      "variant": "destructive", "size": "md", "children": "Deleting", "loading": true
     }
   },
   "withIcons": [
@@ -60,7 +60,7 @@
       "label": "Loading preserves icon-bearing button width",
       "variant": "primary", "size": "md",
       "children": "Save changes",
-      "isLoading": true,
+      "loading": true,
       "leftIconName": "Download"
     },
     {

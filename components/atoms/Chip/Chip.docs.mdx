@@ -100,8 +100,8 @@ level: atom
 
 ## Dark Mode
 
-<ComponentPreview code={"<div data-theme=\"dark\" className=\"bg-primary p-8 rounded-lg max-w-2xl\">\n  <Chip variant=\"solid\">Solid</Chip>\n  <Chip variant=\"solid\" selected>Selected</Chip>\n  <Chip interactive={false} onRemove={() => {}}>Removable</Chip>\n</div>"}>
-  <div data-theme="dark" className="bg-primary p-8 rounded-lg max-w-2xl">
+<ComponentPreview code={"<div data-theme=\"dark\" className=\"bg-[var(--color-bg-primary)] p-8 rounded-lg max-w-2xl\">\n  <Chip variant=\"solid\">Solid</Chip>\n  <Chip variant=\"solid\" selected>Selected</Chip>\n  <Chip interactive={false} onRemove={() => {}}>Removable</Chip>\n</div>"}>
+  <div data-theme="dark" className="bg-[var(--color-bg-primary)] p-8 rounded-lg max-w-2xl">
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-2">
         <span className="text-body-sm text-[var(--color-text-tertiary)]">Unselected</span>

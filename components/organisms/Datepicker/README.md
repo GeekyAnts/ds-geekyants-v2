@@ -13,11 +13,11 @@ Calendar-based date selection component with text input, popover calendar, and f
 | `max` | `Date` | — | Latest selectable date |
 | `label` | `string` | **required** | Field label text |
 | `hint` | `string` | — | Helper text below input |
-| `errorMessage` | `string` | — | Validation error (replaces hint) |
+| `error` | `string` | — | Validation error (replaces hint) |
 | `size` | `'sm' \| 'md' \| 'lg'` | `'md'` | Height and typography scale |
 | `variant` | `'default' \| 'filled' \| 'flushed' \| 'unstyled'` | `'default'` | Input visual style |
 | `disabled` | `boolean` | `false` | Disables all interaction |
-| `isLoading` | `boolean` | `false` | Shows spinner, disables interaction |
+| `loading` | `boolean` | `false` | Shows spinner, disables interaction |
 | `placeholder` | `string` | `'YYYY-MM-DD'` | Input placeholder text |
 | `firstDayOfWeek` | `0 \| 1` | `1` | 0 = Sunday, 1 = Monday |
 | `i18nStrings` | `DatepickerI18nStrings` | — | System string overrides |
@@ -133,7 +133,7 @@ const [date, setDate] = useState<Date | null>(null);
   value={date}
   onChange={setDate}
   min={new Date()}
-  errorMessage={!date ? 'Required' : undefined}
+  error={!date ? 'Required' : undefined}
 />
 
 // Monday-first (default) or Sunday-first

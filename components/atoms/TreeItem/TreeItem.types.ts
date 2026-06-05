@@ -29,7 +29,7 @@ export interface TreeItemProps extends Omit<LiHTMLAttributes<HTMLLIElement>, 'on
   /** Whether this node is non-interactive. */
   isDisabled?: boolean;
   /** Shows a spinner — use while async children are loading. */
-  isLoading?: boolean;
+  loading?: boolean;
   /** Whether this node has children (shows the expand toggle). */
   hasChildren?: boolean;
   /** Optional badge count or label rendered at the trailing edge. */

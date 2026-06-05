@@ -154,7 +154,7 @@ export const States: Story = {
 
       {/* Loading */}
       <FormField label="Loading" htmlFor="state-loading">
-        <Input id="state-loading" placeholder="Validating…" isLoading aria-busy="true" />
+        <Input id="state-loading" placeholder="Validating…" loading aria-busy="true" />
       </FormField>
     </div>
   ),

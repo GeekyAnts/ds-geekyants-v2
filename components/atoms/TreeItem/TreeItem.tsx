@@ -42,7 +42,7 @@ export const TreeItem = memo(
         isExpanded = false,
         isSelected = false,
         isDisabled = false,
-        isLoading = false,
+        loading = false,
         hasChildren = false,
         badge,
         tabIndex = -1,
@@ -83,8 +83,8 @@ export const TreeItem = memo(
       const selectBtnClasses = useMemo(
         () =>
           [
-            'flex-1 flex items-center justify-start gap-[var(--tree-item-gap)]',
-            'min-w-0 bg-transparent outline-none',
+            'content-flex flex items-center justify-start gap-[var(--tree-item-gap)]',
+            'bg-transparent outline-none',
             textClass[size],
             'transition-default',
             'focus-visible:focus-ring rounded-[var(--tree-item-radius)]',
@@ -201,7 +201,7 @@ export const TreeItem = memo(
               <span className="content-flex truncate-label text-left">{label}</span>
 
               {/* Loading spinner */}
-              {isLoading && (
+              {loading && (
                 <span
                   aria-hidden="true"
                   className="flex-none me-auto text-[var(--tree-item-expand-color)]"
@@ -211,7 +211,7 @@ export const TreeItem = memo(
               )}
 
               {/* Badge */}
-              {badge !== undefined && !isLoading && (
+              {badge !== undefined && !loading && (
                 <span
                   className={[
                     'flex-none ms-auto content-nowrap text-label-xs',

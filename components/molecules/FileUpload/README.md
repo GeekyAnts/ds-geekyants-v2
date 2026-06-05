@@ -15,8 +15,7 @@ A drag-and-drop file upload molecule that wraps a hidden `<input type="file">` w
 | `maxFiles` | `number` | — | Cap on accepted files (multiple mode only) |
 | `maxFileSize` | `number` | — | Max file size in bytes. Oversized files are added with `status: 'error'` |
 | `disabled` | `boolean` | `false` | Disables zone, input, and remove buttons |
-| `error` | `boolean` | `false` | Puts the drop zone in error state (red border) |
-| `errorMessage` | `string` | — | Error text shown below the zone when `error` is true |
+| `error` | `string` | — | Error message string. When truthy, puts the drop zone in error visual state (red border) and renders the message below the zone. |
 | `hint` | `string` | — | Secondary hint inside the zone (e.g. `"PNG, JPG up to 5 MB"`) |
 | `files` | `FileUploadFile[]` | — | Controlled file list. Omit for uncontrolled mode |
 | `onFilesChange` | `(files: FileUploadFile[]) => void` | — | Called with full updated list when files are added |
@@ -133,7 +132,7 @@ The `size` prop controls vertical padding and icon size of the drop zone. File i
 |---|---|---|
 | `aria-label` | Hidden `<input type="file">` | Resolved from `i18nStrings.inputLabel` (default: "Upload files") |
 | `aria-disabled` | `<label>` and `<input>` | `true` when `disabled` prop is set |
-| `aria-invalid` + `aria-describedby` | `<input>` | Applied via `getErrorFieldProps()` when `error && errorMessage` |
+| `aria-invalid` + `aria-describedby` | `<input>` | Applied via `getErrorFieldProps()` when `error` is truthy |
 | `aria-label` | `<ul>` file list | "Selected files" |
 | `aria-label` | Remove `<button>` | `"${removeLabel}: ${filename}"` — includes the file name for specificity |
 | `aria-live="polite"` `aria-atomic="true"` | File item meta `<p>` | Announces status changes (Done, Uploading, error message) |

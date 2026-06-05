@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { validateCssTokens, validateComponentTokenRefs, validateTokenNamingConvention } from './validate-tokens'
+import { validateCssTokens, validateComponentTokenRefs, validateTokenNamingConvention, validateNoDuplicateDeclarations } from './validate-tokens'
 
 describe('validateCssTokens (existing)', () => {
   it('returns 0 broken refs for a self-consistent CSS file', () => {
@@ -74,8 +74,8 @@ describe('validateTokenNamingConvention', () => {
     const warnings = validateTokenNamingConvention(css)
     expect(warnings.filter(w => w.includes('--color-action-primary'))).toHaveLength(0)
     expect(warnings.filter(w => w.includes('--color-text-secondary'))).toHaveLength(0)
-    // Note: tokens like --spacing-component-md may be flagged as warnings since they end with a scale
-    // The validator is intentionally conservative to catch potential naming violations
+    // Note: these are in :root, not in a component block, so never flagged
+    // The validator only checks inside /* ComponentName — generated */ blocks
   })
 
   it('does not flag tokens without size-scale suffixes', () => {
@@ -121,9 +121,135 @@ describe('validateTokenNamingConvention', () => {
     const warnings = validateTokenNamingConvention(css)
     // --tree-item-icon-color is inside component block with correct naming: component-first
     expect(warnings.filter(w => w.includes('--tree-item-icon-color'))).toHaveLength(0)
-    // --size-icon-sm is inside a component block but has legitimate semantic-like naming
-    // It should still be flagged if it matches the heuristic (property-first + size scale)
+    // --size-icon-sm is inside a component block — starts with MISPLACED_PREFIX 'size-'
     expect(warnings.some(w => w.includes('--size-icon-sm'))).toBe(true)
+  })
+
+  it('flags tokens inside component blocks even without size-scale suffix (stricter check)', () => {
+    // The validator now flags ANY token starting with a MISPLACED_PREFIX inside
+    // a component block, not just those ending with -xs/sm/md/lg/xl/2xl/3xl.
+    // This catches patterns like --color-picker-bg or --color-swatch-border.
+    const css = `
+      /* Swatch — generated 2026-04-04 */
+      :root,
+      [data-theme="dark"] {
+        --swatch-size-sm: var(--size-component-sm);
+        --color-swatch-border: var(--color-border-subtle);
+      }
+    `
+    const warnings = validateTokenNamingConvention(css)
+    // --swatch-size-sm is correct (component-first naming)
+    expect(warnings.filter(w => w.includes('--swatch-size-sm'))).toHaveLength(0)
+    // --color-swatch-border starts with MISPLACED_PREFIX 'color-' → flagged
+    expect(warnings.some(w => w.includes('--color-swatch-border'))).toBe(true)
+  })
+
+  it('detects cross-contamination — tokens for one component embedded inside another block', () => {
+    const css = `
+/* ─── GENERATED COMPONENT TOKENS ─── */
+
+/* Switch — generated 2026-03-23 */
+:root,
+[data-theme="dark"] {
+  --switch-track-bg: var(--color-bg-tertiary);
+  --toggle-radius: var(--radius-component-md);
+  --switch-thumb-bg: var(--color-control-thumb);
+}
+`
+    const warnings = validateTokenNamingConvention(css)
+    const cross = warnings.filter(w => w.includes('Cross-contamination'))
+    expect(cross).toHaveLength(1)
+    expect(cross[0]).toContain('--toggle-radius')
+    expect(cross[0]).toContain('Switch')
+    expect(cross[0]).toContain('toggle')
+  })
+
+  it('passes when all tokens match their block name', () => {
+    const css = `
+/* Avatar — generated 2026-03-16 */
+:root,
+[data-theme="dark"] {
+  --avatar-size-md: 2rem;
+  --avatar-bg: var(--color-bg-secondary);
+}
+
+/* Badge — generated 2026-03-17 */
+:root,
+[data-theme="dark"] {
+  --badge-bg: var(--color-action-primary);
+  --badge-text: var(--color-text-inverse);
+}
+`
+    const warnings = validateTokenNamingConvention(css)
+    const cross = warnings.filter(w => w.includes('Cross-contamination'))
+    expect(cross).toHaveLength(0)
+  })
+})
+
+describe('validateNoDuplicateDeclarations', () => {
+  it('passes when every property is defined once', () => {
+    const css = `
+/* Input — generated 2026-03-20 */
+:root,
+[data-theme="dark"] {
+  --input-bg: var(--color-bg-primary);
+  --input-text: var(--color-text-primary);
+}
+`
+    const dups = validateNoDuplicateDeclarations(css)
+    expect(dups).toHaveLength(0)
+  })
+
+  it('detects a property defined twice in the same block', () => {
+    const css = `
+/* Input — generated 2026-03-20 */
+:root,
+[data-theme="dark"] {
+  --input-bg: var(--color-bg-primary);
+  --input-text: var(--color-text-primary);
+  --input-bg: var(--color-bg-secondary);
+}
+`
+    const dups = validateNoDuplicateDeclarations(css)
+    expect(dups).toHaveLength(1)
+    expect(dups[0].prop).toBe('--input-bg')
+    expect(dups[0].firstValue).toBe('var(--color-bg-primary)')
+    expect(dups[0].dupValue).toBe('var(--color-bg-secondary)')
+  })
+
+  it('ignores separate [data-theme="dark"] override blocks (not duplicates)', () => {
+    const css = `
+/* InputGroup — generated 2026-05-21 */
+:root {
+  --input-group-bg: var(--color-bg-primary);
+}
+
+[data-theme="dark"] {
+  --input-group-bg: var(--color-bg-secondary);
+}
+`
+    const dups = validateNoDuplicateDeclarations(css)
+    expect(dups).toHaveLength(0)
+  })
+
+  it('detects duplicates in multiple component blocks independently', () => {
+    const css = `
+/* Input — generated 2026-03-20 */
+:root,
+[data-theme="dark"] {
+  --input-bg: var(--color-bg-primary);
+  --input-bg: var(--color-bg-secondary);
+}
+
+/* AreaChart — generated 2026-03-18 */
+:root,
+[data-theme="dark"] {
+  --areachart-bg: var(--color-surface-raised);
+}
+`
+    const dups = validateNoDuplicateDeclarations(css)
+    expect(dups).toHaveLength(1)
+    expect(dups[0].prop).toBe('--input-bg')
   })
 })
 

@@ -1,0 +1,129 @@
+.diff-view {
+  font-family: var(--font-mono), monospace;
+  background: var(--ed-surface);
+  border-radius: var(--ed-radius-card);
+  border: 1px solid var(--ed-border);
+  overflow: auto;
+}
+
+.diff-view-stats {
+  display: flex;
+  gap: 12px;
+  padding: 8px 12px;
+  font-size: 11px;
+  color: var(--ed-text-muted);
+  border-bottom: 1px solid var(--ed-border);
+  background: var(--ed-surface-elevated);
+}
+
+.diff-original-count,
+.diff-merged-count {
+  color: var(--ed-text-secondary);
+}
+
+.diff-hunk {
+  border-bottom: 1px solid var(--ed-border);
+}
+
+.diff-hunk:last-child {
+  border-bottom: none;
+}
+
+.diff-hunk-header {
+  padding: 6px 12px;
+  font-size: 11px;
+  color: var(--ed-text-muted);
+  background: var(--ed-secondary);
+  border-bottom: 1px solid var(--ed-border);
+  font-family: monospace;
+}
+
+.diff-lines {
+  padding: 0;
+  margin: 0;
+}
+
+.diff-line {
+  display: flex;
+  padding: 2px 8px;
+  background: transparent;
+  transition: background-color 0.1s;
+}
+
+.diff-line:hover {
+  background: var(--ed-border);
+}
+
+.diff-removed {
+  background: rgba(235, 87, 87, 0.08);
+}
+
+.diff-removed:hover {
+  background: rgba(235, 87, 87, 0.15);
+}
+
+.diff-added {
+  background: rgba(76, 183, 130, 0.08);
+}
+
+.diff-added:hover {
+  background: rgba(76, 183, 130, 0.15);
+}
+
+.diff-gutter {
+  display: inline-block;
+  min-width: 40px;
+  padding-right: 8px;
+  font-size: 10px;
+  color: var(--ed-text-muted);
+  text-align: right;
+  opacity: 0.5;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.diff-old-line,
+.diff-new-line,
+.diff-context-line {
+  display: inline-block;
+  min-width: 30px;
+}
+
+.diff-indicator {
+  display: inline-block;
+  width: 20px;
+  padding-right: 8px;
+  font-weight: bold;
+  user-select: none;
+}
+
+.diff-removed .diff-indicator {
+  color: var(--ed-danger);
+}
+
+.diff-added .diff-indicator {
+  color: var(--ed-success);
+}
+
+.diff-context .diff-indicator {
+  color: var(--ed-text-muted);
+}
+
+.diff-content {
+  flex: 1;
+  white-space: pre;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.diff-removed .diff-content {
+  color: var(--ed-danger);
+}
+
+.diff-added .diff-content {
+  color: var(--ed-success);
+}
+
+.diff-context .diff-content {
+  color: var(--ed-text-secondary);
+}

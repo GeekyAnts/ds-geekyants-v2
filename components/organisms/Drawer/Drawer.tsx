@@ -1,5 +1,5 @@
 "use client"
-import { memo, useCallback, useId, useRef, useMemo } from 'react';
+import { forwardRef, memo, useCallback, useId, useRef, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { Button } from '../../atoms/Button/Button';
@@ -160,7 +160,7 @@ DrawerFooter.displayName = 'Drawer.Footer';
 
 // ── Main Drawer component ─────────────────────────────────────────────────────
 
-const DrawerInner = memo(function Drawer({
+const DrawerInner = memo(forwardRef<HTMLDivElement, DrawerProps>(({
   isOpen,
   onClose,
   placement = 'right',
@@ -171,7 +171,7 @@ const DrawerInner = memo(function Drawer({
   className,
   children,
   i18nStrings,
-}: DrawerProps) {
+}, ref) => {
   const i18n = useComponentI18n('drawer', i18nStrings);
   const baseId = useId();
   const titleId = `${baseId}-title`;
@@ -209,9 +209,9 @@ const DrawerInner = memo(function Drawer({
   return createPortal(
     /* Backdrop — closes drawer on click when closeOnBackdropClick=true */
     <div
+      ref={ref}
       className={BACKDROP_CLASSES}
       onClick={handleBackdropClick}
-      aria-hidden="true"
     >
       {/* Dialog panel */}
       <div
@@ -260,7 +260,7 @@ const DrawerInner = memo(function Drawer({
     </div>,
     document.body,
   );
-});
+}));
 DrawerInner.displayName = 'Drawer';
 
 // ── Public export with static slot properties ─────────────────────────────────

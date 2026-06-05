@@ -91,7 +91,7 @@ export const FileInput = memo(forwardRef<HTMLInputElement, FileInputProps>(
       variant = 'default',
       size = 'md',
       error = false,
-      isLoading = false,
+      loading = false,
       disabled,
       className,
       wrapperClassName,
@@ -107,7 +107,7 @@ export const FileInput = memo(forwardRef<HTMLInputElement, FileInputProps>(
     const i18n = useComponentI18n('fileInput', i18nStrings);
     const generatedId = useId();
     const inputId = idProp ?? generatedId;
-    const isDisabled = disabled || isLoading;
+    const isDisabled = disabled || loading;
     const sz = sizeMap[size];
 
     // Track selected filenames for display — uncontrolled internal state
@@ -190,7 +190,7 @@ export const FileInput = memo(forwardRef<HTMLInputElement, FileInputProps>(
 
         {/* Right: Browse label or loading spinner — purely decorative, aria-hidden */}
         <div className={browseSectionClasses} aria-hidden="true">
-          {isLoading ? (
+          {loading ? (
             <Loader2
               size={sz.iconSize}
               className="animate-spin text-[var(--file-input-icon-color)]"
@@ -218,7 +218,7 @@ export const FileInput = memo(forwardRef<HTMLInputElement, FileInputProps>(
           required={required}
           aria-required={required || undefined}
           aria-disabled={isDisabled || undefined}
-          aria-busy={isLoading || undefined}
+          aria-busy={loading || undefined}
           {...getErrorFieldProps(error, `${inputId}-error`)}
           onChange={handleChange}
           className={[

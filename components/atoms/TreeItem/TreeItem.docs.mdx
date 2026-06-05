@@ -44,13 +44,13 @@ level: atom
 
 ## States
 
-<ComponentPreview code={"import { TreeItem } from \"@geeklego/ui\"\nimport { Home } from \"lucide-react\"\n\n<ul role=\"tree\" aria-label=\"State examples\" className=\"list-none p-0 m-0 w-80 flex flex-col gap-[var(--tree-view-gap)]\">\n  <TreeItem id=\"s-default\" label=\"Default\" icon={<Home size={14} />} hasChildren />\n  <TreeItem id=\"s-expanded\" label=\"Expanded\" icon={<Home size={14} />} hasChildren isExpanded />\n  <TreeItem id=\"s-selected\" label=\"Selected\" icon={<Home size={14} />} isSelected />\n  <TreeItem id=\"s-sel-exp\" label=\"Selected + expanded\" icon={<Home size={14} />} hasChildren isExpanded isSelected />\n  <TreeItem id=\"s-loading\" label=\"Loading children...\" icon={<Home size={14} />} hasChildren isLoading />\n  <TreeItem id=\"s-disabled\" label=\"Disabled\" icon={<Home size={14} />} hasChildren isDisabled />\n  <TreeItem id=\"s-dis-sel\" label=\"Disabled + selected\" icon={<Home size={14} />} isSelected isDisabled />\n</ul>"}>
+<ComponentPreview code={"import { TreeItem } from \"@geeklego/ui\"\nimport { Home } from \"lucide-react\"\n\n<ul role=\"tree\" aria-label=\"State examples\" className=\"list-none p-0 m-0 w-80 flex flex-col gap-[var(--tree-view-gap)]\">\n  <TreeItem id=\"s-default\" label=\"Default\" icon={<Home size={14} />} hasChildren />\n  <TreeItem id=\"s-expanded\" label=\"Expanded\" icon={<Home size={14} />} hasChildren isExpanded />\n  <TreeItem id=\"s-selected\" label=\"Selected\" icon={<Home size={14} />} isSelected />\n  <TreeItem id=\"s-sel-exp\" label=\"Selected + expanded\" icon={<Home size={14} />} hasChildren isExpanded isSelected />\n  <TreeItem id=\"s-loading\" label=\"Loading children...\" icon={<Home size={14} />} hasChildren loading />\n  <TreeItem id=\"s-disabled\" label=\"Disabled\" icon={<Home size={14} />} hasChildren isDisabled />\n  <TreeItem id=\"s-dis-sel\" label=\"Disabled + selected\" icon={<Home size={14} />} isSelected isDisabled />\n</ul>"}>
   <ul role="tree" aria-label="State examples" className="list-none p-0 m-0 w-80 flex flex-col gap-[var(--tree-view-gap)]">
     <TreeItem id="s-default" label="Default" icon={<Home size={14} />} hasChildren />
     <TreeItem id="s-expanded" label="Expanded" icon={<Home size={14} />} hasChildren isExpanded />
     <TreeItem id="s-selected" label="Selected" icon={<Home size={14} />} isSelected />
     <TreeItem id="s-sel-exp" label="Selected + expanded" icon={<Home size={14} />} hasChildren isExpanded isSelected />
-    <TreeItem id="s-loading" label="Loading children..." icon={<Home size={14} />} hasChildren isLoading />
+    <TreeItem id="s-loading" label="Loading children..." icon={<Home size={14} />} hasChildren loading />
     <TreeItem id="s-disabled" label="Disabled" icon={<Home size={14} />} hasChildren isDisabled />
     <TreeItem id="s-dis-sel" label="Disabled + selected" icon={<Home size={14} />} isSelected isDisabled />
   </ul>
@@ -86,7 +86,7 @@ level: atom
     { name: "isExpanded", type: "boolean", defaultValue: "false", description: "Whether this node's children are currently visible." },
     { name: "isSelected", type: "boolean", defaultValue: "false", description: "Whether this node is the active/selected item." },
     { name: "isDisabled", type: "boolean", defaultValue: "false", description: "Whether this node is non-interactive." },
-    { name: "isLoading", type: "boolean", defaultValue: "false", description: "Shows a spinner — use while async children are loading." },
+    { name: "loading", type: "boolean", defaultValue: "false", description: "Shows a spinner — use while async children are loading." },
     { name: "hasChildren", type: "boolean", defaultValue: "false", description: "Whether this node has children (shows the expand toggle)." },
     { name: "badge", type: "string | number", defaultValue: "—", description: "Optional badge count or label rendered at the trailing edge." },
     { name: "tabIndex", type: "0 | -1", defaultValue: "-1", description: "Roving tabindex value — managed by the parent TreeView. Exactly one item in the tree has tabIndex={0}; all others are -1." },

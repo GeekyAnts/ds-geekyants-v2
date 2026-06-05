@@ -17,7 +17,7 @@
     { "size": "lg", "placeholder": "Large input" }
   ],
   "states": {
-    "loading":       { "placeholder": "Validating…", "isLoading": true },
+    "loading":       { "placeholder": "Validating…", "loading": true },
     "disabled":      { "placeholder": "Cannot edit", "disabled": true },
     "error":         { "defaultValue": "invalid-email", "error": true },
     "withLeftIcon":  { "placeholder": "Search…", "leftIcon": "Search" },

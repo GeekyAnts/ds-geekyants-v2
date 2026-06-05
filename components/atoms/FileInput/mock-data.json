@@ -17,7 +17,7 @@
   "states": {
     "default":  { "aria-label": "Upload document" },
     "error":    { "error": true, "aria-label": "Upload document" },
-    "loading":  { "isLoading": true, "aria-label": "Upload document" },
+    "loading":  { "loading": true, "aria-label": "Upload document" },
     "disabled": { "disabled": true, "aria-label": "Upload document" }
   },
   "edge_cases": {

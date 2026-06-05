@@ -174,7 +174,7 @@ export const States: Story = {
             </div>
           </Card.Body>
           <Card.Footer>
-            <Button variant="primary" size="sm" isLoading>Save</Button>
+            <Button variant="primary" size="sm" loading>Save</Button>
           </Card.Footer>
         </Card>
       </div>
@@ -289,7 +289,7 @@ export const Accessibility: Story = {
           <span className="sr-only">Loading content…</span>
         </Card.Body>
         <Card.Footer>
-          <Button variant="primary" size="sm" isLoading disabled>
+          <Button variant="primary" size="sm" loading disabled>
             Loading
           </Button>
         </Card.Footer>

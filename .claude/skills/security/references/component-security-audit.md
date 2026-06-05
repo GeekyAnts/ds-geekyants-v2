@@ -25,7 +25,6 @@ Update this table after each retrofit or new component generation.
 | `Button` | L1 | No | — | — | N/A | Renders `<button>` only |
 | `Avatar` | L1 | No | — | — | N/A | Renders `<span>` only |
 | `Divider` | L1 | No | — | — | N/A | Renders `<hr>` only |
-| `SkipLink` | L1 | Yes | ✅ | N/A | ✅ | Fragment hrefs only; no external link risk |
 | `Link` | L1 | Yes | ✅ | ✅ (via `external` prop) | ✅ | `external` prop already handles rel; `sanitizeHref` added to href |
 | `Item` | L1 | Yes (link variant) | ✅ | ✅ | ✅ | `getSafeExternalLinkProps`; `target`/`rel` added to `ItemProps` |
 | `NavItem` | L1 | Yes (link variant) | ✅ | Partial (no explicit `target` prop) | ✅ | `sanitizeHref` added; `target` via `rest` is lower risk |
@@ -82,6 +81,7 @@ New components added after 2026-03-24 are checked at generation time via step 4.
 | `Datepicker` | 2026-03-31 | No | N/A | Renders `<input type="text">` + `<button>` trigger + `<table>` calendar grid — no anchor elements |
 | `Carousel` | 2026-04-04 | No | N/A | Renders `<section>` + `<ul>`/`<li>` slide track + `<button>` controls — no anchor elements; slide content is consumer-provided children |
 | `FileUpload` | 2026-04-04 | No | N/A | Renders `<div>` container + `<label>` zone + `<input type="file">` + `<ul>`/`<li>` file list + `<button>` remove — no anchor elements |
+| `ProductCard` | 2026-05-20 | Yes (title link, conditional) | ✅ Secure | `sanitizeHref` applied in `useMemo` when `href` prop is present; no external link target — `rel` guard not required |
 
 ---
 

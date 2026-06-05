@@ -30,7 +30,7 @@ Read these files at the start of every component generation session. Do not skip
 | `.claude/references/semantic-html-guide.md` | Element decision table, form/table/heading/landmark patterns |
 | `components/utils/accessibility/index.ts` | ARIA helper types and functions for disclosure, navigation, live regions, loading/disabled states |
 
-All paths are relative to `packages/geeklego/` inside the monorepo root.
+All paths are relative to `packages/geeklego/` inside the monorepo root. If starting from the monorepo root, prefix all paths with `packages/geeklego/`.
 
 Scan `geeklego.css` to know what tokens already exist. Every component you generate must integrate with what's already there — never duplicate, never conflict.
 
@@ -44,99 +44,29 @@ Scan `geeklego.css` to know what tokens already exist. Every component you gener
 | `references/schema-org.md` | When the component maps to a Schema.org type (check the mapping table and status column) |
 | `references/seo-guide.md` | When implementing SEO — Schema.org patterns, cascade rules, semantic HTML rules, and the step 4.7 checklist |
 | `references/token-quick-reference.md` | When you need to look up available token names while writing component tokens |
-| `.claude/references/storybook-stories.md` | When writing the 7 required stories — full template with JSX examples |
+| `references/design-standards.md` | Design quality rules: shadow elevation, spacing rhythm, variant distinctness, transitions, states, dark mode, inline style policy, prop naming |
+| `references/common-token-mistakes.md` | 15 real-world regressions with wrong/right examples — check before finalizing any token block |
+| `references/verification-checklist.md` | Full post-generation checklist: token integrity, registration, theme, a11y, i18n, RTL, reuse audit |
+| `design-system/SIZE_TAXONOMY.md` | **Every component generation session** — determines which size scale (Micro/Standard/Extended/Avatar/Overlay) to use. Read before Phase 1 step 5. |
+| `.claude/references/storybook-stories.md` | When writing the 8 required stories — full template with JSX examples |
 | `.claude/references/component-generation-flow.md` | When you need the full 5-step generation workflow with accessibility + performance audit checklists |
 | `.claude/skills/state-handling/SKILL.md` | When implementing visual states (loading, disabled, error, selected) — decision matrix, patterns, and token naming. **Required for all interactive atoms and all L3 organisms.** |
 
 ---
 
-## Design Quality — What Makes a Component Production-Grade
+## Design Quality
 
-> This is the most important section in this skill. Architectural correctness is necessary but insufficient. A component that follows every token rule but *looks* like AI-generated boilerplate has failed. The skill exists to produce components that feel intentionally designed — not just structurally valid.
+**Read `references/design-standards.md` before generating any component.** This covers:
+- Shadow elevation rule (theme-aware depth, overlays only)
+- Spacing rhythm (component vs layout scale)
+- Variant distinctness (different visual strategies per variant)
+- Transitions (hover changes 2+ properties)
+- State visual treatments (default/hover/focus/active/disabled/loading/error)
+- Dark mode color rules (contrast check, shade selection)
+- Inline style policy (4 acceptable exceptions)
+- Standardized prop naming (checked, loading, error, isActive conventions)
 
-### Shadow Elevation Rule — Theme-Aware Depth
-
-Shadows communicate layering — they should only appear when an element genuinely floats above the page. The rule differs by theme:
-
-**Light mode & Dark mode — flat UI, contextual shadows only:**
-
-| Element | Shadow | Why |
-|---|---|---|
-| Static/resting component (Button, Card, Input, Item) | `none` | Flat surfaces sit in the page, not above it |
-| Overlay that opens on interaction (dropdown panel, tooltip, popover) | `--shadow-lg` | Floats above the page — shadow communicates this |
-| Modal or dialog | `--shadow-xl` | Highest priority layer — demands the strongest shadow |
-
-Never add shadow to a resting component in light or dark mode. Only the floating layer gets shadow.
-
-
-### Spacing Has Rhythm
-
-Inside a component, spacing follows the **component scale** (`--spacing-component-xs` through `xl`). Between components in a layout, spacing follows the **layout scale** (`--spacing-layout-xs` through `xl`).
-
-The internal rhythm should be tighter than the external rhythm. A card's internal padding (`--spacing-component-lg` = 16px) should be noticeably less than the gap between cards in a grid (`--spacing-layout-sm` = 24px). If internal and external spacing are the same, the UI feels flat — nothing has hierarchy.
-
-### Variants Must Be Visually Distinct at a Glance
-
-If a user squints at your variants and can't tell `secondary` from `ghost`, the design has failed. Use **different types** of visual treatment for each variant — not just color shifts:
-
-| Variant type | Visual approach | Example treatment |
-|---|---|---|
-| **Primary** | Filled background + high contrast text (light/dark flat) | Demands attention — this is the main action |
-| **Secondary** | Filled but muted background, no shadow | Supports the primary without competing |
-| **Outline** | Transparent background + visible border | Visible but lightweight — secondary emphasis |
-| **Ghost** | Transparent everything, color appears only on hover | Hides until needed — tertiary emphasis |
-| **Destructive** | Filled with error color (light/dark flat) | Signals danger — impossible to miss |
-| **Link** | No background, no border, underline on hover | Inline text action — blends with prose |
-
-Each variant should use a *fundamentally different strategy* to communicate its importance level.
-
-### Transitions Must Feel Alive
-
-Every state change must be animated. Instant snapping between states feels broken.
-
-| Timing need | Class/token | Duration | When to use |
-|---|---|---|---|
-| Hover/active micro-moments | `--duration-interaction` | 100ms | Pressing a button, toggling a switch |
-| State change (bg, border, shadow) | `.transition-default` | 200ms ease-out | Most hover/focus transitions |
-| Component entry (modals, dropdowns) | `.transition-enter` | 300ms ease-out | Mount animations |
-
-**Critical rule: hover states should change at least two properties.** In light/dark mode: Background AND border, or color AND opacity — not shadow (static elements have no shadow). A single-property change feels flat and lifeless.
-
-### How Each State Should Feel
-
-| State | Visual treatment | Required properties |
-|---|---|---|
-| **Default** | Resting appearance. Flat (no shadow) in light/dark. | — |
-| **Hover** | Background shifts one step deeper + border tint change (light/dark). | `cursor-pointer`, two-property change |
-| **Focus-visible** | Focus ring appears. No other change beyond the ring. | `focus-visible:outline-none focus-visible:focus-ring` |
-| **Active/Pressed** | Background darkens beyond hover. | — |
-| **Disabled** | Muted background + text. No shadow. No hover/active response. | `cursor-not-allowed`, `pointer-events-none`, `aria-disabled` |
-| **Loading** | Spinner replaces content. Same dimensions — no layout shift. | `aria-busy="true"`, same `width`/`height` |
-| **Error** | Border or background shifts to error color. Use `--component-border-error` or `--component-bg-error` token — never hardcode a color. Error text uses `--component-text-error` aliasing `--color-text-error`. | `aria-invalid="true"`, `aria-describedby` pointing to the error message element |
-
-### Dark Mode Color Rules — Enforced on Every Component
-
-Before assigning any color token in a dark mode override block, apply this table:
-
-| Category | Light mode | Dark mode | Rule |
-|---|---|---|---|
-| Action primary bg | brand-500 | brand-400 | Lighter shade reads on dark surfaces |
-| Text on filled bg | neutral-0 (white) | neutral-950 (near-black) | brand-400 is a light color — dark text required for contrast |
-| Selected state bg | brand-50 (pale tint) | brand-950 (dark tint) | Muted dark container, never opaque brand fill |
-| Hover overlay | neutral-50 | neutral-800 | One subtle step from surface |
-| Pressed overlay | neutral-100 | neutral-700 | Deeper than hover |
-| Status subtle bg | color-50 | color-900 | Pale tints are near-white on dark bg — broken |
-| Shadow opacity | 6–14% | 40–70% | Dark surfaces absorb light, low-opacity shadows vanish |
-| Data series colors | -500 shade | -400 shade | One step lighter for dark bg visibility |
-
-**Contrast check rule:** If the background token resolves to a shade 700–950,
-text must be neutral-0 to neutral-100. If background resolves to a shade 50–400
-(a light color used as bg), text must be neutral-900 to neutral-950.
-Never place light text on a light background or dark text on a dark background.
-
-### Loading States Preserve Dimensions
-
-A loading button stays the same size and shape — only the text is replaced by a spinner. The spinner inherits `currentColor` and uses the matching icon size token for the component's size. The component must not jump, resize, or reflow during loading.
+Components must feel intentionally designed — not just structurally valid.
 
 ---
 
@@ -162,10 +92,12 @@ Every component request — no matter how simple — goes through decomposition 
 2. Recursively break it into every sub-component it needs
 3. **Run the Semantic HTML Selection** (see below) — mandatory before classifying
 4. **Run the Interactive Control Scan** (see below) — mandatory before classifying
-5. Classify each sub-component by level
-6. Check `components/` — note which already exist (reuse) vs. need to be generated
-7. Flatten the tree into bottom-up generation order: atoms first, then molecules, then organisms
-8. Present the full tree (including HTML element choices) and generation passes to the user. **Wait for approval.**
+5. **Run the Size Taxonomy Selection** (see below) — mandatory before classifying. Determines which size scale to use for each new component based on `design-system/SIZE_TAXONOMY.md`.
+6. **Run the Token Block Audit** (see below) — mandatory before classifying. Scans `components/` for any component whose `.tsx` references `var(--component-*)` tokens that DON'T have a matching token block in `geeklego.css`. Report every mismatch. If mismatches exist, flag them before proceeding — no new component should be built while existing components have broken token references.
+7. Classify each sub-component by level
+8. Check `components/` — note which already exist (reuse) vs. need to be generated
+9. Flatten the tree into bottom-up generation order: atoms first, then molecules, then organisms
+10. Present the full tree (including HTML element choices, size scale for each new component, and generation passes) to the user. **Wait for approval.**
 
 Do not write any code or touch any files until the user confirms.
 
@@ -216,6 +148,66 @@ BarChart (Molecule — L2)
 └── Select (Atom — L1)   ← must exist and be approved before BarChart is written
 ```
 
+### Size Taxonomy Selection — Mandatory Step 5
+
+Before classifying or generating a new component, determine which size scale it uses. Open `design-system/SIZE_TAXONOMY.md` and apply the decision tree:
+
+```
+Is the component a person/photo element (Avatar, SkeletonCircle)?
+  → Use Avatar scale (xs → 2xl)
+
+Is the component a container overlay or full-screen toggle?
+  → Use Overlay scale (sm → full)
+
+Is the component a primary action, loading indicator, or progress display?
+  → Use Extended scale (xs → xl)
+
+Is the component a decorative/status element (badge, label, tag, notification)?
+  → Use Micro scale (sm, md)
+
+Otherwise (interactive controls, form inputs, navigation, content blocks):
+  → Use Standard scale (sm, md, lg) — this is the default
+```
+
+**Record the chosen scale in the decomposition tree** next to each component that has a `size` prop. Example:
+
+```
+Button (L1 Atom) → Extended scale (xs-xl)
+├── Badge (L1 Atom) → Micro scale (sm, md)
+└── Input (L1 Atom) → Standard scale (sm, md, lg)
+```
+
+**Why this matters:** The size scale determines the size type definition, the number of CSS tokens, and the Sizes story. Applying the wrong scale creates inconsistency that has historically been the #2 source of design system drift (after hardcoded values). There is no valid reason for a component to use a different scale from the taxonomy — if you believe a component is an exception, raise it in the presentation.
+
+### Token Block Audit — Mandatory Step 6
+
+Before classifying the new component, scan the existing `components/` directory for any component whose `.tsx` file references `var(--component-*)` CSS custom properties that do NOT have a matching token block in `geeklego.css`.
+
+**How to run:**
+```bash
+# 1. Extract all var(--*) references from TSX files
+rg -o 'var\(--[\w-]+\)' components/ --include '*.tsx' | sort -u > /tmp/tsx-vars.txt
+
+# 2. Extract all custom property definitions from geeklego.css
+rg -o '--[\w-]+(?=:)' design-system/geeklego.css | sort -u > /tmp/css-vars.txt
+
+# 3. Find TSX vars that have no CSS definition
+comm -23 /tmp/tsx-vars.txt /tmp/css-vars.txt
+
+# 4. Run the official validator
+npm run validate-tokens
+```
+
+**If mismatches are found:**
+- Report every component + specific missing token(s) to the user
+- Do NOT proceed with generating a new component until existing token gaps are resolved
+- This is how the ProductCard bug occurred: ~30 `--product-card-*` tokens were referenced in the TSX but never defined in `geeklego.css`
+
+**CSS class rule check — run this after the var() check:**
+In addition to token checking, scan every component's TSX for CSS class names used in `className` that are NOT standard Tailwind utilities and verify each one has a matching CSS rule in `geeklego.css`. The Slider component's `.slider-input` class rules were missing from `geeklego.css`, causing it to render as a browser-default unstyled range input.
+- Use `rg -o 'className="([^"]+)"' components/ --include '*.tsx'` to find class strings, then cross-reference against CSS rules in `geeklego.css`.
+- Standard Tailwind utilities (`.bg-*`, `.text-*`, `.h-*`, `.p-*`, `.flex`, `.gap-*`, `.rounded-*`, etc.) are exempt — they come from Tailwind's generated stylesheet.
+
 ### Level Rules
 
 See CLAUDE.md "Component Architecture — 5-Level Hierarchy" for the full level rules. Key reminders:
@@ -254,19 +246,176 @@ For each component in bottom-up order, build the tokens and code together.
 ### Token Chain
 
 Follow the token chain rule in CLAUDE.md. Key reminders:
-- Every component token must alias a semantic — never a primitive, never hardcoded
+- Every component token must alias a semantic — never a primitive, never hardcoded, **and never another component's token**.
+- **Crucially, that semantic must be a `:root`-level semantic token — never another component's `--component-*` token.** A component token that references another component's token (e.g., `--card-bg: var(--button-bg)`) creates a hidden cross-component dependency. If the referenced component's block is regenerated, the dependent component silently breaks. Component tokens must only alias `:root` semantic tokens.
 - Before writing a component token that references a semantic — **verify it exists** in `geeklego.css`. A token that references an undefined variable resolves to `unset` and is silent at runtime.
 - If a semantic is missing, create it first (aliasing a primitive), then create the component token from it
 - Never auto-create primitives — STOP and ask the user
 
-**Cross-file validation — mandatory before writing TSX:** After writing tokens to `geeklego.css`, verify every `var(--component-*)` reference you plan to use in the TSX actually exists in the token block you just wrote. The runtime is silent on undefined tokens — a missing name produces an invisible element with no error. Run:
+**Cross-file validation — ⚠️ MANDATORY GATES ⚠️:**
 
+**After writing tokens to `geeklego.css`, before writing TSX:**
 ```bash
-npm run validate-tokens   # confirms all var() references in geeklego.css resolve
-npx tsc --noEmit         # confirms no type errors in TSX
+npm run validate-tokens   # Catch #1: CSS-internal broken var() refs
 ```
 
-Both must exit 0 before you proceed to Phase 3.
+**After writing the TSX file:**
+```bash
+# Verify the TSX file starts with "use client";
+head -n 1 [ComponentName].tsx | grep -q "'use client';" || (echo "Error: TSX file must start with 'use client';" && exit 1)
+
+npm run validate-tokens   # Catch #2: TSX var() refs not defined in CSS + hardcoded values
+npx tsc --noEmit         # Confirms no type errors in TSX
+```
+
+**Pass 1 (after writing tokens, before TSX):** `validate-tokens` checks that every `var(--)` reference inside `geeklego.css` itself has a matching `--name:` declaration. This catches tokens that reference misspelled or nonexistent semantics.
+
+**Pass 2 (after writing TSX):** The same `validate-tokens` script also scans all `*.tsx` component files for `var(--)` references and cross-references them against CSS definitions. A second pass here catches newly-introduced `var()` refs added during TSX authoring that have no matching CSS token. This is the pass that would have caught the ChatHeader `--chat-header-title-gap` gap.
+
+**Pass 6 — Hardcoded value detection (after writing TSX):** `npm run validate-tokens` now includes a 6th pass that scans all component TSX files for hardcoded `px`, `rem`, and hex values. It flags:
+- Tailwind arbitrary values with hardcoded units (`w-[8rem]`, `h-[40px]`) — must use `var(--token)` syntax
+- Inline style values with raw units (`'8px'`, `'2rem'`) — must use CSS variables
+- Hardcoded hex colors in className or inline styles (`bg-[#6366f1]`, `'#000'`) — must use color tokens
+- Exemptions: `0`/`0px` for resetting properties
+
+This catches what Pass 5 (primitive ref check) cannot — literal hardcoded values that bypass the token chain entirely.
+
+**"use client" check (after writing TSX):** Verifies that the TSX file starts with `'use client';` as required for React Server Component compatibility with the docs site.
+
+### Primitive Token Blocklist — Never Reference in TSX
+
+Component TSX files must **never** reference Tier 1 primitive tokens directly. The token chain rule (primitive → semantic → component) must never be skipped.
+
+| Primitive pattern | Forbidden in TSX | Correct replacement |
+|---|---|---|
+| `var(--color-brand-*)` | Tier 1 color | `var(--color-action-primary)` or relevant semantic |
+| `var(--color-neutral-*)` | Tier 1 color | `var(--color-text-primary)` / `var(--color-bg-subtle)` etc. |
+| `var(--color-{success,warning,error,info}-*)` | Tier 1 color | `var(--color-status-*)` semantic tokens |
+| `var(--color-{slate,blue,green,red,yellow,orange,purple,pink,cyan,teal}-*)` | Tier 1 color | Semantic alias for the intent |
+| `var(--spacing-{0..96})` | Tier 1 spacing | `var(--size-fixed-*)`, `var(--spacing-component-*)`, or `var(--spacing-layout-*)` |
+| `var(--font-size-*)` | Tier 1 typography | `.text-body-md` / `.text-label-sm` etc. typography classes |
+| `var(--font-weight-*)` | Tier 1 typography | Typography utility classes (e.g. `.text-label-xs`) |
+| `var(--font-family-sans)` / `var(--font-family-mono)` | Tier 1 font | `var(--font-family-body)` / `var(--font-family-code)` |
+| `var(--line-height-*)` / `var(--letter-spacing-*)` | Tier 1 typography | Typography utility classes |
+| Hardcoded hex (`#000`, `#3b82f6`) | Not a token | `var(--color-bg-inverse)`, `var(--color-status-info)` etc. |
+
+**SVG numeric props** (e.g. Recharts `fontSize={11}`): Resolve via `useMemo` + `getComputedStyle` reading a component token (e.g. `--areachart-axis-label-font-size`), with a numeric SSR fallback.
+
+**⚠️ Standalone block header audit — same gate, manual step:**
+After writing tokens, verify the component has its own standalone section header. Search for the component name followed by ` — generated`:
+```bash
+rg '/* ComponentName' design-system/geeklego.css
+```
+If the search returns the component name as a standalone header (e.g., `/* Toggle — generated 2026-03-23 */`), the block is correctly scoped. If the search returns zero results, the tokens are embedded inside another component's block — a cross-contamination bug. Fix by extracting them into their own block before proceeding.
+
+**⚠️ Shared token contamination audit — same gate, additional check:**
+After writing tokens, verify that no tokens with a generic property prefix (`--size-`, `--color-`, `--spacing-`, `--content-`, `--radius-`, `--border-`, `--shadow-`) appear inside the component's block. Search for property-prefix tokens inside component blocks:
+```bash
+rg '^\s*--(size|color|spacing|content|radius|border|shadow)-' design-system/geeklego.css -B 5 | rg 'generated'
+```
+If a generic-prefix token appears within 5 lines of a `/* ComponentName — generated */` header, it is a shared semantic masquerading as a component token — move it to `:root` before proceeding.
+
+**⚠️ Parent-child token prefix pollution audit — same gate, additional check:**
+After writing tokens for a parent component that renders child components, verify that no token in the parent's block has a sub-prefix matching a child component's name. For example, in a Navbar block, tokens like `--navbar-item-height-sm` have the sub-prefix `item` which collides with the NavItem component's `--navitem-*` namespace. These tokens are dead code or stale overrides. Replace them with CSS cascade class rules (see "Parent-child token prefix pollution" section above). Search after writing tokens:
+```bash
+# List all component token prefixes to find potential child-component collisions
+rg '^\s*--([a-z]+)-([a-z]+)-' design-system/geeklego.css -B 5 | rg 'generated'
+# Cross-reference the second segment against existing component names in components/
+```
+
+**⚠️ CSS class rule audit — same gate, manual step:**
+After writing TSX, grep for every CSS class name used in `className` that IS NOT a standard Tailwind utility and verify it has a matching CSS rule in `geeklego.css`. This check exists because `validate-tokens` only catches `var()` references — a missing CSS class rule (like `.slider-input` with pseudo-elements) is silent at build time and only shows up as an unstyled component in the browser.
+
+Both must exit 0 before you proceed to Phase 3. Do not skip. Do not defer.
+
+### Token Metadata Generation — Mandatory Step (after tokens + TSX)
+
+After writing component tokens to `geeklego.css` and verifying with `npm run validate-tokens`, generate metadata entries for every new component token in `design-system/tokens.metadata.json`.
+
+**Why:** The token editor, auto-generated docs, and IA classification all rely on `tokens.metadata.json`. Metadata must be generated at the same time as the component — never deferred.
+
+**Procedure:**
+
+1. Read the current `design-system/tokens.metadata.json`
+2. For each component token you created (e.g., `--button-bg`, `--button-bg-hover`, `--button-text`, etc.), add an entry:
+   ```json
+   "--button-bg": {
+     "description": "Background color for the Button component in resting state",
+     "category": "component",
+     "subcategory": "Button",
+     "type": "color"
+   }
+   ```
+3. Use the following schema for each field:
+   - `description`: One sentence describing what the token controls and in which state. Include the component name and state (resting/hover/focus/active/disabled/loading/error).
+   - `category`: Always `"component"` for component tokens.
+   - `subcategory`: The component name (e.g., `"Button"`, `"Card"`, `"Input"`).
+   - `type`: The CSS property type — `"color"`, `"spacing"`, `"size"`, `"radius"`, `"shadow"`, `"border"`, `"typography"`, or `"other"`.
+   - `tags` (optional): Array of context tags like `["interactive", "filled", "primary"]`.
+   - `relatedTokens` (optional): Array of semantically related token names (e.g., `["--button-bg-hover", "--button-bg-active"]`).
+4. Write the updated JSON back to `design-system/tokens.metadata.json`. Preserve existing entries — only add new ones and update `lastUpdated`.
+
+**Example for a Button component:**
+```json
+{
+  "version": "1.0",
+  "lastUpdated": "2026-05-26T00:00:00.000Z",
+  "tokens": {
+    "--button-bg": {
+      "description": "Background color for the Button component in resting state",
+      "category": "component",
+      "subcategory": "Button",
+      "type": "color",
+      "relatedTokens": ["--button-bg-hover", "--button-bg-active", "--button-bg-disabled"]
+    },
+    "--button-bg-hover": {
+      "description": "Background color for the Button component on hover",
+      "category": "component",
+      "subcategory": "Button",
+      "type": "color",
+      "relatedTokens": ["--button-bg", "--button-bg-active"]
+    },
+    "--button-text": {
+      "description": "Text color for the Button component in resting state",
+      "category": "component",
+      "subcategory": "Button",
+      "type": "color",
+      "relatedTokens": ["--button-text-hover"]
+    },
+    "--button-height-md": {
+      "description": "Height for the Button component at medium size",
+      "category": "component",
+      "subcategory": "Button",
+      "type": "size"
+    },
+    "--button-radius": {
+      "description": "Border radius for the Button component",
+      "category": "component",
+      "subcategory": "Button",
+      "type": "radius"
+    }
+  }
+}
+```
+
+**Detection rule — audit after writing tokens:** Verify that every component token in the newly written block has a matching entry in `tokens.metadata.json`. Count tokens in the block, count metadata entries for that subcategory, and ensure they match.
+
+
+**Post-refactor JSX validation — after replacing an inlined pattern with a sub-component import (e.g. `<StatCard>`, `<FormField>`, `<Breadcrumb>`):**
+Verify no orphaned JSX wrappers remain from the inlined version:
+```bash
+npx tsc --noEmit   # Catches unmatched </div>, ), or )}
+```
+A common regression: removing a conditional wrapper but leaving its closing tags behind (e.g. four orphaned `</div>){)}</div>)}` lines after simplifying a chart header). TypeScript will catch these immediately.
+
+**useId audit — when an id-like variable appears in JSX (e.g. gradient IDs, panel IDs, tooltip IDs):**
+```bash
+# Find all template-literal id references
+rg 'id={`' components/
+# Then verify each referenced variable has a corresponding useId() call
+rg 'const \w+ = useId' components/
+```
+A common regression: referencing `gradientId` in a template literal without ever calling `const gradientId = useId()`. The import of `useId` exists but the variable is never declared — this compiles under Storybook's Vite config but fails at runtime.
 
 **Type↔CSS contract:** If you add a new semantic group structure (e.g. a nested object in `types.ts`), `tokenValidator.ts` and `cssGenerator.ts` must be updated in the same session. The two sources diverging is what caused 75 TypeScript errors and token editor crashes in past regressions — the fix was always more expensive than the original alignment would have been.
 
@@ -292,6 +441,73 @@ Ask: *"Could three different components plausibly use this token for the same de
 
 - **NO** → it belongs only in the component token block, aliasing the closest existing semantic.
 
+### Shared token detection — never embed cross-component tokens in a component block
+
+Before adding any token to a component's block, check the token name prefix:
+
+- If the token name starts with `--color-`, `--size-`, `--spacing-`, `--content-`, `--radius-`, `--border-`, or `--shadow-` (i.e., a **property-name prefix**, not a component-name prefix like `--tree-view-` or `--button-`), it MUST NOT live inside a component token block. Place it at `:root` level in the semantic tokens section (above the `GENERATED COMPONENT TOKENS` marker).
+
+**This rule exists because `--control-indicator-size-sm/md/lg` (formerly `--size-control-indicator-sm/md/lg`) were defined inside the TreeView block but consumed by Checkbox, Radio, Slider, and ColorPicker — four separate components. When TreeView tokens were regenerated, three other components silently lost their sizing.**
+
+**Detection heuristic:** If the token's purpose is a generic design concept (indicator size, overlay backdrop, empty-state content colors, control thumb size), it is a shared semantic — not a component token. Name it by concept, not by the first component that uses it. A generic property prefix in the token name is a red flag that the token belongs at `:root`.
+
+**⚠️ Editing existing semantic tokens:** When modifying a semantic token value (e.g., `--color-overlay-backdrop`), the entire file is scanned for duplicate declarations. If you accidentally define the same property twice in the same CSS block (e.g., three `--color-overlay-backdrop` lines in `[data-theme="dark"]`), both `npm run validate-tokens` and `node scripts/dedup-component-tokens.cjs --check` now catch it — no matter where in the file the duplicate lives.
+
+**Moving a misplaced shared token to `:root`:**
+1. Cross-reference `validate-tokens.test.ts` to update any test data referencing the old location
+2. If the token's value differs per theme, add both `:root` (light) and `[data-theme="dark"]` entries — define each exactly once per CSS block
+3. Remove the token from the component block
+4. Run `npm run validate-tokens` after the move to confirm no broken references
+
+### Cross-component token chaining — never reference another component's tokens
+
+A component token that uses `var(--some-other-component-*)` in its value creates a horizontal coupling that violates the token chain's vertical-only design. If the referenced component's block is regenerated, the dependent component's tokens silently break.
+
+**Every `var()` in a component token's value must resolve to a `:root`-level semantic token, never to another component's `--component-*` token.**
+
+Detection command:
+```bash
+rg '--[a-z]+-[a-z]+-.*var\(--[a-z]+-[a-z]+-' design-system/geeklego.css
+```
+Review each match manually: if the prefix before `var(--` differs from the prefix inside `var(--`, it's a cross-component reference that must be replaced with a `:root` semantic.
+
+### Parent-child token prefix pollution — never define child-component tokens in the parent's block
+
+When a parent component (e.g. Navbar) renders a child component (e.g. NavItem) and needs to override the child's tokens per variant/size, do NOT create intermediate tokens like `--navbar-item-height-sm` inside the parent's token block. These pollute the child component's namespace and become dead code or stale values when the child's own block is regenerated.
+
+**The bug:** Navbar's token block defined `--navbar-item-height-sm/md/lg` and `--navbar-item-label-*`. The `--navbar-item-*` prefix conceptually overlaps with NavItem's `--navitem-*` namespace. The size tokens were dead (no CSS class rules consumed them). The label tokens were never referenced by any file.
+
+**The correct pattern — CSS cascade class rules:**
+
+If a parent needs to override a child's token per variant/size context, add a CSS class rule that directly overrides the child's token on the parent element. The child's tokens re-resolve via CSS cascade — no intermediate tokens needed.
+
+```css
+/* ✅ Correct — CSS class rule overrides child token directly */
+.navbar-size-sm {
+  --navitem-height: var(--size-component-sm);
+}
+.navbar-size-lg {
+  --navitem-height: var(--size-component-lg);
+}
+.navbar-variant-underline {
+  --navitem-bg-active: transparent;
+  --navitem-text-active: var(--color-action-primary);
+}
+
+/* ❌ Wrong — intermediate tokens in parent block pollute child namespace */
+/* In Navbar token block: */
+  --navbar-item-height-sm: var(--size-component-sm);
+  --navbar-item-height-lg: var(--size-component-lg);
+```
+
+**Detection rule:** After writing a parent component's tokens, search for any token whose `--[parent]-{part}-*` pattern has `{part}` matching another component's name (e.g. `--navbar-item-*` where "item" = NavItem). If found, remove the token and replace it with a CSS class rule that overrides the child component's token directly.
+
+```bash
+# After writing tokens, check for child-component namespace pollution
+rg '-----[a-z]+-[a-z]+-' design-system/geeklego.css | rg -v 'generated'
+# Then manually verify any matches aren't a child component name
+```
+
 ### Token naming conventions
 
 | Pattern | Example |
@@ -303,11 +519,24 @@ Ask: *"Could three different components plausibly use this token for the same de
 | `--[component]-[property]-[size]` | `--button-height-md` |
 | `--[component]-[part]-[property]` | `--card-header-bg` |
 
-### Writing tokens into geeklego.css
+**⚠️ The `[component]` prefix must not start with a MISPLACED_PREFIX** (`color-`, `size-`, `spacing-`, `icon-`, `radius-`, `border-`, `shadow-`, `text-`). If your component's kebab-case name would start with one of these when using the full name, drop the MISPLACED_PREFIX from the token prefix:
+- `ColorPicker` → token prefix `picker-` (not `color-picker-`)
+- `ColorSwatch` → token prefix `swatch-` (not `color-swatch-`)
 
-Open `design-system/geeklego.css` and append a new token block to the **GENERATED COMPONENT TOKENS** section (after the last existing block). Search for `/* GENERATED COMPONENT TOKENS */`. If that comment doesn't exist, create it at the very end, then append beneath it.
+### Writing tokens and CSS class rules into geeklego.css
 
-**CRITICAL:** Use the multi-selector pattern so tokens re-resolve in each theme context:
+Open `design-system/geeklego.css`. **First, search for an existing token block** by looking for `/* ComponentName — generated YYYY-MM-DD */` (replace ComponentName with your component name). 
+
+- **If found**: Delete the old block entirely, then insert the new block in its place. This is the most common case — you are updating an existing component.
+- **If NOT found**: Append the new block at the end of the **GENERATED COMPONENT TOKENS** section. Search for `/* GENERATED COMPONENT TOKENS */`. If that comment doesn't exist, create it at the very end, then append beneath it.
+
+**CRITICAL — never append a second block for the same component.** CSS cascade silently picks the last duplicate declaration, creating dead code and maintenance confusion. A script exists to clean up accidental duplicates: `node scripts/dedup-component-tokens.cjs`.
+
+**After the token block, add any CSS class rules** the component needs: pseudo-element selectors (range input thumb/track), size modifier classes, `@keyframes` animations, etc. These rules MUST go in `geeklego.css`.
+
+**CRITICAL — ALWAYS use the unified multi-selector pattern:** Every component
+token block MUST use the `:root, [data-theme="dark"]` unified selector. Never
+create a separate `[data-theme="dark"]` override block at the component level.
 
 ```css
 /* [ComponentName] — generated [YYYY-MM-DD] */
@@ -318,37 +547,53 @@ Open `design-system/geeklego.css` and append a new token block to the **GENERATE
 }
 ```
 
-**Dark mode override blocks on component tokens:**
-Only create a component-level `[data-theme="dark"]` override block when a
-component token needs a value that CANNOT be achieved by the semantic token
-alone re-resolving in dark context. Before writing a component dark override,
-ask: does the semantic already flip correctly in [data-theme="dark"]? If yes,
-no component override is needed. If the component token needs a structurally
-different value in dark mode, add a focused override block for only those tokens.
+The unified selector ensures all tokens are defined in one self-contained block.
+If a token needs a different resolved value per theme, that is the semantic
+token's responsibility — fix the `[data-theme="dark"]` override at the semantic
+level in `:root` / `[data-theme="dark"]` foundation block, not at the component
+level. A separate `[data-theme="dark"]` override block at the component level
+is always wrong — it duplicates declarations, creates maintenance burden, and
+breaks the principle that component tokens are thin aliases of semantics.
 
-When writing any dark component token override, every value must comply with the
-Dark Mode Color Rules table in the Design Quality section above.
+This rule applies to ALL component token blocks — including elevated/overlay
+variants that use shadows. If `--shadow-sm` does not resolve visibly on dark
+surfaces, fix the semantic shadow token's dark override, not the component token.
 
 **Rules:**
-- One token block per component. Check for duplicates first — if the block exists, STOP and ask: update, replace, or skip? **When regenerating, delete the old block in the same commit.** CSS source-order cascade silently picks the last duplicate — two blocks for the same component is a guaranteed silent regression waiting to happen.
+- **One token block per component, one declaration per property name.** Never define the same `--component-property` more than once within the same CSS block. If you need to override a token value while adding a new section, update the original declaration in-place rather than appending a second one. CSS source-order cascade silently picks the last duplicate — two declarations for the same property is a guaranteed silent regression.
+- **Search for an existing block first.** Before writing any token, search for `/* ComponentName — generated YYYY-MM-DD */`. If found, replace the entire block (do not append a second one). If not found, append at the end of the GENERATED COMPONENT TOKENS section.
+ - **Run dedup check after writing tokens:** `node scripts/dedup-component-tokens.cjs --check` must exit 0 before proceeding to TSX. This catches accidental within-block duplicates. The check exits 1 if any CSS property name appears more than once in the same selector block, even if the values differ.
+ - **Run cross-block dup check after writing tokens:** `npm run validate-tokens` now includes a cross-block duplicate pass. It flags any component token that appears in more than one CSS block for the same component (e.g., `--chat-border` in both the unified `:root, [data-theme="dark"]` block AND a separate `[data-theme="dark"]` block). Must exit 0 before proceeding to TSX.
+- **Each component MUST have its OWN dedicated token block with a standalone `/* ComponentName — generated YYYY-MM-DD */` header.** NEVER embed tokens for one component inside another component's block. Every component's tokens must begin and end under its own header — no exceptions.
 - Every token aliases a semantic — never a primitive, never a hardcoded value
 - Include tokens for all variants, sizes, states, and sub-parts
+- **⚠️ Variant state symmetry — every visual state group (selected, unselected, hover, active, disabled, focus, etc.) must be treated consistently across all variants.** Either ALL variants get their own token block for that state group, or ALL variants share a single token set. Never define variant-specific tokens for one state group (e.g., `--segmented-default-selected-bg`, `--segmented-outline-selected-bg`) while using shared tokens for another state group (e.g., `--segmented-segment-bg` shared across variants). This asymmetry creates incomplete variant isolation — consumers cannot tune one variant's unselected appearance without affecting all variants. If state tokens are currently shared, split them into variant-specific blocks with identical values initially, then allow per-variant tuning. **Detection:** After writing tokens, audit each state group: for any token group that has a variant prefix (like `--component-default-*` and `--component-outline-*`), verify that EVERY state within that group uses the same variant prefix pattern. If any state misses the variant prefix (e.g., `--ed-segment-*` instead of `--ed-default-segment-*`), the state is shared and must be split.
 - **Never create typography tokens** at the component level — typography is handled by utility classes (`.text-button-md`, `.text-body-sm`, etc.)
-- **Skip token blocks for passthrough atoms** where every token would be a 1:1 alias of a semantic — use semantics directly in TSX instead
+- **Every component — including layout/passthrough atoms — MUST have a token block.** Even when every token is a thin 1:1 alias of a semantic, the block is required for pattern consistency, Token Editor discoverability, and per-component customization. The previous exception for "passthrough atoms" is removed.
 - If you discover mid-coding that a token is missing, go add it now and continue
 
-### When a component token needs different semantics per theme
-
-Default: use the multi-selector — the component token aliases one semantic, and the semantic's own per-theme overrides cascade automatically. Most tokens work this way.
-
-Exception: when the component needs a *different semantic* per theme (e.g., `--shadow-md` in light but `--shadow-lg` in dark), split into separate selector blocks:
+**Component CSS class rules (not just custom properties):**
+If the component uses any CSS class rule — including pseudo-element selectors (`::-webkit-slider-thumb`, `::-moz-range-track`), size modifier classes (`--sm`, `--lg`), animation `@keyframes`, or any other non-token CSS — add them immediately after the token block in `geeklego.css`. Use this pattern:
 
 ```css
-:root { --card-shadow: var(--shadow-md); }
-[data-theme="dark"] { --card-shadow: var(--shadow-lg); }
+@keyframes component-animation-name {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+.component-class-name {
+  animation: component-animation-name var(--component-duration-token, var(--duration-slowest)) linear infinite;
+  transform-origin: center;
+}
 ```
 
-Only split when you can articulate why the same semantic reference produces wrong results in a specific theme.
+**Known regression — Slider component:** The `.slider-input` class rules (range input pseudo-elements, size variants, hover/disabled states) were defined without matching CSS rules in `geeklego.css`. The Slider rendered as a browser-default unstyled range input for months before detection. **Every CSS class name used in a component's `className` — or pseudo-element selector applied via CSS — that is not a standard Tailwind utility must be defined in `geeklego.css`.**
+
+**Critical — the `validate-tokens` script only checks `var()` references.** A missing CSS class rule, pseudo-element selector, or `@keyframes` produces a silent visual bug with no build-time error. After writing CSS class rules, manually verify that every CSS class name used in `className` that isn't a standard Tailwind utility is defined in `geeklego.css`.
+
+**Duplicate token validation (MANDATORY):** After writing or modifying any CSS block (component tokens, semantic section, or `@theme`), run both checks:
+1. `npm run validate-tokens` — verifies all `var()` references resolve; also scans the entire file for duplicate declarations within any CSS rule block (catches accidental triplicates like `--color-overlay-backdrop` or `--duration-stagger-*` in `@theme`)
+2. `node scripts/dedup-component-tokens.cjs --check` — same full-file duplicate check; can auto-fix duplicates when run without `--check`
+Both must exit 0 before proceeding to TSX.
 
 ### Progressive Enhancement Check
 
@@ -362,7 +607,11 @@ Every component gets exactly 5 files in `components/[level]/[ComponentName]/`. S
 
 #### File 1: `[ComponentName].tsx`
 
+**Every component file starts with `'use client'`** — components use React hooks (useMemo, forwardRef, etc.) and must be client-rendered when consumed by the docs site (which is a React Server Component page).
+
 ```tsx
+'use client';
+
 import { forwardRef, memo, useMemo } from 'react';
 import type { ComponentProps, ComponentVariant, ComponentSize } from './Component.types';
 
@@ -412,13 +661,14 @@ Component.displayName = 'Component';
 ```
 
 **Key patterns** (full rules in CLAUDE.md):
-- `memo(forwardRef())` — memo outer, forwardRef inner
+- L1/L2: `memo(forwardRef())` — **mandatory**. L3+: `memo(forwardRef())` (recommended for consistency, `memo()` minimum).
+- Set `displayName` immediately after the closing `)));` — never skip.
 - Token-based Tailwind only: `bg-[var(--token)]` — `var()` wrapper required in Tailwind v4.2
 - Variant/size maps as plain `Record<Variant, string>` — no clsx, no cva
 - Array join pattern: `[a, b, c].filter(Boolean).join(' ')`
 - `transition-default` on all elements that change visual state
 - `focus-visible:outline-none focus-visible:focus-ring` on all focusable elements
-- Content flexibility: `.truncate-label` for single-line, `.clamp-description` for multi-line, `.content-nowrap` for buttons/chips, `.content-flex` for flex children
+- Content flexibility: `.truncate-label` for single-line, `.clamp-description` for multi-line, `.content-nowrap` for buttons/chips, `.content-flex` for flex children. **Never use `flex-1 min-w-0` — always use `.content-flex` instead.**
 
 #### File 2: `[ComponentName].types.ts`
 
@@ -443,7 +693,7 @@ export interface ComponentProps extends ButtonHTMLAttributes<HTMLButtonElement> 
 
 #### File 3: `[ComponentName].stories.tsx`
 
-All **7 stories** are non-negotiable:
+All **8 stories** are non-negotiable:
 
 | Story | What it shows |
 |---|---|
@@ -453,6 +703,7 @@ All **7 stories** are non-negotiable:
 | `States` | default, hover (via CSS), focus-visible, active, disabled, loading, error |
 | `DarkMode` | Wrapped in `data-theme="dark"` with `bg-primary` container and `max-w-2xl` |
 | `Playground` | All args exposed as controls |
+| `Mobile` | Rendered at 375px viewport using the `mobile` Storybook preset — verifies layout doesn't break at small widths; no dark mode wrapper required |
 | `Accessibility` | Tagged `['a11y']`; renders with explicit aria-label, aria-expanded, aria-busy, aria-disabled |
 
 Story title format: `'Atoms/Button'`, `'Molecules/Card'` (matches level hierarchy).
@@ -469,233 +720,37 @@ Must cover: `default`, `variants` (array), `sizes` (array), `states` (object: lo
 
 ---
 
-## Common Token Mistakes — What Not to Do
+## Common Token Mistakes
 
-These five patterns caused the most regressions in the design system's history. They are silent at build time and only reveal themselves visually — which is why they survived undetected for months.
+**Read `references/common-token-mistakes.md` for 15 real-world regressions** with wrong/right examples and detection commands:
 
-**❌ 1 — Hardcoding a Tier 1 primitive in a component token**
-```css
-/* Wrong — neutral-950 is a primitive, not a semantic */
---badge-text-disabled: var(--color-neutral-950);
+| # | Mistake | Detection |
+|---|---|---|
+| 1 | Hardcoding primitives in component tokens | `npm run validate-tokens` |
+| 2 | Property-before-component naming | `--button-bg-hover`, not `--bg-button-hover` |
+| 3 | Borrowing global motion as per-element delay | Use `--duration-stagger-*` instead |
+| 4 | Duplicate token blocks after regeneration | Delete old block before inserting new |
+| 6 | Hardcoding px/rem in component tokens | Alias existing design tokens |
+| 7 | Hardcoding hex in inline styles/fallbacks | SSR fallback must match light-mode resolved value |
+| 8 | Separate `[data-theme="dark"]` component block | Use unified `:root, [data-theme="dark"]` selector |
+| 10 | Duplicate property declarations in same block | `dedup-component-tokens.cjs --check` |
+| 9 | Shared/cross-component tokens in component block | Generic prefix (`--size-`, `--color-`) → must be `:root` |
+| 5 | Inverting semantics in dark mode | Dark value must still match token name's concept |
+| 11 | Hardcoding rem in component CSS tokens | Route through `--size-fixed-*` semantics |
+| 12 | Inline style duplicating token block defaults | Remove inline default, let CSS cascade provide it |
+| 13 | Hardcoding color when shared semantic exists | Search for `--color-overlay-backdrop`, etc. |
+| 14 | Cross-component token chaining | LHS prefix != RHS prefix in `var()` reference |
+| 15 | Variant state asymmetry | All state groups must have same prefix pattern |
 
-/* Right — route through the semantic that captures the intent */
---badge-text-disabled: var(--color-text-on-status-solid);
-```
-If the needed semantic doesn't exist, create it in `:root` first. Hardcoding the primitive means this token becomes a maintenance liability: one palette change breaks every component that used the shortcut.
-
-**❌ 2 — Naming the token with property before component**
-```css
-/* Wrong — violates --{component}-{property} ordering */
---size-avatar-md: 2rem;
---icon-color-button: var(--color-text-primary);
-
-/* Right — component name always leads */
---avatar-size-md: 2rem;
---button-icon-color: var(--color-text-primary);
-```
-The validator (`npm run validate-tokens`) enforces this pattern on component blocks and exits with code 1 on violations. Fixing after the fact requires hunting down every consumer.
-
-**❌ 3 — Borrowing a global motion token as a per-element delay**
-```css
-/* Wrong — steals the interaction-level duration as an animation stagger */
---typing-dot-delay-2: var(--duration-interaction);
---typing-dot-delay-3: var(--duration-transition);
-
-/* Right — use dedicated stagger semantics */
---typing-dot-delay-2: var(--duration-stagger-sm);
---typing-dot-delay-3: var(--duration-stagger-md);
-```
-Global durations are tuned for their interaction category. Reusing them for unrelated timing couples two unrelated design decisions — tune one, break the other.
-
-**❌ 4 — Leaving duplicate token blocks after regeneration**
-```css
-/* Wrong — both blocks exist; cascade picks the second silently */
-/* Button — generated 2026-01-15 */
-:root { --button-bg-primary: var(--color-action-primary); }   /* old value */
-
-/* Button — generated 2026-04-27 */
-:root { --button-bg-primary: var(--color-brand-600); }        /* new value */
-```
-When you regenerate tokens, delete the old block in the same edit. Two blocks pass the validator and compile cleanly — the bug only shows up in the browser.
-
-**❌ 5 — Inverting a semantic in dark mode instead of correcting it**
-```css
-/* Wrong — surface-overlay becomes opaque solid white in dark mode (inverted!) */
-[data-theme="dark"] { --color-surface-overlay: var(--color-neutral-0); }
-
-/* Right — an overlay is a transparent scrim in both modes */
-[data-theme="dark"] { --color-surface-overlay: var(--color-overlay-backdrop); }
-```
-Dark mode overrides should adjust opacity or shade, never invert the semantic's role. When in doubt, check: does the dark value still describe the same concept the token name promises?
+Check for regressions before finalizing any token block.
 
 ---
 
 ## Phase 3 — Verification Checklist
 
-Run after all components in the tree are generated. Fix any failure before presenting.
+**Run `references/verification-checklist.md` after all components are generated.** Fix every failure before presenting output.
 
-### Token integrity
-- [ ] Every component token references a semantic, never a primitive
-- [ ] No duplicate token blocks in geeklego.css — if regenerated, old block deleted in the same edit
-- [ ] No hardcoded values anywhere in CSS or TSX
-- [ ] Every `var(--component-*)` used in the TSX exists in the component's token block in `geeklego.css` (missing tokens silently resolve to `unset`)
-- [ ] Token naming follows `--{component}-{property}-{state}` ordering — `--button-bg-hover`, not `--bg-button-hover`
-- [ ] `npm run validate-tokens` exits code 0 — confirms no broken references and no naming violations
-- [ ] `npm run lint-css` exits code 0 — Stylelint confirms geeklego.css has no CSS violations
-- [ ] `npx tsc --noEmit` exits code 0 — confirms no type errors introduced by the new component
-
-### Theme completeness
-- [ ] Every semantic token referenced by component tokens has overrides in `[data-theme="dark"]` — check geeklego.css directly
-- [ ] Shadow tokens resolve to visible shadows in dark mode (not invisible against dark backgrounds)
-- [ ] Dark mode action primary uses a lighter shade than light mode (brand-400 not brand-500/600)
-- [ ] Dark mode text on any filled colored bg uses correct contrast pair:
-      light bg (shade 50–400) → dark text (neutral-900/950);
-      dark bg (shade 700–950) → light text (neutral-0/50)
-- [ ] Dark mode selected state bg uses --color-state-selected (brand-950), NOT --color-action-primary
-- [ ] Dark mode status subtle tokens use -900 tints, not -50 tints
-
-### File integrity
-- [ ] Exactly 5 files per component — no more, no fewer
-- [ ] No inline `style` prop used for visual styling
-- [ ] No arbitrary Tailwind values (`bg-[#xxx]`, `h-[40px]`) — only `bg-[var(--token)]` syntax (must include `var()`)
-- [ ] No clsx, cva, cn(), or class-merging utilities imported
-- [ ] All icon imports use lucide-react only
-
-### Import integrity
-- [ ] Atoms import nothing from `components/`
-- [ ] Molecules import only atoms
-- [ ] Organisms import molecules and/or atoms
-- [ ] No same-level imports, no circular dependencies
-- [ ] All imports are relative paths
-
-### Storybook completeness
-- [ ] All 7 required stories present (Default, Variants, Sizes, States, DarkMode, Playground, Accessibility)
-- [ ] DarkMode uses `data-theme` wrapper with `max-w-2xl`
-- [ ] Playground has all props as controls
-- [ ] Accessibility story tagged `['a11y']`
-
-### Design quality
-- [ ] Variants are visually distinct — different *types* of treatment, not just color shifts
-- [ ] Hover changes at least two properties
-- [ ] Disabled state: muted, no shadow, no hover/active, `cursor-not-allowed`
-- [ ] Loading state preserves component dimensions (no layout shift)
-- [ ] Focus ring present on every focusable element
-- [ ] `transition-default` on every element that changes visual state
-
-### Responsive layout protection
-- [ ] Card-shell components use `.card-shell`, `.card-header-row`, `.card-header-title`, `.card-metric-row`
-- [ ] Title text uses `.truncate-label`
-- [ ] DarkMode story includes `max-w-2xl`
-- [ ] Component has `--{component}-min-width` token (for card-shell components)
-
-### Accessibility — WCAG 2.2 AA
-
-Read `references/aria-patterns.md` for the full ARIA reference tables. Key checks:
-
-**Semantic structure**
-- [ ] Semantic HTML used throughout (see `.claude/references/semantic-html-guide.md`)
-- [ ] No `<div>` where a semantic element exists
-- [ ] No `onClick` on `<div>` or `<span>`
-- [ ] No redundant `role` overriding native element semantics
-
-**Accessible names**
-- [ ] Every interactive element has an accessible name
-- [ ] Icon-only buttons have `aria-label`
-- [ ] Every `<nav>` landmark has `aria-label`
-- [ ] Decorative icons have `aria-hidden="true"` on wrapper
-
-**Interactive states**
-- [ ] Toggle controls have `aria-expanded` — use `getDisclosureProps()`
-- [ ] Controls with panels have `aria-controls` + matching `id` — use `useId()`
-- [ ] Disabled: both `disabled` attribute AND `aria-disabled={true}`
-- [ ] Loading: `aria-busy={true}` with visible spinner
-
-**Focus and keyboard**
-- [ ] Every focusable element has `focus-visible:outline-none focus-visible:focus-ring`
-- [ ] Inputs use `focus-visible:focus-ring-inset`
-- [ ] Arrow-navigated groups use `useRovingTabindex`
-- [ ] Overlays use `useFocusTrap` and `useEscapeDismiss`
-- [ ] No positive `tabIndex` values
-
-**Touch targets**
-- [ ] All interactive elements minimum 24x24px CSS
-
-### Schema.org (when applicable)
-- [ ] Component checked against mapping table in `references/schema-org.md`
-- [ ] `schema?: boolean` prop added if applicable
-- [ ] Microdata attributes only render when `schema={true}`
-
-### Performance
-- [ ] `memo(forwardRef(...))` wrapping — memo outer
-- [ ] `displayName` set
-- [ ] `useMemo` for computed className strings
-- [ ] Static class strings hoisted to module scope
-- [ ] `useCallback` for internal event handlers
-- [ ] No index-based keys in `.map()`
-- [ ] `.perf-contain-content` on repeated list items
-- [ ] `.perf-content-auto` for off-screen collapsible panels
-
-### Cross-browser
-- [ ] No `color-mix()`, vendor prefixes, `@supports`, or `@property` in component code
-- [ ] All values via `var(--token-name)` — no raw hex, px, or rem
-
-### Security
-
-**Read `.claude/skills/security/SKILL.md` for full implementation patterns.**
-
-- [ ] Every component that renders `<a href={...}>` imports `sanitizeHref` from `'../../utils/security/sanitize'`
-- [ ] Every `href` value is passed through `sanitizeHref()` — never rendered verbatim; wrapped in `useMemo`
-- [ ] Components with `external` prop or `target` prop use `getSafeExternalLinkProps()` instead
-- [ ] `target`/`rel` are destructured from `...rest` before anchor props are constructed (for polymorphic `<a>` components)
-- [ ] No `dangerouslySetInnerHTML` anywhere (covered by CLAUDE.md rule — confirm)
-- [ ] New component row added to `.claude/skills/security/references/component-security-audit.md`
-
-### i18n — Internationalisation
-
-**Check `.claude/skills/i18n/references/string-inventory.md` before marking this section complete.**
-
-- [ ] Component has no hardcoded system strings in JSX (strings a user reads or a screen reader announces that aren't consumer-supplied `children`/`label`/`title` props)
-- [ ] If the component has system strings: `i18nStrings?` prop added to `.types.ts` with a typed per-component interface (e.g. `SpinnerI18nStrings`)
-- [ ] If the component has system strings: `useComponentI18n('key', i18nStrings)` called as first line inside the component function — import via `import { useComponentI18n } from '../../utils/i18n/useGeeklegoI18n'` (NOT from the barrel export)
-- [ ] If the component has system strings: `GeeklegoI18nProvider.types.ts`, `DEFAULT_STRINGS`, `index.ts`, and `string-inventory.md` are updated
-- [ ] Existing content props (`label`, `placeholder`, `deltaLabel`) are never replaced — use augment pattern: `const resolved = propValue ?? i18n.default`
-- [ ] Template label functions typed as `(arg: T) => string`, not inline concatenation
-
-### RTL — Logical Properties
-
-- [ ] No `pl-*` / `pr-*` for directional padding — use `ps-*` / `pe-*`
-- [ ] No `ml-*` / `mr-*` for directional margin — use `ms-*` / `me-*`
-- [ ] No `left-[var(--token)]` / `right-[var(--token)]` for icon/content inset — use `start-[var(--token)]` / `end-[var(--token)]`
-- [ ] Symmetric padding (`px-*`), block axis (`py-*`, `pt-*`, `pb-*`, `mt-*`, `mb-*`), and overlay anchors (`left-0 top-full`) are exempt
-- [ ] No `direction:` or `writing-mode:` set in component TSX — `dir` is read from `<html>`
-
-### Reuse Audit
-
-After the verification checklist passes, scan all existing components at the same level or above as the newly generated component.
-
-For each existing component file, check whether it inlines markup, styling, or logic that the new component now owns — e.g. hand-rolled spinners, raw badge-like spans, custom dividers, inline avatar markup.
-
-If violations are found:
-1. Print a terminal summary in this format:
-   ```
-   ⚠ Reuse audit — N refactor candidates found:
-     → [Filename]   [what is inlined] → replace with <[NewComponent]>
-   ↳ Logged to REFACTOR.md
-   ```
-
-2. Append a new block to `REFACTOR.md` in the project root (create the file if it does not exist) in this format:
-   ```
-   ## [NewComponent] — [Month Year]
-   - [ ] `[Filename]` — [what is inlined], replace with <[NewComponent]>
-   ```
-
-Each generation session appends a new dated block. Never overwrite existing entries.
-
-If no violations are found, print:
-```
-✓ Reuse audit — no refactor candidates found
-```
-And do not touch REFACTOR.md.
+The checklist covers: token integrity, registration, theme completeness, file integrity, import integrity, Storybook completeness, design quality, responsive layout, accessibility (WCAG 2.2 AA), Schema.org, performance, cross-browser, security, i18n, RTL logical properties, and reuse audit.
 
 ---
 
@@ -706,14 +761,15 @@ All icons must come from `lucide-react`. Size and color always via tokens:
 ```tsx
 import { ChevronDown, Search, X, Plus } from 'lucide-react';
 
-// Size via token — use --icon-size-* (Tier 1 primitive) or --icon-semantic-* (Tier 2 alias)
-<Search size="var(--icon-size-md)" />
+// Size via token — use --size-icon-* (component-ready token, Tier 2 alias → Tier 1 primitive)
+// NEVER use --icon-size-* directly (that is the raw primitive — skips the token chain)
+<Search size="var(--size-icon-md)" />
 
 // Color via parent or prop
 <span className="text-[var(--color-text-secondary)]"><Search /></span>
 
 // Icon slots: pass as React nodes, not strings
-<Button leftIcon={<Plus size="var(--icon-size-sm)" />}>Add item</Button>
+<Button leftIcon={<Plus size="var(--size-icon-sm)" />}>Add item</Button>
 ```
 
 ---
@@ -734,6 +790,7 @@ Use these as the baseline for all components. For unlisted components, research 
 | Checkbox | default, indeterminate | sm, md, lg |
 | Switch | default | sm, md, lg |
 | Spinner | default, inverse | xs, sm, md, lg, xl |
+| ProgressBar | default, success, warning, error, neutral | xs, sm, md, lg, xl |
 | Divider | horizontal, vertical | styles: solid, dashed, dotted |
 | Chip | solid, outline, ghost | sm, md |
 | Tag | default, dismissible | sm, md |
@@ -767,14 +824,23 @@ Use these as the baseline for all components. For unlisted components, research 
 | Missing primitive | **STOP** — ask the user. Never auto-create primitives. |
 | Component already exists in `components/` | **STOP** — ask: "Update it, replace it, or skip and reuse it?" |
 | Circular dependency detected | **STOP** — show the cycle, propose restructuring |
-| Dark mode token gap | Verify semantic has a `[data-theme="dark"]` override AND that the dark value follows the Dark Mode Color Rules table in Design Quality above. If not, fix geeklego.css first before writing the component token. If a component dark override produces light-text-on-light-bg or dark-text-on-dark-bg — STOP. Fix the semantic, never patch contrast failures by hardcoding a color. |
+| Dark mode token gap | Verify semantic has a `[data-theme="dark"]` override AND that the dark value follows the Dark Mode Color Rules in `references/design-standards.md`. If not, fix geeklego.css first before writing the component token. If a component dark override produces light-text-on-light-bg or dark-text-on-dark-bg — STOP. Fix the semantic, never patch contrast failures by hardcoding a color. |
 
 ---
 
 ## What This Skill Must Never Do
 
-Rules 1-16 are covered by CLAUDE.md's "What Claude Code Should Never Do" list. The following are **skill-specific** rules that go beyond the project-level constraints:
+These rules are documented in detail in the sections above. This is a quick reference:
 
-17. **Never create a standalone 5-file molecule folder for a non-reusable slot component.** If a sub-component (e.g. `SidebarHeader`, `DialogFooter`, `CardHeader`) is only ever used inside one parent organism, define it as an internal named const and attach as a static property.
-18. **Never classify a self-contained interactive unit as a molecule just because it appears in a list.** `NavItem`, `TabItem`, `BreadcrumbItem`, `MenuOption` — no component dependencies means they are atoms. Level is determined by import dependencies, not visual complexity.
-19. **Never inline a styled interactive HTML control inside a parent component.** A `<select>`, `<input>`, `<textarea>`, styled checkbox/radio — if it has custom styling, it is a full L1 Atom with 5 files. The Interactive Control Scan exists to catch this.
+| Rule | Where documented |
+|---|---|
+| No standalone 5-file folder for slot components | Level Rules |
+| No molecule classification for self-contained units | Level Rules / Interactive Control Scan |
+| No inlined interactive controls | Interactive Control Scan |
+| L1/L2: `memo(forwardRef(...))` mandatory | 5-file templates / Verification Checklist |
+| No inline style duplicating token block defaults | `references/design-standards.md` (Inline Style Policy) |
+| No MISPLACED_PREFIX in token names | Token naming conventions |
+| No separate `[data-theme="dark"]` component block | `references/common-token-mistakes.md` ❌8 |
+| No cross-component token chaining | `references/common-token-mistakes.md` ❌14 |
+
+See CLAUDE.md for the full 47 project-level "Never Do" rules.

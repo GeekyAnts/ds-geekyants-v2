@@ -1,5 +1,6 @@
 "use client"
 import { forwardRef, memo, useMemo } from 'react';
+import { useComponentI18n } from '../../utils/i18n/useGeeklegoI18n';
 import type { VideoProps, VideoRatio } from './Video.types';
 
 // ── Static class maps (hoisted — never recreated per render) ──────────────────
@@ -31,6 +32,7 @@ export const Video = memo(forwardRef<HTMLElement, VideoProps>(
       rounded = true,
       bordered = false,
       schema = false,
+      i18nStrings,
       className,
       'aria-label': ariaLabel,
       ...rest
@@ -39,6 +41,8 @@ export const Video = memo(forwardRef<HTMLElement, VideoProps>(
   ) => {
     // Enforce muted when autoPlay is true (browser policy)
     const effectiveMuted = autoPlay ? true : muted;
+
+    const i18n = useComponentI18n('video', i18nStrings);
 
     // Resolve accessible label — prefer explicit prop, then caption
     const resolvedLabel = ariaLabel ?? caption;
@@ -114,7 +118,7 @@ export const Video = memo(forwardRef<HTMLElement, VideoProps>(
             ))}
 
             {/* Fallback for browsers without <video> support */}
-            Your browser does not support the video element.
+            {i18n.fallbackText}
           </video>
         </div>
 

@@ -27,27 +27,27 @@ level: molecule
 
 ## States
 
-<ComponentPreview code={"import { DateInput } from \"@geeklego/ui\"\n\n<div className=\"flex flex-col gap-4 max-w-sm\">\n  <DateInput label=\"Default\" hint=\"Helper text appears here\" />\n  <DateInput label=\"With value\" defaultValue=\"2026-03-25\" hint=\"Pre-filled date\" />\n  <DateInput label=\"Error state\" errorMessage=\"Please enter a valid date\" defaultValue=\"2026-13-45\" />\n  <DateInput label=\"Disabled\" hint=\"This field cannot be edited\" disabled defaultValue=\"2026-03-25\" />\n  <DateInput label=\"Loading\" hint=\"Fetching allowed date range\u2026\" isLoading />\n  <DateInput label=\"Required field\" hint=\"This field is required\" required />\n</div>"}>
+<ComponentPreview code={"import { DateInput } from \"@geeklego/ui\"\n\n<div className=\"flex flex-col gap-4 max-w-sm\">\n  <DateInput label=\"Default\" hint=\"Helper text appears here\" />\n  <DateInput label=\"With value\" defaultValue=\"2026-03-25\" hint=\"Pre-filled date\" />\n  <DateInput label=\"Error state\" error=\"Please enter a valid date\" defaultValue=\"2026-13-45\" />\n  <DateInput label=\"Disabled\" hint=\"This field cannot be edited\" disabled defaultValue=\"2026-03-25\" />\n  <DateInput label=\"Loading\" hint=\"Fetching allowed date range\u2026\" loading />\n  <DateInput label=\"Required field\" hint=\"This field is required\" required />\n</div>"}>
   <div className="flex flex-col gap-4 max-w-sm">
     <DateInput label="Default" hint="Helper text appears here" />
     <DateInput label="With value" defaultValue="2026-03-25" hint="Pre-filled date" />
-    <DateInput label="Error state" errorMessage="Please enter a valid date" defaultValue="2026-13-45" />
+    <DateInput label="Error state" error="Please enter a valid date" defaultValue="2026-13-45" />
     <DateInput label="Disabled" hint="This field cannot be edited" disabled defaultValue="2026-03-25" />
-    <DateInput label="Loading" hint="Fetching allowed date range…" isLoading />
+    <DateInput label="Loading" hint="Fetching allowed date range…" loading />
     <DateInput label="Required field" hint="This field is required" required />
   </div>
 </ComponentPreview>
 
 ## Dark Mode
 
-<ComponentPreview code={"import { DateInput } from \"@geeklego/ui\"\n\n<div\n  data-theme=\"dark\"\n  className=\"flex flex-col gap-4 p-8 bg-[var(--color-bg-primary)] rounded-[var(--radius-component-lg)] max-w-2xl\"\n>\n  <div className=\"flex flex-col gap-4 max-w-sm\">\n    <DateInput label=\"Date of birth\" hint=\"Use the format MM/DD/YYYY\" />\n    <DateInput label=\"Start date\" errorMessage=\"Date must be in the future\" defaultValue=\"2020-01-01\" />\n    <DateInput label=\"End date\" disabled defaultValue=\"2026-12-31\" />\n  </div>\n</div>"}>
+<ComponentPreview code={"import { DateInput } from \"@geeklego/ui\"\n\n<div\n  data-theme=\"dark\"\n  className=\"flex flex-col gap-4 p-8 bg-[var(--color-bg-primary)] rounded-[var(--radius-component-lg)] max-w-2xl\"\n>\n  <div className=\"flex flex-col gap-4 max-w-sm\">\n    <DateInput label=\"Date of birth\" hint=\"Use the format MM/DD/YYYY\" />\n    <DateInput label=\"Start date\" error=\"Date must be in the future\" defaultValue=\"2020-01-01\" />\n    <DateInput label=\"End date\" disabled defaultValue=\"2026-12-31\" />\n  </div>\n</div>"}>
   <div
     data-theme="dark"
     className="flex flex-col gap-4 p-8 bg-[var(--color-bg-primary)] rounded-[var(--radius-component-lg)] max-w-2xl"
   >
     <div className="flex flex-col gap-4 max-w-sm">
       <DateInput label="Date of birth" hint="Use the format MM/DD/YYYY" />
-      <DateInput label="Start date" errorMessage="Date must be in the future" defaultValue="2020-01-01" />
+      <DateInput label="Start date" error="Date must be in the future" defaultValue="2020-01-01" />
       <DateInput label="End date" disabled defaultValue="2026-12-31" />
     </div>
   </div>
@@ -59,10 +59,10 @@ level: molecule
   rows={[
     { name: "label", type: "string", defaultValue: "—", description: "Label text for the field. Required for accessibility — linked via htmlFor." },
     { name: "hint", type: "string", defaultValue: "—", description: "Helper text shown below the input when no error is present." },
-    { name: "errorMessage", type: "string", defaultValue: "—", description: "Validation error message. Switches the input to error state and replaces hint text. Announced immediately via role='alert'." },
+    { name: "error", type: "string", defaultValue: "—", description: "Validation error message. Switches the input to error state and replaces hint text. Announced immediately via role='alert'." },
     { name: "size", type: "'sm' | 'md' | 'lg'", defaultValue: "'md'", description: "Height and typography scale of the input." },
     { name: "variant", type: "'default' | 'filled' | 'flushed' | 'unstyled'", defaultValue: "'default'", description: "Visual style variant of the underlying input." },
-    { name: "isLoading", type: "boolean", defaultValue: "false", description: "Shows a loading spinner and disables interaction." },
+    { name: "loading", type: "boolean", defaultValue: "false", description: "Shows a loading spinner and disables interaction." },
     { name: "disabled", type: "boolean", defaultValue: "—", description: "Disables the input and mirrors the disabled state to the label." },
     { name: "required", type: "boolean", defaultValue: "—", description: "Marks the field as required, rendering a visual indicator on the label." },
     { name: "id", type: "string", defaultValue: "—", description: "ID for the underlying input. Auto-generated when omitted; label is linked via htmlFor automatically." },

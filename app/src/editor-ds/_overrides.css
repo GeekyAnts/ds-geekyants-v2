@@ -1,0 +1,305 @@
+/* ============================================================================
+   Feature-component overrides
+   These rules adjust legacy components built for the dark-only ed-ds palette
+   to look correct under the new Open Design-inspired light theme.
+   They do NOT touch any logic — purely visual.
+   ============================================================================ */
+
+/* ─── Modal/Dialog backdrops — replace harsh black with themed overlay ─── */
+.ed-export-modal-overlay,
+.ed-command-palette-overlay,
+.ed-onboarding-tour__overlay,
+.ed-keyboard-shortcuts__overlay,
+.ed-health-panel__overlay,
+.ed-diff-view__overlay {
+  background: var(--ed-bg-overlay) !important;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+/* ─── Export modal — polish dialog chrome ──────────────────────────────── */
+.ed-export-modal-dialog {
+  background: var(--ed-bg-elevated) !important;
+  border-color: var(--ed-border) !important;
+  border-radius: var(--ed-radius-xl) !important;
+  box-shadow: var(--ed-shadow-lg) !important;
+}
+
+.ed-export-modal-header { border-color: var(--ed-border-soft) !important; }
+.ed-export-modal-header h3 {
+  font-family: var(--ed-font-display);
+  font-size: var(--ed-text-xl);
+  letter-spacing: -0.01em;
+}
+
+.ed-export-modal-stepper {
+  background: var(--ed-bg-panel);
+  border-color: var(--ed-border-soft) !important;
+}
+
+.ed-export-step-indicator {
+  background: var(--ed-bg-subtle) !important;
+  border-color: var(--ed-border) !important;
+  color: var(--ed-text-muted) !important;
+  font-family: var(--ed-font-mono);
+  font-size: 11px !important;
+  font-weight: var(--ed-weight-semibold);
+}
+.ed-export-step-indicator.active {
+  background: var(--ed-accent) !important;
+  border-color: var(--ed-accent) !important;
+  color: var(--ed-accent-fg) !important;
+}
+
+.ed-export-pending-item,
+.ed-export-snapshot-item {
+  background: var(--ed-bg-subtle) !important;
+  border-color: var(--ed-border-soft) !important;
+}
+.ed-export-pending-item:hover,
+.ed-export-snapshot-item:hover {
+  background: var(--ed-bg-muted) !important;
+}
+
+/* Primary button — replace indigo shadow with warm-accent shadow */
+.ed-export-btn-primary,
+.ed-export-btn-next {
+  background: var(--ed-accent) !important;
+  color: var(--ed-accent-fg) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12);
+}
+.ed-export-btn-primary:hover,
+.ed-export-btn-next:hover {
+  background: var(--ed-accent-hover) !important;
+  box-shadow: 0 2px 8px rgba(201, 100, 66, 0.25);
+}
+
+.ed-export-btn-secondary,
+.ed-export-btn-back {
+  background: var(--ed-bg-panel) !important;
+  border-color: var(--ed-border) !important;
+  color: var(--ed-text) !important;
+}
+.ed-export-btn-secondary:hover,
+.ed-export-btn-back:hover {
+  background: var(--ed-bg-subtle) !important;
+  border-color: var(--ed-border-strong) !important;
+}
+
+/* Validation tags */
+.ed-export-blocker { background: var(--ed-danger-bg) !important; color: var(--ed-danger) !important; }
+.ed-export-warning { background: var(--ed-warning-bg) !important; color: var(--ed-warning) !important; }
+.ed-export-notice  { background: var(--ed-bg-subtle) !important; color: var(--ed-text-muted) !important; }
+.ed-export-blockers {
+  background: var(--ed-danger-bg) !important;
+  border-color: var(--ed-danger) !important;
+}
+.ed-export-blocker-item {
+  color: var(--ed-danger) !important;
+  border-color: transparent !important;
+}
+
+/* Footer of export modal */
+.ed-export-modal-footer {
+  border-color: var(--ed-border-soft) !important;
+  background: var(--ed-bg-panel);
+}
+
+/* Modal content area */
+.ed-export-modal-content { background: var(--ed-bg-elevated); }
+
+.ed-export-token-name {
+  font-family: var(--ed-font-mono) !important;
+  color: var(--ed-text-strong) !important;
+}
+
+/* ─── Command Palette ─────────────────────────────────────────────────── */
+.ed-command-palette-input:focus,
+.ed-command-palette-input:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+.ed-command-palette-input {
+  caret-color: var(--ed-accent) !important;
+}
+
+.ed-command-palette {
+  background: var(--ed-bg-elevated) !important;
+  border-color: var(--ed-border) !important;
+  border-radius: var(--ed-radius-xl) !important;
+  box-shadow: var(--ed-shadow-lg) !important;
+}
+
+.ed-command-palette__input,
+.ed-command-palette__input-bar input,
+.ed-command-palette input[type="text"] {
+  background: transparent !important;
+  border: none !important;
+  color: var(--ed-text-strong) !important;
+  font-size: var(--ed-text-lg) !important;
+  font-family: var(--ed-font-sans);
+}
+.ed-command-palette__input::placeholder,
+.ed-command-palette input[type="text"]::placeholder {
+  color: var(--ed-text-faint) !important;
+}
+
+.ed-command-palette__header,
+.ed-command-palette__input-bar {
+  border-bottom-color: var(--ed-border-soft) !important;
+  padding: 14px 18px !important;
+}
+
+.ed-command-palette__item:hover,
+.ed-command-palette__item.active,
+.ed-command-palette__item--active,
+.ed-command-palette__result:hover,
+.ed-command-palette__result.active {
+  background: var(--ed-bg-subtle) !important;
+}
+
+.ed-command-palette__result-name,
+.ed-command-palette__item-name {
+  font-family: var(--ed-font-mono) !important;
+  color: var(--ed-text-strong) !important;
+}
+
+.ed-command-palette__result-meta,
+.ed-command-palette__item-value {
+  color: var(--ed-text-muted) !important;
+}
+
+.ed-command-palette__footer,
+.ed-command-palette__shortcuts {
+  background: var(--ed-bg-panel) !important;
+  border-color: var(--ed-border-soft) !important;
+  color: var(--ed-text-muted) !important;
+}
+.ed-command-palette kbd {
+  background: var(--ed-bg-subtle) !important;
+  border-color: var(--ed-border) !important;
+  color: var(--ed-text-muted) !important;
+}
+
+/* ─── Health Panel ────────────────────────────────────────────────────── */
+.ed-health-panel,
+.ed-health {
+  background: var(--ed-bg-panel) !important;
+  border-color: var(--ed-border) !important;
+  border-radius: var(--ed-radius-lg) !important;
+  box-shadow: var(--ed-shadow-xs);
+}
+
+.ed-health-panel__metric,
+.ed-health__metric {
+  background: var(--ed-bg-subtle) !important;
+  border-color: transparent !important;
+}
+
+/* ─── Dependency Tree ─────────────────────────────────────────────────── */
+.ed-dep-tree,
+.ed-dependency-tree {
+  background: var(--ed-bg-panel) !important;
+  border-color: var(--ed-border) !important;
+}
+
+.ed-dep-tree__node:hover,
+.ed-dependency-tree__node:hover {
+  background: var(--ed-bg-subtle) !important;
+}
+
+/* ─── Diff View ───────────────────────────────────────────────────────── */
+.diff-view, .ed-diff-view {
+  background: var(--ed-bg-panel) !important;
+  border-color: var(--ed-border) !important;
+}
+
+.diff-view__old, .diff-view__before {
+  background: var(--ed-bg-subtle) !important;
+  color: var(--ed-text-muted) !important;
+}
+.diff-view__new, .diff-view__after {
+  background: var(--ed-accent-tint) !important;
+  color: var(--ed-accent) !important;
+  border-color: var(--ed-accent-soft) !important;
+}
+
+/* ─── Bulk Ops Bar ────────────────────────────────────────────────────── */
+.ed-bulk-ops-bar {
+  background: var(--ed-bg-elevated) !important;
+  border: 1px solid var(--ed-border) !important;
+  border-radius: var(--ed-radius-lg) !important;
+  box-shadow: var(--ed-shadow-sm) !important;
+}
+
+/* ─── Onboarding Tour ─────────────────────────────────────────────────── */
+.ed-onboarding-tour,
+.ed-onboarding-tour__modal,
+.ed-onboarding-tour__dialog {
+  background: var(--ed-bg-elevated) !important;
+  border: 1px solid var(--ed-border) !important;
+  border-radius: var(--ed-radius-xl) !important;
+  box-shadow: var(--ed-shadow-lg) !important;
+}
+.ed-onboarding-tour__dot {
+  background: var(--ed-bg-muted) !important;
+}
+.ed-onboarding-tour__dot--active {
+  background: var(--ed-accent) !important;
+}
+
+/* ─── Keyboard Shortcuts ──────────────────────────────────────────────── */
+.ed-keyboard-shortcuts,
+.ed-keyboard-shortcuts__modal {
+  background: var(--ed-bg-elevated) !important;
+  border: 1px solid var(--ed-border) !important;
+  border-radius: var(--ed-radius-xl) !important;
+  box-shadow: var(--ed-shadow-lg) !important;
+}
+.ed-keyboard-shortcuts kbd {
+  background: var(--ed-bg-subtle) !important;
+  border-color: var(--ed-border) !important;
+  color: var(--ed-text) !important;
+}
+
+/* ─── Auto-Save Banner ────────────────────────────────────────────────── */
+.ed-auto-save-banner,
+.ed-autosave-banner {
+  background: var(--ed-bg-elevated) !important;
+  border-color: var(--ed-border) !important;
+  border-radius: var(--ed-radius-md) !important;
+  box-shadow: var(--ed-shadow-md) !important;
+}
+
+/* ─── Inline Preview ──────────────────────────────────────────────────── */
+.ed-inline-preview {
+  border-color: var(--ed-border) !important;
+}
+
+/* ─── Component Preview container ─────────────────────────────────────── */
+.ed-component-preview-container {
+  background: var(--ed-bg-panel) !important;
+  border-color: var(--ed-border) !important;
+  border-radius: var(--ed-radius-lg) !important;
+}
+
+/* ─── Typography normalization across legacy headings ────────────────── */
+.ed-export-modal-header h3,
+.ed-command-palette__title,
+.ed-health-panel__title,
+.ed-onboarding-tour__title,
+.ed-keyboard-shortcuts__title,
+.ed-export-validation > h4,
+.ed-export-diff > h4,
+.ed-export-final > h4 {
+  font-family: var(--ed-font-display);
+  color: var(--ed-text-strong);
+  font-weight: var(--ed-weight-semibold);
+  letter-spacing: -0.005em;
+}
+
+/* ─── Section labels (h5 etc.) ────────────────────────────────────────── */
+.ed-export-snapshots > h5,
+.ed-export-pending-header h4 {
+  color: var(--ed-text-strong) !important;
+}

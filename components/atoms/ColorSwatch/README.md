@@ -20,14 +20,14 @@ All other `ButtonHTMLAttributes<HTMLButtonElement>` props are forwarded (except 
 
 | Token | Purpose |
 |---|---|
-| `--color-swatch-size-sm/md/lg` | Width and height per size |
-| `--color-swatch-radius-square` | Border radius for square shape |
-| `--color-swatch-radius-circle` | Border radius for circle shape |
-| `--color-swatch-border` | Subtle border to define swatch against light backgrounds |
-| `--color-swatch-border-hover` | Border darkens on hover |
-| `--color-swatch-ring` | Outline color for selected state |
-| `--color-swatch-opacity-disabled` | Opacity when disabled |
-| `--color-swatch-gap` | Recommended gap for swatch grid layouts |
+| `--swatch-size-sm/md/lg` | Width and height per size |
+| `--swatch-radius-square` | Border radius for square shape |
+| `--swatch-radius-circle` | Border radius for circle shape |
+| `--swatch-border` | Subtle border to define swatch against light backgrounds |
+| `--swatch-border-hover` | Border darkens on hover |
+| `--swatch-ring` | Outline color for selected state |
+| `--swatch-opacity-disabled` | Opacity when disabled |
+| `--swatch-gap` | Recommended gap for swatch grid layouts |
 
 ## Variants
 
@@ -103,7 +103,7 @@ import { ColorSwatch } from '@geeklego/ui/components/atoms/ColorSwatch';
 <ColorSwatch color="#999" aria-label="Unavailable color" disabled />
 
 // In a grid
-<div role="group" aria-label="Color palette" className="flex flex-wrap gap-[var(--color-swatch-gap)]">
+<div role="group" aria-label="Color palette" className="flex flex-wrap gap-[var(--swatch-gap)]">
   {colors.map((c) => (
     <ColorSwatch key={c.hex} color={c.hex} aria-label={c.label} />
   ))}

@@ -35,6 +35,7 @@ export interface Primitives {
   zIndex: Record<string, number>
   duration: Record<string, string>
   easing: Record<string, string>
+  sizeScale: Record<string, string>
   iconSize: Record<string, string>
   colorShadowNeutral: string
   breakpoints: Record<string, string>
@@ -150,6 +151,13 @@ export interface ColorOption {
   label: string
   value: string
   hex: string
+}
+
+// ─── Token entry ──────────────────────────────────────────────────────────────
+
+export interface TokenEntry {
+  name: string
+  value: string
 }
 
 // ─── History checkpoints ─────────────────────────────────────────────────────

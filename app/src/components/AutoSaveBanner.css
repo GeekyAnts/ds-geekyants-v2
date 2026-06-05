@@ -1,0 +1,71 @@
+.ed-auto-save-banner {
+  background: linear-gradient(to right, var(--ed-surface), var(--ed-surface-elevated));
+  border-bottom: 1px solid var(--ed-accent);
+  box-shadow: 0 4px 12px rgba(94, 106, 210, 0.2);
+  padding: 12px 24px;
+  position: relative;
+  z-index: 50;
+}
+
+.ed-auto-save-banner-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 1100px;
+  margin: 0 auto;
+  justify-content: center;
+}
+
+.ed-auto-save-icon {
+  font-size: 20px;
+}
+
+.ed-auto-save-message {
+  font-size: 13px;
+  color: var(--ed-text-secondary);
+  margin: 0;
+}
+
+.ed-auto-save-message strong {
+  color: var(--ed-accent);
+  font-weight: 600;
+}
+
+.ed-auto-save-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.ed-auto-save-restore-btn {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ed-accent);
+  cursor: pointer;
+  background: transparent;
+  border: 1px solid var(--ed-accent);
+  border-radius: var(--ed-radius-button);
+  padding: 5px 16px;
+  transition: all 0.15s;
+}
+
+.ed-auto-save-restore-btn:hover {
+  background: var(--ed-accent);
+  color: white;
+  box-shadow: 0 2px 6px rgba(94, 106, 210, 0.4);
+}
+
+.ed-auto-save-dismiss-btn {
+  font-size: 12px;
+  color: var(--ed-text-muted);
+  cursor: pointer;
+  background: transparent;
+  border: 1px solid var(--ed-border);
+  border-radius: var(--ed-radius-button);
+  padding: 5px 12px;
+  transition: all 0.15s;
+}
+
+.ed-auto-save-dismiss-btn:hover {
+  background: var(--ed-surface-elevated);
+  color: var(--ed-text-secondary);
+}

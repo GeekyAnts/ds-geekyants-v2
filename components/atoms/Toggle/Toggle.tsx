@@ -77,9 +77,9 @@ export const Toggle = memo(
   forwardRef<HTMLButtonElement, ToggleProps>(
     (
       {
-        pressed,
-        defaultPressed = false,
-        onPressedChange,
+        checked,
+        defaultChecked = false,
+        onChange,
         variant = 'default',
         size = 'md',
         disabled = false,
@@ -90,16 +90,16 @@ export const Toggle = memo(
       ref,
     ) => {
       // ── Controlled vs uncontrolled ─────────────────────────────────────────
-      const isControlled = pressed !== undefined;
-      const [internalPressed, setInternalPressed] = useState(defaultPressed);
-      const isPressed = isControlled ? (pressed as boolean) : internalPressed;
+      const isControlled = checked !== undefined;
+      const [internalChecked, setInternalChecked] = useState(defaultChecked);
+      const isChecked = isControlled ? (checked as boolean) : internalChecked;
 
       const handleClick = useCallback(() => {
         if (disabled) return;
-        const next = !isPressed;
-        if (!isControlled) setInternalPressed(next);
-        onPressedChange?.(next);
-      }, [isPressed, isControlled, disabled, onPressedChange]);
+        const next = !isChecked;
+        if (!isControlled) setInternalChecked(next);
+        onChange?.(next);
+      }, [isChecked, isControlled, disabled, onChange]);
 
       const classes = useMemo(
         () =>
@@ -113,7 +113,7 @@ export const Toggle = memo(
             'cursor-pointer',
             disabled
               ? DISABLED_CLASSES
-              : isPressed
+              : isChecked
                 ? variantPressedClasses[variant]
                 : variantUnpressedClasses[variant],
             sizeClasses[size].base,
@@ -121,14 +121,14 @@ export const Toggle = memo(
           ]
             .filter(Boolean)
             .join(' '),
-        [disabled, isPressed, variant, size, className],
+        [disabled, isChecked, variant, size, className],
       );
 
       return (
         <button
           ref={ref}
           type="button"
-          aria-pressed={isPressed}
+          aria-pressed={isChecked}
           aria-disabled={disabled || undefined}
           disabled={disabled}
           onClick={handleClick}

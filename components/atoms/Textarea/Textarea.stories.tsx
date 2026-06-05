@@ -17,7 +17,7 @@ const meta: Meta<typeof Textarea> = {
       options: ['none', 'vertical', 'horizontal', 'both'],
     },
     error: { control: 'boolean' },
-    isLoading: { control: 'boolean' },
+    loading: { control: 'boolean' },
     disabled: { control: 'boolean' },
     rows: { control: 'number' },
     placeholder: { control: 'text' },
@@ -107,7 +107,7 @@ export const States: Story = {
 
       <div>
         <p className="text-label-sm text-secondary mb-2">Loading</p>
-        <Textarea placeholder="Processing…" isLoading rows={3} />
+        <Textarea placeholder="Processing…" loading rows={3} />
       </div>
 
       <div>
@@ -144,7 +144,7 @@ export const DarkMode: Story = {
       <Textarea variant="filled" placeholder="Filled" rows={3} />
       <Textarea variant="flushed" placeholder="Flushed" rows={3} />
       <Textarea variant="default" placeholder="Error state" error rows={3} />
-      <Textarea variant="default" placeholder="Loading…" isLoading rows={3} />
+      <Textarea variant="default" placeholder="Loading…" loading rows={3} />
       <Textarea variant="default" placeholder="Disabled" disabled rows={3} />
     </div>
   ),
@@ -159,7 +159,7 @@ export const Playground: Story = {
     resize: 'vertical',
     rows: 4,
     error: false,
-    isLoading: false,
+    loading: false,
     disabled: false,
   },
 };
@@ -246,7 +246,7 @@ export const Accessibility: Story = {
         <Textarea
           id="a11y-loading"
           placeholder="Analysing content…"
-          isLoading
+          loading
           rows={3}
           aria-label="Analysis, checking content"
         />

@@ -248,6 +248,14 @@ export const DEFAULT_TOKENS: GeeklegoTokens = {
       'in-out': 'cubic-bezier(0.4, 0, 0.2, 1)',
       spring:   'cubic-bezier(0.34, 1.56, 0.64, 1)',
     },
+    sizeScale: {
+      '6':  '1.5rem',
+      '8':  '2rem',
+      '10': '2.5rem',
+      '12': '3rem',
+      '14': '3.5rem',
+      '16': '4rem',
+    },
     iconSize: {
       xs:  '0.75rem',
       sm:  '1rem',

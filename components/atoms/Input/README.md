@@ -11,9 +11,9 @@ Single-line text input atom for the Geeklego design system. Provides four visual
 | `variant` | `'default' \| 'filled' \| 'flushed' \| 'unstyled'` | `'default'` | Visual style. Each uses a fundamentally different strategy — not just color shifts. |
 | `size` | `'sm' \| 'md' \| 'lg'` | `'md'` | Height and typography scale. |
 | `error` | `boolean` | `false` | Activates error border and sets `aria-invalid="true"`. |
-| `isLoading` | `boolean` | `false` | Shows spinner in right slot; disables input interaction. |
+| `loading` | `boolean` | `false` | Shows spinner in right slot; disables input interaction. |
 | `leftIcon` | `ReactNode` | — | Icon node at the left edge. Decorative (`aria-hidden`). |
-| `rightIcon` | `ReactNode` | — | Icon node at the right edge. Replaced by spinner when `isLoading`. |
+| `rightIcon` | `ReactNode` | — | Icon node at the right edge. Replaced by spinner when `loading`. |
 | `wrapperClassName` | `string` | — | Extra classes for the outer `<div>` wrapper. |
 | `className` | `string` | — | Extra classes for the inner `<input>` element. |
 | `id` | `string` | auto | DOM id for label association. Auto-generated via `useId()` if not provided. |
@@ -260,7 +260,7 @@ import { Search, Mail } from 'lucide-react';
 <p id="email-err" role="alert">Invalid email address.</p>
 
 // Loading state
-<Input placeholder="Checking availability…" isLoading />
+<Input placeholder="Checking availability…" loading />
 
 // Disabled
 <Input defaultValue="USR-00412" disabled aria-label="Account ID, read-only" />

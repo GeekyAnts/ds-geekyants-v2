@@ -12,7 +12,6 @@ import {
 } from 'react';
 import type { KeyboardEvent } from 'react';
 import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
-import { Button } from '../../atoms/Button/Button';
 import { Skeleton } from '../../atoms/Skeleton/Skeleton';
 import { useComponentI18n } from '../../utils/i18n/useGeeklegoI18n';
 import { getLoadingProps } from '../../utils/accessibility';
@@ -31,14 +30,35 @@ const slideWidthClasses: Record<CarouselSlidesPerView, string> = {
 };
 
 // ── Nav button size mapping ───────────────────────────────────────────────────
-const navButtonSizes: Record<CarouselSize, 'xs' | 'sm' | 'md'> = {
-  sm:   'xs',
-  md:   'sm',
-  lg:   'md',
-  full: 'sm',
+const navSizeClasses: Record<CarouselSize, string> = {
+  sm:   'h-[var(--carousel-nav-size-sm)] w-[var(--carousel-nav-size-sm)]',
+  md:   'h-[var(--carousel-nav-size)] w-[var(--carousel-nav-size)]',
+  lg:   'h-[var(--carousel-nav-size-lg)] w-[var(--carousel-nav-size-lg)]',
+  full: 'h-[var(--carousel-nav-size)] w-[var(--carousel-nav-size)]',
+};
+
+const navIconSizes: Record<CarouselSize, string> = {
+  sm:   'var(--size-icon-sm)',
+  md:   'var(--size-icon-md)',
+  lg:   'var(--size-icon-lg)',
+  full: 'var(--size-icon-md)',
 };
 
 // ── Module-scope static class strings ─────────────────────────────────────────
+const navBtnBase = [
+  'absolute top-1/2 -translate-y-1/2 z-10',
+  'inline-flex items-center justify-center shrink-0',
+  'rounded-[var(--carousel-nav-radius)]',
+  'bg-[var(--carousel-nav-bg)]',
+  'border border-[var(--carousel-nav-border)]',
+  'text-[var(--carousel-nav-text)]',
+  'shadow-[var(--carousel-nav-shadow)]',
+  'transition-default',
+  'hover:bg-[var(--carousel-nav-bg-hover)] hover:border-[var(--carousel-nav-border-hover)]',
+  'focus-visible:outline-none focus-visible:focus-ring',
+  'disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none disabled:shadow-none',
+].join(' ');
+
 const dotBaseClasses = [
   'h-[var(--carousel-dot-size)]',
   'rounded-[var(--carousel-dot-radius)]',
@@ -59,13 +79,13 @@ const dotActiveClasses = [
 ].join(' ');
 
 const autoplayBtnClasses = [
-  'me-[var(--spacing-component-sm)]',
   'inline-flex items-center justify-center',
+  'h-[var(--carousel-dot-size)] w-[var(--carousel-dot-size)]',
   'text-[var(--carousel-autoplay-color)]',
   'hover:text-[var(--carousel-autoplay-color-hover)]',
   'transition-default',
   'focus-visible:outline-none focus-visible:focus-ring',
-  'rounded-[var(--carousel-nav-radius)]',
+  'rounded-[var(--carousel-dot-radius)]',
 ].join(' ');
 
 // ── Internal CarouselSlide slot component ─────────────────────────────────────
@@ -165,48 +185,59 @@ const CarouselRoot = memo(
       // ── Keyboard ────────────────────────────────────────────────────────────
       const handleKeyDown = useCallback(
         (e: KeyboardEvent<HTMLElement>) => {
-          if (e.key === 'ArrowLeft') {
-            e.preventDefault();
-            prev();
-          }
-          if (e.key === 'ArrowRight') {
-            e.preventDefault();
-            next();
-          }
+          if (e.key === 'ArrowLeft') { e.preventDefault(); prev(); }
+          if (e.key === 'ArrowRight') { e.preventDefault(); next(); }
           onKeyDown?.(e);
         },
         [prev, next, onKeyDown],
       );
 
-      // ── Track transform (dynamic position — justified inline style) ──────────
-      // This is a runtime-computed translate value; cannot be expressed as a
-      // static token. It is the only inline style in this component.
+      // ── Track transform — data-driven slide offset computed at runtime ─────
       const trackStyle = useMemo(
         () => ({ transform: `translateX(-${currentIndex * (100 / slidesPerView)}%)` }),
         [currentIndex, slidesPerView],
       );
 
-      // ── Root classes ─────────────────────────────────────────────────────────
+      // ── Classes ─────────────────────────────────────────────────────────────
       const rootClasses = useMemo(
-        () =>
-          [
-            'relative overflow-hidden',
-            'rounded-[var(--carousel-radius)]',
-            'bg-[var(--carousel-bg)]',
-            'min-w-[var(--carousel-min-width)]',
-            'w-full',
-            size === 'full' ? 'h-full' : '',
-            'focus-visible:outline-none focus-visible:focus-ring',
-            className,
-          ]
-            .filter(Boolean)
-            .join(' '),
+        () => [
+          'flex flex-col gap-[var(--carousel-gap)]',
+          'min-w-[var(--carousel-min-width)] w-full',
+          size === 'full' ? 'h-full' : '',
+          'focus-visible:outline-none focus-visible:focus-ring',
+          className,
+        ].filter(Boolean).join(' '),
         [size, className],
+      );
+
+      // Outer arrow wrapper — relative for arrow positioning, NOT overflow-hidden
+      const arrowWrapClasses = useMemo(
+        () => [
+          'relative',
+          size === 'full' ? 'flex-1' : '',
+        ].filter(Boolean).join(' '),
+        [size],
+      );
+
+      // Inner clip div — only the slide track is clipped here
+      const viewportClasses = useMemo(
+        () => [
+          'overflow-hidden',
+          'rounded-[var(--carousel-radius)]',
+          'bg-[var(--carousel-bg)]',
+          'w-full h-full',
+        ].join(' '),
+        [],
+      );
+
+      const navBtnClasses = useMemo(
+        () => [navBtnBase, navSizeClasses[size]].join(' '),
+        [size],
       );
 
       const showArrows = navigation === 'arrows' || navigation === 'both';
       const showDots = navigation === 'dots' || navigation === 'both';
-      const navSize = navButtonSizes[size];
+      const iconSize = navIconSizes[size];
 
       return (
         <section
@@ -230,90 +261,90 @@ const CarouselRoot = memo(
             {i18n.slideLabel?.(currentIndex + 1, total)}
           </div>
 
-          {/* Slide viewport — clips the translate track */}
-          <div className="overflow-hidden w-full">
-            {loading ? (
-              <Skeleton variant="box" className="w-full aspect-video" />
-            ) : (
-              /* Track — translate drives slide advancement */
-              <ul
-                className="flex transition-default"
-                style={trackStyle}
-                aria-live="off"
+          {/*
+            Arrow wrapper — relative so arrows can be absolutely positioned.
+            NOT overflow-hidden so arrows are never clipped by the slide track.
+          */}
+          <div className={arrowWrapClasses}>
+            {/* Viewport — ONLY this div clips the slide track */}
+            <div className={viewportClasses}>
+              {loading ? (
+                <Skeleton variant="box" className="w-full aspect-video" />
+              ) : (
+                <ul
+                  className="flex transition-[transform] duration-[var(--carousel-track-duration)] ease-[var(--carousel-track-ease)]"
+                  style={trackStyle}
+                  aria-live="off"
+                >
+                  {slideArray.map((slide, i) => (
+                    <li
+                      key={`slide-${baseId}-${i}`}
+                      role="group"
+                      aria-roledescription="slide"
+                      aria-label={i18n.slideLabel?.(i + 1, total)}
+                      aria-hidden={
+                        i < currentIndex || i >= currentIndex + slidesPerView
+                          ? true
+                          : undefined
+                      }
+                      className={[
+                        slideWidthClasses[slidesPerView],
+                        'shrink-0 perf-contain-content',
+                      ].join(' ')}
+                    >
+                      {slide}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+
+            {/* Arrows — absolute on the non-clipping wrapper, centred on viewport */}
+            {showArrows && !loading && (
+              <button
+                type="button"
+                disabled={!canGoPrev}
+                onClick={prev}
+                aria-label={i18n.previousSlide ?? 'Previous slide'}
+                className={[
+                  navBtnClasses,
+                  'start-[var(--carousel-nav-inset)]',
+                ].join(' ')}
               >
-                {slideArray.map((slide, i) => (
-                  <li
-                    key={`slide-${baseId}-${i}`}
-                    role="group"
-                    aria-roledescription="slide"
-                    aria-label={i18n.slideLabel?.(i + 1, total)}
-                    aria-hidden={
-                      i < currentIndex || i >= currentIndex + slidesPerView
-                        ? true
-                        : undefined
-                    }
-                    className={[
-                      slideWidthClasses[slidesPerView],
-                      'shrink-0 perf-contain-content',
-                    ].join(' ')}
-                  >
-                    {slide}
-                  </li>
-                ))}
-              </ul>
+                <ChevronLeft size={iconSize} aria-hidden="true" />
+              </button>
+            )}
+
+            {showArrows && !loading && (
+              <button
+                type="button"
+                disabled={!canGoNext}
+                onClick={next}
+                aria-label={i18n.nextSlide ?? 'Next slide'}
+                className={[
+                  navBtnClasses,
+                  'end-[var(--carousel-nav-inset)]',
+                ].join(' ')}
+              >
+                <ChevronRight size={iconSize} aria-hidden="true" />
+              </button>
             )}
           </div>
 
-          {/* Previous arrow */}
-          {showArrows && !loading && (
-            <Button
-              variant="outline"
-              size={navSize}
-              iconOnly
-              disabled={!canGoPrev}
-              onClick={prev}
-              aria-label={i18n.previousSlide}
-              className={[
-                'absolute top-1/2 start-[var(--carousel-nav-inset)] -translate-y-1/2 z-10',
-                'rounded-[var(--carousel-nav-radius)]',
-              ].join(' ')}
-            >
-              <ChevronLeft size="var(--size-icon-md)" />
-            </Button>
-          )}
-
-          {/* Next arrow */}
-          {showArrows && !loading && (
-            <Button
-              variant="outline"
-              size={navSize}
-              iconOnly
-              disabled={!canGoNext}
-              onClick={next}
-              aria-label={i18n.nextSlide}
-              className={[
-                'absolute top-1/2 end-[var(--carousel-nav-inset)] -translate-y-1/2 z-10',
-                'rounded-[var(--carousel-nav-radius)]',
-              ].join(' ')}
-            >
-              <ChevronRight size="var(--size-icon-md)" />
-            </Button>
-          )}
-
-          {/* Controls row — autoplay toggle + dot indicators */}
+          {/* Controls row — sits BELOW viewport, never overlapping slides */}
           {(showDots || autoPlay) && !loading && total > 1 && (
             <div
               className={[
                 'flex items-center justify-center',
-                'gap-[var(--carousel-dot-gap)]',
-                'py-[var(--carousel-dot-py)]',
+                'gap-[var(--carousel-controls-gap)]',
+                'py-[var(--carousel-controls-py)]',
               ].join(' ')}
             >
               {autoPlay && (
                 <button
                   type="button"
                   onClick={togglePlay}
-                  aria-label={isPlaying ? i18n.pauseAutoPlay : i18n.resumeAutoPlay}
+                  aria-label={isPlaying ? (i18n.pauseAutoPlay ?? 'Pause auto-play') : (i18n.resumeAutoPlay ?? 'Resume auto-play')}
                   aria-pressed={isPlaying}
                   className={autoplayBtnClasses}
                 >
@@ -327,20 +358,28 @@ const CarouselRoot = memo(
                 </button>
               )}
 
-              {showDots &&
-                slideArray.map((_, i) => (
-                  <button
-                    key={`dot-${baseId}-${i}`}
-                    type="button"
-                    onClick={() => goTo(i)}
-                    aria-label={i18n.goToSlide?.(i + 1)}
-                    aria-current={i === currentIndex ? 'true' : undefined}
-                    className={[
-                      dotBaseClasses,
-                      i === currentIndex ? dotActiveClasses : dotInactiveClasses,
-                    ].join(' ')}
-                  />
-                ))}
+              {showDots && (
+                <div
+                  className={[
+                    'flex items-center',
+                    'gap-[var(--carousel-dot-gap)]',
+                  ].join(' ')}
+                >
+                  {slideArray.map((_, i) => (
+                    <button
+                      key={`dot-${baseId}-${i}`}
+                      type="button"
+                      onClick={() => goTo(i)}
+                      aria-label={i18n.goToSlide?.(i + 1) ?? `Go to slide ${i + 1}`}
+                      aria-current={i === currentIndex ? 'true' : undefined}
+                      className={[
+                        dotBaseClasses,
+                        i === currentIndex ? dotActiveClasses : dotInactiveClasses,
+                      ].join(' ')}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </section>

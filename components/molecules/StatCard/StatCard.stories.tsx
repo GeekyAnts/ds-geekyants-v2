@@ -6,6 +6,7 @@ import {
   Activity,
   TrendingUp,
   BarChart2,
+  HelpCircle,
 } from 'lucide-react';
 import { StatCard } from './StatCard';
 
@@ -38,7 +39,7 @@ const meta = {
       control: 'select',
       options: ['up', 'down', 'neutral'],
     },
-    isLoading: { control: 'boolean' },
+    loading: { control: 'boolean' },
     delta: { control: 'number' },
     deltaLabel: { control: 'text' },
     label: { control: 'text' },
@@ -152,7 +153,7 @@ export const States: Story = {
       <StatCard
         label="Loading"
         value="—"
-        isLoading
+        loading
       />
       <StatCard
         label="With icon"
@@ -176,7 +177,35 @@ export const States: Story = {
   ),
 };
 
-// ── 5. DarkMode ───────────────────────────────────────────────────────────────
+// ── 5. Embedded in Chart ─────────────────────────────────────────────────────
+
+export const EmbeddedInChart: Story = {
+  render: () => (
+    <div className="card-shell max-w-sm rounded-[var(--radius-component-lg)] border border-[var(--color-border-default)] bg-[var(--color-background-card)] overflow-hidden">
+      <div className="card-header-row">
+        <span className="card-header-title">Revenue Overview</span>
+        <button
+          type="button"
+          aria-label="More information about Revenue Overview"
+          className="text-[var(--color-text-muted)] hover:text-[var(--color-text-default)] transition-default rounded-[var(--radius-component-sm)] focus-ring"
+        >
+          <HelpCircle size="var(--size-icon-md)" aria-hidden="true" />
+        </button>
+      </div>
+      <div className="card-metric-row">
+        <StatCard
+          value="$12,450"
+          delta={12.5}
+          deltaLabel="vs last month"
+          variant="ghost"
+          icon={<DollarSign size="var(--size-icon-md)" />}
+        />
+      </div>
+    </div>
+  ),
+};
+
+// ── 6. DarkMode ───────────────────────────────────────────────────────────────
 
 export const DarkMode: Story = {
   render: () => (
@@ -211,7 +240,7 @@ export const DarkMode: Story = {
         delta={0.3}
         deltaLabel="this week"
         variant="filled"
-        isLoading={false}
+        loading={false}
       />
     </div>
   ),
@@ -227,7 +256,7 @@ export const Playground: Story = {
     deltaLabel: 'vs last month',
     variant: 'elevated',
     size: 'md',
-    isLoading: false,
+    loading: false,
   },
 };
 
@@ -270,7 +299,7 @@ export const Accessibility: Story = {
       <StatCard
         label="Active Sessions"
         value="—"
-        isLoading
+        loading
       />
     </div>
   ),

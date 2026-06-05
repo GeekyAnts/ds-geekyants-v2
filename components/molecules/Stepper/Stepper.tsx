@@ -1,7 +1,7 @@
 "use client"
 import { forwardRef, memo, useMemo } from 'react';
 import { Check, AlertCircle } from 'lucide-react';
-import { VisuallyHidden } from '../../atoms/VisuallyHidden/VisuallyHidden';
+import { VisuallyHidden } from '../../utils/accessibility/VisuallyHidden';
 import { useComponentI18n } from '../../utils/i18n/useGeeklegoI18n';
 import type {
   StepperProps,

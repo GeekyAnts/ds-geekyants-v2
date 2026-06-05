@@ -22,7 +22,9 @@ import type {
   HeaderBrandProps,
   HeaderComposite,
   HeaderNavProps,
+  HeaderPosition,
   HeaderProps,
+  HeaderVariant,
 } from './Header.types';
 
 // ── Context ───────────────────────────────────────────────────────────────────
@@ -43,14 +45,30 @@ function useHeader(): HeaderContextValue {
   return ctx;
 }
 
+// ── Variant classes ───────────────────────────────────────────────────────────
+
+const variantClasses: Record<HeaderVariant, string> = {
+  default: '',
+  transparent: 'header-variant-transparent',
+  floating: 'header-variant-floating',
+};
+
+// ── Position classes ──────────────────────────────────────────────────────────
+
+const positionClasses: Record<HeaderPosition, string> = {
+  sticky: 'sticky top-0 z-[var(--layer-sticky)]',
+  static: 'relative',
+  fixed: 'fixed top-0 inset-x-0 z-[var(--layer-sticky)]',
+};
+
 // ── Module-scope static strings ───────────────────────────────────────────────
 
 const HEADER_BASE = [
-  'relative w-full sticky top-0',
+  'relative w-full',
   'bg-[var(--header-bg)]',
   'border-b border-[var(--header-border-color)]',
   'shadow-[var(--header-shadow)]',
-  'z-[var(--layer-sticky)]',
+  'transition-default',
 ].join(' ');
 
 const HEADER_INNER = [
@@ -75,6 +93,7 @@ const NAV_DESKTOP_BASE = [
   'hidden md:flex',
   'items-center',
   'flex-1',
+  'header-nav-context',
 ].join(' ');
 
 const ACTIONS_BASE = [
@@ -82,6 +101,8 @@ const ACTIONS_BASE = [
   'gap-[var(--header-actions-gap)]',
   'ms-auto',
 ].join(' ');
+
+const NAV_SKELETON_ITEM = 'skeleton h-[var(--size-component-xs)] w-16 rounded-[var(--radius-component-sm)]';
 
 // ── Internal: MobileToggle ────────────────────────────────────────────────────
 
@@ -109,7 +130,7 @@ const MobileToggle = memo(function MobileToggle() {
           <Menu size="var(--size-icon-md)" aria-hidden="true" />
         )
       }
-      className="ms-auto md:hidden"
+      className="md:hidden"
       onClick={toggleMobile}
       {...ariaProps}
     >
@@ -123,7 +144,7 @@ MobileToggle.displayName = 'Header.MobileToggle';
 
 const HeaderBrand = memo(
   forwardRef<HTMLAnchorElement, HeaderBrandProps>(
-    ({ children, href, className, ...rest }, ref) => {
+    ({ children, href = '/', className, ...rest }, ref) => {
       const safeHref = useMemo(() => sanitizeHref(href), [href]);
       const classes = useMemo(
         () => [BRAND_BASE, className].filter(Boolean).join(' '),
@@ -140,8 +161,6 @@ const HeaderBrand = memo(
 HeaderBrand.displayName = 'Header.Brand';
 
 // ── Header.Nav ────────────────────────────────────────────────────────────────
-
-const NAV_SKELETON_ITEM = 'skeleton h-[var(--size-component-xs)] w-16 rounded-[var(--radius-component-sm)]';
 
 const HeaderNav = memo(
   forwardRef<HTMLElement, HeaderNavProps>(({ children, className, ...rest }, ref) => {
@@ -160,8 +179,11 @@ const HeaderNav = memo(
           'border-b border-[var(--header-mobile-panel-border)]',
           'shadow-[var(--header-mobile-panel-shadow)]',
           'px-[var(--header-mobile-panel-px)] py-[var(--header-mobile-panel-py)]',
+          'header-nav-context',
           'transition-enter',
-          mobileOpen ? 'flex flex-col md:hidden' : 'hidden',
+          mobileOpen
+            ? 'visible opacity-100 translate-y-0 pointer-events-auto'
+            : 'invisible opacity-0 -translate-y-2 pointer-events-none',
         ].join(' '),
       [mobileOpen],
     );
@@ -177,14 +199,17 @@ const HeaderNav = memo(
 
     return (
       <>
-        {/* Desktop nav — visible on md+ only */}
-        <nav ref={ref} aria-label={i18n.navLabel} className={desktopClasses} {...rest}>
+        <nav
+          ref={ref}
+          aria-label={i18n.navLabel}
+          className={desktopClasses}
+          {...rest}
+        >
           <ul className="flex items-center gap-[var(--header-nav-gap)] list-none m-0 p-0">
             {navContent}
           </ul>
         </nav>
 
-        {/* Mobile nav panel — absolutely positioned below the header bar, mobile only */}
         <nav
           id={mobileNavId}
           aria-label={i18n.navLabel}
@@ -222,7 +247,19 @@ HeaderActions.displayName = 'Header.Actions';
 
 const HeaderRoot = memo(
   forwardRef<HTMLElement, HeaderProps>(
-    ({ children, schema, i18nStrings, loading = false, className, ...rest }, externalRef) => {
+    (
+      {
+        children,
+        variant = 'default',
+        position = 'sticky',
+        schema,
+        i18nStrings,
+        loading = false,
+        className,
+        ...rest
+      },
+      externalRef,
+    ) => {
       const i18n = useComponentI18n('header', i18nStrings);
       const [mobileOpen, setMobileOpen] = useState(false);
       const mobileNavId = useId();
@@ -231,7 +268,6 @@ const HeaderRoot = memo(
       const toggleMobile = useCallback(() => setMobileOpen((prev) => !prev), []);
       const closeMobile = useCallback(() => setMobileOpen(false), []);
 
-      // Merge internal ref (for click-outside) with the consumer ref
       const setRef = useCallback(
         (el: HTMLElement | null) => {
           (internalRef as React.MutableRefObject<HTMLElement | null>).current = el;
@@ -252,8 +288,16 @@ const HeaderRoot = memo(
       });
 
       const headerClasses = useMemo(
-        () => [HEADER_BASE, className].filter(Boolean).join(' '),
-        [className],
+        () =>
+          [
+            HEADER_BASE,
+            variantClasses[variant],
+            positionClasses[position],
+            className,
+          ]
+            .filter(Boolean)
+            .join(' '),
+        [variant, position, className],
       );
 
       const ctxValue = useMemo(
@@ -277,8 +321,6 @@ const HeaderRoot = memo(
               {children}
               <MobileToggle />
             </div>
-            {/* Mobile nav panel is rendered by Header.Nav as a sibling of HEADER_INNER,
-                positioned absolutely relative to <header> via position: sticky context. */}
           </header>
         </HeaderContext.Provider>
       );
@@ -296,6 +338,5 @@ HeaderRoot.displayName = 'Header';
 (HeaderRoot as unknown as HeaderComposite).Nav = HeaderNav;
 (HeaderRoot as unknown as HeaderComposite).Actions = HeaderActions;
 
-// Public exports
 export const Header = HeaderRoot;
 export { HeaderBrand, HeaderNav, HeaderActions };

@@ -1,0 +1,226 @@
+/* ─── Health Panel Styles ─────────────────────────────────────────────────── */
+
+.ed-health-panel {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90%;
+  max-width: 700px;
+  max-height: 80vh;
+  background-color: var(--ed-surface);
+  border: 1px solid var(--ed-border);
+  border-radius: var(--ed-radius-card);
+  box-shadow: 0 24px 64px var(--ed-nav-scrim);
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+}
+
+.ed-health-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-6) var(--spacing-8);
+  border-bottom: 1px solid var(--ed-border);
+  flex-shrink: 0;
+}
+
+.ed-health-panel__title {
+  font-size: var(--ed-font-size-md);
+  font-weight: 600;
+  color: var(--ed-text-primary);
+  margin: 0;
+}
+
+.ed-health-panel__close-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-2);
+  color: var(--ed-text-muted);
+  background: none;
+  border: none;
+  font-size: var(--ed-font-size-lg);
+  cursor: pointer;
+}
+
+.ed-health-panel__close-btn:hover {
+  color: var(--ed-text-primary);
+}
+
+/* ─── Summary ───────────────────────────────────────────────────────────────── */
+
+.ed-health-panel__summary {
+  display: flex;
+  gap: var(--spacing-4);
+  padding: var(--spacing-6) var(--spacing-8);
+  border-bottom: 1px solid var(--ed-border);
+  flex-shrink: 0;
+}
+
+.ed-health-panel__summary-item {
+  flex: 1;
+  text-align: center;
+}
+
+.ed-health-panel__summary-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-2);
+  width: 100%;
+  padding: var(--spacing-3) var(--spacing-4);
+  background-color: var(--ed-secondary);
+  border: 1px solid var(--ed-border);
+  border-radius: var(--ed-radius-card);
+  color: var(--ed-text-primary);
+  font-size: var(--ed-font-size-sm);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.ed-health-panel__summary-toggle:hover {
+  border-color: var(--ed-border-strong);
+  background-color: var(--ed-surface-elevated);
+}
+
+.ed-health-panel__summary-count {
+  margin-top: var(--spacing-2);
+  font-size: var(--ed-font-size-xs);
+  color: var(--ed-text-muted);
+}
+
+/* ─── Issues List ───────────────────────────────────────────────────────────── */
+
+.ed-health-panel__issues {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--spacing-6) var(--spacing-8);
+}
+
+.ed-health-panel__issues-section {
+  margin-bottom: var(--spacing-8);
+}
+
+.ed-health-panel__issues-title {
+  font-size: var(--ed-font-size-sm);
+  font-weight: 600;
+  margin: 0 0 var(--spacing-4) 0;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+}
+
+.ed-health-panel__scroll {
+  max-height: 300px;
+}
+
+.ed-health-panel__issue-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-3) var(--spacing-4);
+  background-color: var(--ed-secondary);
+  border: 1px solid var(--ed-border);
+  border-radius: var(--ed-radius-card);
+  margin-bottom: var(--spacing-2);
+  gap: var(--spacing-3);
+}
+
+.ed-health-panel__issue-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.ed-health-panel__issue-token {
+  font-family: var(--font-family-mono);
+  font-size: var(--ed-font-size-xs);
+  font-weight: 500;
+  color: var(--ed-text-primary);
+  margin-right: var(--spacing-2);
+}
+
+.ed-health-panel__issue-message {
+  font-size: var(--ed-font-size-xs);
+  color: var(--ed-text-secondary);
+}
+
+.ed-health-panel__issue-details {
+  display: block;
+  font-size: var(--ed-font-size-xs);
+  color: var(--ed-text-tertiary);
+  margin-top: var(--spacing-1);
+}
+
+.ed-health-panel__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-16) var(--spacing-8);
+  text-align: center;
+  color: var(--ed-text-muted);
+}
+
+.ed-health-panel__empty-message {
+  font-size: var(--ed-font-size-sm);
+  margin: 0;
+}
+
+/* ─── Footer ────────────────────────────────────────────────────────────────── */
+
+.ed-health-panel__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-6) var(--spacing-8);
+  border-top: 1px solid var(--ed-border);
+  flex-shrink: 0;
+}
+
+.ed-health-panel__metadata-coverage {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.ed-health-panel__metadata-label {
+  font-size: 13px;
+  color: var(--ed-text-muted);
+}
+
+.ed-health-panel__coverage-bar {
+  flex: 1;
+  max-width: 150px;
+  height: 8px;
+  background-color: var(--ed-surface);
+  border: 1px solid var(--ed-border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.ed-health-panel__coverage-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--ed-accent), var(--ed-success));
+  transition: width 0.3s ease;
+  border-radius: 4px;
+}
+
+.ed-health-panel__metadata-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ed-text-primary);
+  min-width: 35px;
+  text-align: right;
+}
+
+.ed-health-panel__metadata-label {
+  color: var(--ed-text-tertiary);
+}
+
+.ed-health-panel__metadata-value {
+  color: var(--ed-text-primary);
+  font-weight: 500;
+}

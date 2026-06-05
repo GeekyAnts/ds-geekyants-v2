@@ -8,6 +8,7 @@ import {
   useEffect,
   useRef,
   useId,
+  useState,
 } from 'react';
 import { Check, Minus } from 'lucide-react';
 import type { CheckboxProps, CheckboxSize } from './Checkbox.types';
@@ -63,6 +64,7 @@ export const Checkbox = memo(
     (
       {
         checked,
+        defaultChecked: defaultCheckedProp,
         indeterminate = false,
         size = 'md',
         error = false,
@@ -100,8 +102,24 @@ export const Checkbox = memo(
         [forwardedRef],
       );
 
+      const isControlled = checked !== undefined;
+      const [internalChecked, setInternalChecked] = useState(
+        isControlled ? checked : (defaultCheckedProp ?? false),
+      );
+
+      const handleChange = useCallback(
+        (e: React.ChangeEvent<HTMLInputElement>) => {
+          if (!isControlled) {
+            setInternalChecked(e.target.checked);
+          }
+          onChange?.(e);
+        },
+        [isControlled, onChange],
+      );
+
       const sz = sizeClasses[size];
-      const isCheckedOrIndeterminate = (checked ?? false) || indeterminate;
+      const effectiveChecked = isControlled ? checked : internalChecked;
+      const isCheckedOrIndeterminate = effectiveChecked || indeterminate;
 
       // Indicator box — carries all visual state; aria-hidden (screen readers use native input).
       // Focus ring uses peer-focus-visible: CSS — no JS state needed.
@@ -180,13 +198,14 @@ export const Checkbox = memo(
               ref={setRef}
               id={inputId}
               type="checkbox"
-              checked={checked}
+              checked={isControlled ? checked : undefined}
+              defaultChecked={isControlled ? undefined : defaultCheckedProp}
               disabled={disabled}
               required={required}
               aria-required={required || undefined}
               {...getErrorFieldProps(error, `${inputId}-error`)}
-              onChange={onChange}
-              readOnly={checked !== undefined && onChange == null}
+              onChange={handleChange}
+              readOnly={isControlled && onChange == null}
               className="peer absolute inset-0 w-full h-full opacity-0 m-0"
               {...rest}
             />

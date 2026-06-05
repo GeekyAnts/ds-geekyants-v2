@@ -225,13 +225,8 @@ export const SidebarProvider = memo(
           <div
             ref={ref}
             className={providerClasses}
-            style={
-              {
-                '--sidebar-width': '16rem',
-                '--sidebar-width-icon': 'var(--size-component-2xl)',
-                ...style,
-              } as React.CSSProperties
-            }
+            // Consumer style prop passthrough — intentional escape hatch for layout overrides
+            style={style as React.CSSProperties}
             {...rest}
           >
             {children}
@@ -575,7 +570,7 @@ export const SidebarMenuButton = memo(
                   'hover:text-[var(--sidebar-menu-button-text-hover)]',
                 ].join(' '),
             disabled
-              ? 'text-[var(--navitem-text-disabled)] cursor-not-allowed pointer-events-none'
+              ? 'text-[var(--sidebar-menu-button-text-disabled)] cursor-not-allowed pointer-events-none'
               : 'cursor-pointer',
             className,
           ]

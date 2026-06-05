@@ -97,10 +97,54 @@ level: atom
   </div>
 </ComponentPreview>
 
+## Edge Cases
+
+<ComponentPreview code={"import { SegmentedControl } from \"@geeklego/ui\"\n\nconst viewOptions = [\n  { value: \"grid\", label: \"Grid\" },\n  { value: \"list\", label: \"List\" },\n  { value: \"map\", label: \"Map\" },\n]\n\n{/* Long labels */}\n<SegmentedControl\n  options={[\n    { value: \"option1\", label: \"This is a very long option label\" },\n    { value: \"option2\", label: \"Another lengthy description here\" },\n  ]}\n  defaultValue=\"option1\"\n  aria-label=\"Long option test\"\n/>\n\n{/* Full width */}\n<SegmentedControl\n  options={viewOptions}\n  defaultValue=\"grid\"\n  fullWidth\n  aria-label=\"View mode\"\n/>\n\n{/* Interactive selection */}\n<SegmentedControl\n  options={viewOptions}\n  defaultValue=\"grid\"\n  aria-label=\"View mode\"\n/>\n\n{/* Outline variant */}\n<SegmentedControl\n  options={viewOptions}\n  defaultValue=\"grid\"\n  variant=\"outline\"\n  aria-label=\"View mode\"\n/>"}>
+  <div className="flex flex-col gap-[var(--spacing-layout-md)]">
+    <div className="flex flex-col gap-[var(--spacing-component-sm)]">
+      <p className="text-body-sm font-semibold">Long labels (wrapped)</p>
+      <SegmentedControl
+        options={[
+          {value:"option1",label:"This is a very long option label"},
+          {value:"option2",label:"Another lengthy description here"},
+        ]}
+        defaultValue="option1"
+        aria-label="Long option test"
+      />
+    </div>
+    <div className="flex flex-col gap-[var(--spacing-component-sm)]">
+      <p className="text-body-sm font-semibold">Full width layout</p>
+      <SegmentedControl
+        options={[{value:"grid",label:"Grid"},{value:"list",label:"List"},{value:"map",label:"Map"}]}
+        defaultValue="grid"
+        fullWidth
+        aria-label="View mode"
+      />
+    </div>
+    <div className="flex flex-col gap-[var(--spacing-component-sm)]">
+      <p className="text-body-sm font-semibold">Interactive selection</p>
+      <SegmentedControl
+        options={[{value:"grid",label:"Grid"},{value:"list",label:"List"},{value:"map",label:"Map"}]}
+        defaultValue="grid"
+        aria-label="View mode"
+      />
+    </div>
+    <div className="flex flex-col gap-[var(--spacing-component-sm)]">
+      <p className="text-body-sm font-semibold">Outline variant</p>
+      <SegmentedControl
+        options={[{value:"grid",label:"Grid"},{value:"list",label:"List"},{value:"map",label:"Map"}]}
+        defaultValue="grid"
+        variant="outline"
+        aria-label="View mode"
+      />
+    </div>
+  </div>
+</ComponentPreview>
+
 ## Dark Mode
 
-<ComponentPreview code={"<div data-theme=\"dark\" className=\"flex flex-col gap-4 p-8 bg-primary rounded-[var(--radius-component-lg)] max-w-2xl\">\n  <SegmentedControl options={options} defaultValue=\"grid\" aria-label=\"View mode\" />\n  <SegmentedControl options={options} defaultValue=\"list\" variant=\"outline\" aria-label=\"View mode\" />\n  <SegmentedControl options={options} defaultValue=\"grid\" disabled aria-label=\"View mode\" />\n</div>"}>
-  <div data-theme="dark" className="flex flex-col gap-4 p-8 bg-primary rounded-[var(--radius-component-lg)] max-w-2xl">
+<ComponentPreview code={"<div data-theme=\"dark\" className=\"flex flex-col gap-4 p-8 bg-[var(--color-bg-primary)] rounded-[var(--radius-component-lg)] max-w-2xl\">\n  <SegmentedControl options={options} defaultValue=\"grid\" aria-label=\"View mode\" />\n  <SegmentedControl options={options} defaultValue=\"list\" variant=\"outline\" aria-label=\"View mode\" />\n  <SegmentedControl options={options} defaultValue=\"grid\" disabled aria-label=\"View mode\" />\n</div>"}>
+  <div data-theme="dark" className="flex flex-col gap-4 p-8 bg-[var(--color-bg-primary)] rounded-[var(--radius-component-lg)] max-w-2xl">
     <SegmentedControl options={[{value:"grid",label:"Grid"},{value:"list",label:"List"},{value:"map",label:"Map"}]} defaultValue="grid" aria-label="View mode" />
     <SegmentedControl options={[{value:"grid",label:"Grid"},{value:"list",label:"List"},{value:"map",label:"Map"}]} defaultValue="list" variant="outline" aria-label="View mode" />
     <SegmentedControl options={[{value:"grid",icon:<Grid size={14} />,"aria-label":"Grid view"},{value:"list",icon:<List size={14} />,"aria-label":"List view"},{value:"filter",icon:<Filter size={14} />,"aria-label":"Filter view"}]} defaultValue="grid" aria-label="View mode" />

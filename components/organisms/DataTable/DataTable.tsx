@@ -1,5 +1,5 @@
 "use client"
-import { memo, useMemo, useCallback, useId } from 'react';
+import { forwardRef, memo, useMemo, useCallback, useId } from 'react';
 import { ChevronUp, ChevronDown, ChevronsUpDown, InboxIcon } from 'lucide-react';
 import type {
   DataTableProps,
@@ -58,7 +58,7 @@ function nextSortDirection(current: SortDirection): SortDirection {
 
 // ── Component ──────────────────────────────────────────────────────────────
 
-function DataTableComponent({
+const DataTableComponent = forwardRef<HTMLDivElement, DataTableProps>(({
   columns,
   data,
   rowKey,
@@ -76,7 +76,7 @@ function DataTableComponent({
   pagination,
   i18nStrings,
   className,
-}: DataTableProps): React.JSX.Element {
+}, ref): React.JSX.Element => {
   const i18n = useComponentI18n('dataTable', i18nStrings);
   const captionId = useId();
 
@@ -148,7 +148,7 @@ function DataTableComponent({
   );
 
   const tableClass = useMemo(
-    () => ['w-full border-collapse', cellText, 'text-[var(--data-table-row-text)]'].join(' '),
+    () => ['w-full border-collapse', cellText, 'text-[var(--data-table-row-text)]', 'min-w-[var(--data-table-min-width)]'].join(' '),
     [cellText],
   );
 
@@ -193,7 +193,7 @@ function DataTableComponent({
       role="region"
       aria-label={regionLabel}
       aria-busy={loading || undefined}
-      className={containerClass}
+      ref={ref}
     >
       {/* Horizontal scroll container */}
       <div className="overflow-x-auto w-full">
@@ -201,7 +201,6 @@ function DataTableComponent({
           className={tableClass}
           aria-labelledby={caption ? captionId : undefined}
           aria-label={!caption ? ariaLabel : undefined}
-          style={{ minWidth: 'var(--data-table-min-width)' }}
         >
           {/* Accessible caption — always sr-only; region label handles visual labelling */}
           {caption && (
@@ -428,9 +427,9 @@ function DataTableComponent({
           />
         </div>
       )}
-    </div>
-  );
-}
+     </div>
+   );
+});
 
 export const DataTable = memo(DataTableComponent);
 DataTable.displayName = 'DataTable';

@@ -255,7 +255,7 @@ export const DropdownMenu = memo(
             : isDestructive
               ? [
                   'text-[var(--dropdown-item-text-destructive)]',
-                  'bg-[var(--dropdown-item-bg)]',
+                  'bg-[var(--dropdown-item-bg-destructive)]',
                   'hover:bg-[var(--dropdown-item-bg-destructive-hover)]',
                   'hover:text-[var(--dropdown-item-text-destructive-hover)]',
                   'active:bg-[var(--dropdown-item-bg-destructive-hover)]',

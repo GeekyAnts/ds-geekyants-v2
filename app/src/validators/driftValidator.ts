@@ -1,0 +1,138 @@
+import type { ValidatorResult } from './types'
+import type { GeeklegoTokens } from '../types'
+
+interface DefaultTokenSnapshot {
+  tokens: Map<string, string>
+  loadedAt: number
+}
+
+const STORAGE_KEY = 'geeklego.editor.default.snapshot.v1'
+
+function loadDefaultSnapshot(): DefaultTokenSnapshot | null {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY)
+    if (stored) {
+      const parsed = JSON.parse(stored)
+      const tokens = new Map<string, string>()
+      for (const [k, v] of Object.entries(parsed.tokens || {})) {
+        if (typeof k === 'string' && typeof v === 'string') {
+          tokens.set(k, v)
+        }
+      }
+      return { tokens, loadedAt: parsed.loadedAt || Date.now() }
+    }
+  } catch {
+    // Ignore errors
+  }
+  return null
+}
+
+export function saveDefaultSnapshot(tokens: GeeklegoTokens): void {
+  const tokenMap = new Map<string, string>()
+
+  for (const [family, shades] of Object.entries(tokens.primitives.colors)) {
+    if (typeof shades === 'object' && shades !== null && !Array.isArray(shades)) {
+      for (const [shade, shadeValue] of Object.entries(shades)) {
+        tokenMap.set(`--color-${family}-${shade}`, shadeValue)
+      }
+    }
+  }
+
+  const primitiveKeys = [
+    'fontSize', 'fontFamily', 'lineHeight', 'letterSpacing', 'fontWeight',
+    'spacing', 'radius', 'borderWidth', 'opacity', 'zIndex', 'duration',
+    'easing', 'sizeScale', 'iconSize', 'contentFlexibility', 'colorShadowNeutral',
+    'breakpoints'
+  ] as const
+
+  for (const key of primitiveKeys) {
+    const data = tokens.primitives[key]
+    if (data && typeof data === 'object') {
+      for (const k of Object.keys(data)) {
+        const value = (data as Record<string, string>)[k]
+        if (value) {
+          tokenMap.set(`--${key.replace(/([A-Z])/g, '-$1').toLowerCase()}-${k}`, value)
+        }
+      }
+    }
+  }
+
+  const colorGroups = ['bg', 'surface', 'text', 'border', 'action', 'status', 'state'] as const
+  for (const group of colorGroups) {
+    if (tokens.semantics.light[group]) {
+      for (const k of Object.keys(tokens.semantics.light[group])) {
+        tokenMap.set(`--color-${group}-${k}`, tokens.semantics.light[group][k])
+      }
+    }
+  }
+
+  try {
+    const toStore = {
+      tokens: Object.fromEntries(tokenMap),
+      loadedAt: Date.now(),
+    }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(toStore))
+  } catch {
+    // Ignore storage errors
+  }
+}
+
+export function checkDrift(
+  tokens: GeeklegoTokens,
+  currentStaged: Map<string, string>
+): ValidatorResult[] {
+  const results: ValidatorResult[] = []
+
+  const snapshot = loadDefaultSnapshot()
+  if (!snapshot || snapshot.tokens.size === 0) {
+    return results
+  }
+
+  let driftedCount = 0
+
+  snapshot.tokens.forEach((originalValue, tokenName) => {
+    const currentValue = currentStaged.get(tokenName)
+    const defaultValue = getDefaultTokenValue(tokenName, tokens)
+
+    if (originalValue && currentValue && originalValue !== currentValue) {
+      driftedCount++
+    }
+  })
+
+  if (driftedCount > 0) {
+    results.push({
+      tokenName: '(global)',
+      severity: 'notice',
+      category: 'drift',
+      message: `Drifted from default by ${driftedCount} token${driftedCount > 1 ? 's' : ''}`,
+      details: `${driftedCount} tokens have staged changes from default snapshot`,
+    })
+  }
+
+  return results
+}
+
+function getDefaultTokenValue(tokenName: string, tokens: GeeklegoTokens): string | null {
+  for (const [family, shades] of Object.entries(tokens.primitives.colors)) {
+    if (typeof shades === 'object' && shades !== null && !Array.isArray(shades)) {
+      for (const [shade, shadeValue] of Object.entries(shades)) {
+        if (`--color-${family}-${shade}` === tokenName) {
+          return shadeValue
+        }
+      }
+    }
+  }
+
+  const colorGroups = ['bg', 'surface', 'text', 'border', 'action', 'status', 'state'] as const
+  for (const group of colorGroups) {
+    if (tokens.semantics.light[group]) {
+      for (const k of Object.keys(tokens.semantics.light[group])) {
+        if (`--color-${group}-${k}` === tokenName) {
+          return tokens.semantics.light[group][k]
+        }
+      }
+    }
+  }
+
+  return null
+}

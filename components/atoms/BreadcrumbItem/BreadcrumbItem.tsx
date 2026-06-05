@@ -41,7 +41,7 @@ export const BreadcrumbItem = memo(forwardRef<HTMLLIElement, BreadcrumbItemProps
   (
     {
       href,
-      current = false,
+      isActive = false,
       disabled = false,
       size = 'md',
       leftIcon,
@@ -53,7 +53,7 @@ export const BreadcrumbItem = memo(forwardRef<HTMLLIElement, BreadcrumbItemProps
     },
     ref,
   ) => {
-    const isLink = Boolean(href) && !current && !disabled;
+    const isLink = Boolean(href) && !isActive && !disabled;
     const safeHref = useMemo(() => sanitizeHref(href), [href]);
 
     const iconSlot = leftIcon ? (
@@ -73,7 +73,7 @@ export const BreadcrumbItem = memo(forwardRef<HTMLLIElement, BreadcrumbItemProps
           sizeClasses[size],
           className,
         ].filter(Boolean).join(' ')}
-        aria-current={current ? 'page' : undefined}
+        aria-current={isActive ? 'page' : undefined}
         {...(schema && {
           itemScope: true,
           itemProp: 'itemListElement',

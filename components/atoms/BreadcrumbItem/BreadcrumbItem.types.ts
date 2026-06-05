@@ -6,7 +6,7 @@ export interface BreadcrumbItemProps extends Omit<LiHTMLAttributes<HTMLLIElement
   /** URL this item links to. When provided (and not current/disabled), renders as an anchor. */
   href?: string;
   /** Marks as the current page. Renders non-interactive text with aria-current="page". */
-  current?: boolean;
+  isActive?: boolean;
   /** Disabled state. Non-interactive and visually muted. */
   disabled?: boolean;
   /** Text size. Defaults to 'md'. */

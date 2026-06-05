@@ -1,3 +1,13 @@
+// ─── rem → px annotation ──────────────────────────────────────────────────────
+
+/** Returns "1rem · 16px" for rem values, or the original string unchanged. */
+export function withPxAnnotation(value: string): string {
+  const match = value.match(/^([\d.]+)rem$/)
+  if (!match) return value
+  const px = Math.round(parseFloat(match[1]) * 16)
+  return `${value} · ${px}px`
+}
+
 // ─── Hex / RGB ────────────────────────────────────────────────────────────────
 
 export function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
@@ -127,7 +137,7 @@ function oklchToHex(L: number, C: number, H: number): string {
 
 // ─── Scale generation ─────────────────────────────────────────────────────────
 
-// L targets for each shade (Tailwind-compatible perceptual scale)
+// Shade keys that define the palette structure
 const SHADE_L: Record<number, number> = {
   50: 0.970, 100: 0.940, 200: 0.880,
   300: 0.800, 400: 0.680, 500: 0.570,
@@ -135,38 +145,43 @@ const SHADE_L: Record<number, number> = {
   900: 0.240, 950: 0.175,
 }
 
+// Perceptual lightness anchors for the scale extremes
+const OKLCH_L_MAX = 0.970
+const OKLCH_L_MIN = 0.175
+
 export function generateOklchScale(baseHex: string, includeZero = false): Record<string, string> {
   const lin = hexToLinearRgb(baseHex)
   if (!lin) return {}
   const { l: baseL, c: baseC, h } = linearRgbToOklch(...lin)
 
-  // Scale L values so the base color lands at shade 500
-  const nominalL = SHADE_L[500]
-  const scale = baseL / nominalL
-
   const result: Record<string, string> = {}
-
   if (includeZero) result['0'] = '#ffffff'
 
-  for (const [shadeStr, targetL] of Object.entries(SHADE_L)) {
+  for (const [shadeStr] of Object.entries(SHADE_L)) {
     const shade = Number(shadeStr)
-    // Remap lightness proportionally to base color
-    const l = Math.max(0.05, Math.min(0.99, targetL * scale))
 
-    // Taper chroma at light and dark extremes for natural look
-    let chromaFactor = 1.0
-    if (shade <= 100) chromaFactor = 0.25
-    else if (shade <= 200) chromaFactor = 0.50
-    else if (shade <= 300) chromaFactor = 0.75
-    else if (shade >= 900) chromaFactor = 0.60
-    else if (shade >= 800) chromaFactor = 0.80
+    // Lightness: use baseL at shade 500, interpolate smoothly to endpoints
+    const l = shade === 500
+      ? baseL
+      : shade < 500
+        ? baseL + (OKLCH_L_MAX - baseL) * easeOut((500 - shade) / 450)
+        : baseL + (OKLCH_L_MIN - baseL) * easeIn((shade - 500) / 450)
 
-    const c = baseC * chromaFactor
-    result[String(shade)] = oklchToHex(l, c, h)
+    // Chroma: smooth Gaussian falloff from peak at shade 500
+    const distance = Math.abs(shade - 500) / 450
+    const chromaFactor = Math.exp(-1.7 * distance * distance)
+    const c = Math.max(0, baseC * chromaFactor)
+
+    result[String(shade)] = oklchToHex(
+      Math.max(0.05, Math.min(0.99, l)), c, h,
+    )
   }
 
   return result
 }
+
+function easeOut(t: number): number { return 1 - Math.pow(1 - t, 1.5) }
+function easeIn(t: number): number { return Math.pow(t, 1.5) }
 
 // ─── rem ↔ px display conversion ─────────────────────────────────────────────
 

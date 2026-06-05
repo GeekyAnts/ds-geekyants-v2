@@ -15,10 +15,9 @@ A single-select group of radio buttons rendered inside a semantic `<fieldset>` +
 | `orientation` | `'vertical' \| 'horizontal'` | `'vertical'` | Direction the options are laid out. |
 | `size` | `'sm' \| 'md' \| 'lg'` | `'md'` | Size of each Radio indicator and label. |
 | `variant` | `'default' \| 'boxed'` | `'default'` | `'boxed'` draws a bordered container around the group. |
-| `error` | `boolean` | `false` | Error state — shifts Radio indicators to error colour. |
+| `error` | `string` | — | Error message string. When truthy, shifts Radio indicators to error colour and renders the message below the options. |
 | `required` | `boolean` | `false` | Marks all options as required. Appends SR-only "(required)" to the legend. |
-| `hint` | `string` | — | Helper text shown below options. Hidden when `errorMessage` is visible. |
-| `errorMessage` | `string` | — | Error message shown when `error=true`. |
+| `hint` | `string` | — | Helper text shown below options. Hidden when `error` is set. |
 | `disabled` | `boolean` | `false` | Disables all options. |
 | `i18nStrings` | `RadioGroupI18nStrings` | — | Per-instance string overrides. |
 
@@ -65,7 +64,7 @@ A single-select group of radio buttons rendered inside a semantic `<fieldset>` +
 | State | Behaviour |
 |-------|-----------|
 | Default | All options interactive |
-| Error | Radio indicators shift to error colour; `errorMessage` rendered with `role="alert"` |
+| Error | Radio indicators shift to error colour; error message rendered with `role="alert"` |
 | Disabled (group) | All options muted and non-interactive via native `<fieldset disabled>` |
 | Disabled (option) | Individual option muted; rest remain interactive |
 | Required | SR-only "(required)" appended to legend; `*` visible marker |
@@ -107,8 +106,7 @@ const [plan, setPlan] = useState('pro');
     { value: 'monthly', label: 'Monthly' },
     { value: 'annual', label: 'Annual (save 20%)' },
   ]}
-  error
-  errorMessage="Please select a billing cycle."
+  error="Please select a billing cycle."
   required
 />
 

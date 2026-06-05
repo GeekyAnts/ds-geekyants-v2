@@ -10,9 +10,9 @@ A pressable button with a persistent pressed/unpressed state, communicated via `
 
 | Prop | Type | Default | Description |
 |---|---|---|---|
-| `pressed` | `boolean` | — | Controlled pressed state. Omit for uncontrolled mode. |
-| `defaultPressed` | `boolean` | `false` | Initial state in uncontrolled mode. |
-| `onPressedChange` | `(pressed: boolean) => void` | — | Called with the new boolean whenever the state changes. |
+| `checked` | `boolean` | — | Controlled checked state. Omit for uncontrolled mode. |
+| `defaultChecked` | `boolean` | `false` | Initial state in uncontrolled mode. |
+| `onChange` | `(checked: boolean) => void` | — | Called with the new boolean whenever the state changes. |
 | `variant` | `'default' \| 'outline' \| 'ghost'` | `'default'` | Visual treatment strategy. |
 | `size` | `'sm' \| 'md' \| 'lg'` | `'md'` | Height and typography scale. |
 | `disabled` | `boolean` | `false` | Disables interaction and visual response. |
@@ -20,7 +20,7 @@ A pressable button with a persistent pressed/unpressed state, communicated via `
 | `aria-label` | `string` | — | **Required for icon-only usage** — provides the accessible name. |
 | `className` | `string` | — | Additional Tailwind classes (merged last). |
 
-All other native `<button>` attributes are forwarded (except `onClick` — use `onPressedChange`).
+All other native `<button>` attributes are forwarded (except `onClick` — use `onChange`).
 
 ---
 
@@ -91,7 +91,7 @@ Icon-only toggles are square — each size sets `min-w` equal to its height.
 
 ### Uncontrolled (internal state)
 ```tsx
-<Toggle defaultPressed={false} onPressedChange={(p) => console.log(p)}>
+<Toggle defaultChecked={false} onChange={(checked) => console.log(checked)}>
   Bold
 </Toggle>
 ```
@@ -100,7 +100,7 @@ Icon-only toggles are square — each size sets `min-w` equal to its height.
 ```tsx
 const [isBold, setIsBold] = useState(false);
 
-<Toggle pressed={isBold} onPressedChange={setIsBold} variant="outline">
+<Toggle checked={isBold} onChange={setIsBold} variant="outline">
   Bold
 </Toggle>
 ```
@@ -127,10 +127,10 @@ const [isBold, setIsBold] = useState(false);
 ### Toolbar group
 ```tsx
 <div role="toolbar" aria-label="Text formatting">
-  <Toggle aria-label="Bold" pressed={bold} onPressedChange={setBold} variant="ghost">
+  <Toggle aria-label="Bold" checked={bold} onChange={setBold} variant="ghost">
     <span aria-hidden="true"><Bold size="var(--size-icon-sm)" /></span>
   </Toggle>
-  <Toggle aria-label="Italic" pressed={italic} onPressedChange={setItalic} variant="ghost">
+  <Toggle aria-label="Italic" checked={italic} onChange={setItalic} variant="ghost">
     <span aria-hidden="true"><Italic size="var(--size-icon-sm)" /></span>
   </Toggle>
 </div>
@@ -147,7 +147,7 @@ const [isBold, setIsBold] = useState(false);
 
 | Attribute | Value | Purpose |
 |---|---|---|
-| `aria-pressed` | `true \| false` | Communicates pressed state to assistive technology. Screen readers announce "Bold, toggle button, pressed" or "not pressed". |
+| `aria-pressed` | `true \| false` | Communicates checked state to assistive technology. Screen readers announce "Bold, toggle button, checked" or "not checked". |
 | `aria-disabled` | `true` (when disabled) | Redundant with native `disabled` — ensures AT announces the state even on styled elements. |
 | `aria-label` | required for icon-only | Provides accessible name when children contain no visible text. |
 
@@ -157,18 +157,18 @@ const [isBold, setIsBold] = useState(false);
 |---|---|
 | `Tab` | Move focus to the toggle |
 | `Shift+Tab` | Move focus away from the toggle |
-| `Space` | Toggle the pressed state |
-| `Enter` | Toggle the pressed state |
+| `Space` | Toggle the checked state |
+| `Enter` | Toggle the checked state |
 
 ### Screen reader announcement
-When focused: **"[label], toggle button, [pressed/not pressed]"**
-After activation: state re-announced — **"[label], toggle button, pressed"** or **"not pressed"**.
+When focused: **"[label], toggle button, [checked/not checked]"**
+After activation: state re-announced — **"[label], toggle button, checked"** or **"not checked"**.
 
 ### Decorative icons
 All icons inside Toggle must be wrapped with `aria-hidden="true"` to prevent double-announcement. The accessible name must come from either the text children or an `aria-label` prop on the button.
 
 ### Non-colour state cue
-Pressed state always changes **both** a background/fill property **and** a border or text colour — never colour alone. This satisfies WCAG 1.4.1 (Use of Color).
+Checked state always changes **both** a background/fill property **and** a border or text colour — never colour alone. This satisfies WCAG 1.4.1 (Use of Color).
 
 ### Touch target
 All sizes meet WCAG 2.5.8 (24×24px minimum). `sm` height is 32px; `md` is 40px; `lg` is 48px.

@@ -127,19 +127,27 @@ export const Popover = memo(
           );
         }
 
-        // Fallback: wrap raw content in an accessible button
+        // Fallback: wrap raw content in a non-<button> trigger element so that
+        // RSC-serialized elements (which may slip past isElementLike) rendering
+        // a native <button> don't cause a nested-button hydration error.
         return (
-          <button
+          <span
             id={triggerId}
-            type="button"
+            role="button"
+            tabIndex={0}
             aria-haspopup="dialog"
             aria-expanded={isOpen}
             aria-controls={panelId}
             onClick={toggle}
-            className="focus-visible:outline-none focus-visible:focus-ring"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                toggle();
+              }
+            }}
           >
             {trigger}
-          </button>
+          </span>
         );
       }, [trigger, triggerId, isOpen, panelId, toggle]);
 
@@ -155,12 +163,11 @@ export const Popover = memo(
           [
             'absolute z-[var(--popover-panel-z)]',
             placementClasses[placement] ?? placementClasses['bottom-start'],
-            'min-w-[var(--popover-panel-min-width)] max-w-[var(--popover-panel-max-width)] w-max',
+            'min-w-[var(--popover-panel-min-width)] max-w-[var(--popover-panel-max-width)]',
             'bg-[var(--popover-panel-bg)]',
             'border border-[var(--popover-panel-border)]',
             'rounded-[var(--popover-panel-radius)]',
             'shadow-[var(--popover-panel-shadow)]',
-            'overflow-hidden',
             'transition-default',
             isOpen
               ? 'opacity-100 pointer-events-auto'
@@ -207,7 +214,10 @@ export const Popover = memo(
               >
                 <HeadingTag
                   id={titleId}
-                  className="text-body-md text-[var(--popover-title-text)] font-semibold truncate-label"
+                  className={[
+                    'text-body-md text-[var(--popover-title-text)] font-semibold',
+                    'truncate-label',
+                  ].join(' ')}
                 >
                   {title}
                 </HeadingTag>
@@ -233,6 +243,7 @@ export const Popover = memo(
                 SECTION_PX,
                 SECTION_PY,
                 'text-body-sm text-[var(--popover-body-text)]',
+                'content-flex',
               ].join(' ')}
             >
               {children}
@@ -245,6 +256,7 @@ export const Popover = memo(
                   SECTION_PX,
                   SECTION_PY,
                   'border-t border-[var(--popover-divider)]',
+                  'content-flex',
                 ].join(' ')}
               >
                 {footerContent}

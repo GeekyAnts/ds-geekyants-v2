@@ -67,9 +67,9 @@ All other `InputHTMLAttributes<HTMLInputElement>` props (`aria-label`, `aria-des
 
 | Size | Indicator | Token |
 |---|---|---|
-| `sm` | 14 px | `--checkbox-size-sm` — `--size-control-indicator-sm` |
-| `md` | 16 px | `--checkbox-size-md` — `--size-control-indicator-md` |
-| `lg` | 20 px | `--checkbox-size-lg` — `--size-control-indicator-lg` |
+| `sm` | 14 px | `--checkbox-size-sm` — `--control-indicator-size-sm` |
+| `md` | 16 px | `--checkbox-size-md` — `--control-indicator-size-md` |
+| `lg` | 20 px | `--checkbox-size-lg` — `--control-indicator-size-lg` |
 
 ---
 

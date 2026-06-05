@@ -1,16 +1,9 @@
 import type { InputHTMLAttributes } from 'react';
 import type { InputVariant, InputSize } from '../../atoms/Input/Input.types';
+import type { DateInputI18nStrings } from '../../utils/i18n';
 
 export type { InputVariant, InputSize };
-
-export interface DateInputI18nStrings {
-  /** Placeholder text for the date input. Defaults to 'MM/DD/YYYY' or locale variant. */
-  placeholder?: string;
-  /** Error message for invalid date format. Defaults to 'Please enter a valid date.' */
-  invalidDateMessage?: string;
-  /** Error message for required field. Defaults to 'Date is required.' */
-  requiredMessage?: string;
-}
+export type { DateInputI18nStrings };
 
 export interface DateInputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'size' | 'type'> {
   /** Label text for the field. Required for accessibility. */
@@ -21,13 +14,13 @@ export interface DateInputProps extends Omit<InputHTMLAttributes<HTMLInputElemen
    * Validation error message. When set, switches the input to its error state
    * and replaces the hint text. Announced immediately via `role="alert"`.
    */
-  errorMessage?: string;
+  error?: string;
   /** Height and typography scale. Defaults to 'md'. */
   size?: InputSize;
   /** Visual style variant. Defaults to 'default'. */
   variant?: InputVariant;
   /** Shows loading spinner and disables interaction. */
-  isLoading?: boolean;
+  loading?: boolean;
   /**
    * Additional class names applied to the outer wrapper `<div>`.
    * Use this to control width or layout placement of the entire field group.

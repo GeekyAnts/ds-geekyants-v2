@@ -19,8 +19,8 @@ SearchBar does **not** import the Input atom internally — the atom's `rightIco
 | `onClear` | `() => void` | — | Fires when the clear button (×) is clicked. |
 | `searchButton` | `ReactNode` | — | Optional `<Button>` rendered to the right of the input field. |
 | `disabled` | `boolean` | `false` | Disables the input and clear button. |
-| `isLoading` | `boolean` | `false` | Shows a spinner in place of the clear button. Sets `aria-busy`. |
-| `error` | `boolean` | `false` | Applies error border styling. Sets `aria-invalid`. |
+| `loading` | `boolean` | `false` | Shows a spinner in place of the clear button. Sets `aria-busy`. |
+| `error` | `string` | — | Error message string. When truthy, applies error border styling, sets `aria-invalid`, and renders the message below the field. |
 | `label` | `string` | i18n `'Search'` | Visible label above the field. Also used as the landmark `aria-label`. |
 | `labelHidden` | `boolean` | `false` | Renders the label as `sr-only` — hidden visually, present for screen readers. |
 | `placeholder` | `string` | resolved `label` | Input placeholder. Defaults to the resolved label value. |
@@ -47,13 +47,14 @@ All other `InputHTMLAttributes` are forwarded to the inner `<input type="search"
 | `--search-bar-shadow` / `--search-bar-shadow-hover` | Shadow (none at rest; elevated on focus-within) |
 | `--search-bar-icon-color` | Search icon color |
 | `--search-bar-icon-size-{sm\|md\|lg}` | Search icon dimensions |
+| `--search-bar-icon-text-gap` | Gap between search icon and input text/placeholder |
 | `--search-bar-clear-color` / `--search-bar-clear-color-hover` | Clear button icon color |
 | `--search-bar-clear-bg-hover` | Clear button background on hover |
 | `--search-bar-clear-radius` | Clear button border radius |
 | `--search-bar-clear-size-{sm\|md\|lg}` | Clear button icon dimensions |
 | `--search-bar-height-{sm\|md\|lg}` | Component height |
 | `--search-bar-px-{sm\|md\|lg}` | Input horizontal padding |
-| `--search-bar-icon-offset-{sm\|md\|lg}` | Input start padding to clear the search icon |
+| `--search-bar-icon-offset-{sm\|md\|lg}` | Computed: px + icon size + icon-text-gap (derived, not user-facing) |
 | `--search-bar-clear-pe-{sm\|md\|lg}` | Input end padding when clear button is visible |
 | `--search-bar-clear-inset-{sm\|md\|lg}` | Clear button inline-end inset position |
 | `--search-bar-min-width` | Minimum width for responsive layout protection |
@@ -161,10 +162,10 @@ The `role="search"` landmark is announced by screen readers as a distinct region
 | `aria-label` | Outer `<div>` | Resolved from `label` prop or i18n default |
 | `htmlFor` | `<label>` | Associated with input via `id` |
 | `type="search"` | `<input>` | Native search semantics; browser may add a system clear button (suppressed by SearchBar's own clear) |
-| `aria-busy` | `<input>` | `true` when `isLoading` is set |
+| `aria-busy` | `<input>` | `true` when `loading` is set |
 | `aria-disabled` | `<input>` | `true` when `disabled` is set |
-| `aria-invalid` | `<input>` | `"true"` when `error` is set |
-| `aria-describedby` | `<input>` | Points to the error message span when `error` is set |
+| `aria-invalid` | `<input>` | `"true"` when `error` is truthy |
+| `aria-describedby` | `<input>` | Points to the error message span when `error` is truthy |
 | `aria-label` | Clear `<button>` | Resolved from i18n `clearLabel` — announces as "Clear search, button" |
 | `aria-hidden` | Search icon `<span>` | `true` — decorative icon, not announced |
 | `aria-hidden` | Spinner `<span>` | `true` — loading state communicated via `aria-busy` on input |

@@ -11,7 +11,7 @@ An L1 Atom that communicates task completion or loading state. Supports determin
 | `value` | `number \| undefined` | `undefined` | Current progress (0–`max`). Omit for indeterminate state. |
 | `max` | `number` | `100` | Maximum value the progress can reach. |
 | `variant` | `'default' \| 'success' \| 'warning' \| 'error' \| 'neutral'` | `'default'` | Fill color signalling semantic meaning. |
-| `size` | `'xs' \| 'sm' \| 'md' \| 'lg'` | `'md'` | Track height (2px / 4px / 8px / 16px). |
+| `size` | `'xs' \| 'sm' \| 'md' \| 'lg' \| 'xl'` | `'md'` | Track height (2px / 4px / 8px / 16px / 32px). |
 | `rounded` | `boolean` | `true` | Pill-shaped (fully rounded) track and fill ends. |
 | `label` | `string` | — | Accessible name (always used as `aria-label`; optionally rendered visually). |
 | `showLabel` | `boolean` | `false` | Render the `label` string as visible text above the bar. |
@@ -39,6 +39,7 @@ All other `HTMLDivElement` attributes are forwarded to the outer wrapper div.
 | `--progress-height-sm` | `var(--spacing-1)` — 4px |
 | `--progress-height-md` | `var(--spacing-2)` — 8px |
 | `--progress-height-lg` | `var(--spacing-4)` — 16px |
+| `--progress-height-xl` | `var(--size-fixed-8)` — 32px |
 
 ---
 
@@ -62,6 +63,7 @@ All other `HTMLDivElement` attributes are forwarded to the outer wrapper div.
 | `sm` | 4px | Compact contexts, table rows, dense UI |
 | `md` | 8px | Default — standard form and card usage |
 | `lg` | 16px | High-visibility progress, onboarding flows |
+| `xl` | 32px | Hero sections, full-page loading overlays |
 
 ---
 

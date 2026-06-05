@@ -44,9 +44,9 @@ level: molecule
 
 ## Zone Error State
 
-<ComponentPreview code={"import { FileUpload } from \"@geeklego/ui\"\n\n<div className=\"max-w-lg\">\n  <FileUpload\n    error\n    errorMessage=\"Only PNG and JPG files are accepted.\"\n    hint=\"PNG, JPG up to 10 MB\"\n  />\n</div>"}>
+<ComponentPreview code={"import { FileUpload } from \"@geeklego/ui\"\n\n<div className=\"max-w-lg\">\n  <FileUpload\n    error=\"Only PNG and JPG files are accepted.\"\n    hint=\"PNG, JPG up to 10 MB\"\n  />\n</div>"}>
   <div className="max-w-lg">
-    <FileUpload error errorMessage="Only PNG and JPG files are accepted." hint="PNG, JPG up to 10 MB" />
+    <FileUpload error="Only PNG and JPG files are accepted." hint="PNG, JPG up to 10 MB" />
   </div>
 </ComponentPreview>
 
@@ -84,8 +84,7 @@ level: molecule
     { name: "maxFiles", type: "number", defaultValue: "—", description: "Cap on accepted files in multiple mode." },
     { name: "maxFileSize", type: "number", defaultValue: "—", description: "Max file size in bytes. Files over this limit are added with status 'error'." },
     { name: "disabled", type: "boolean", defaultValue: "false", description: "Disables the zone, input, and all remove buttons." },
-    { name: "error", type: "boolean", defaultValue: "false", description: "Puts the drop zone in error visual state (red border)." },
-    { name: "errorMessage", type: "string", defaultValue: "—", description: "Error text shown below the zone when error is true." },
+    { name: "error", type: "string", defaultValue: "—", description: "Error message string. When truthy, puts the drop zone in error visual state (red border) and renders the message below the zone." },
     { name: "hint", type: "string", defaultValue: "—", description: "Secondary hint inside the zone, e.g. \"PNG, JPG up to 5 MB\"." },
     { name: "files", type: "FileUploadFile[]", defaultValue: "—", description: "Controlled file list. Each entry carries id, File object, and optional status/progress. Omit for uncontrolled mode." },
     { name: "onFilesChange", type: "(files: FileUploadFile[]) => void", defaultValue: "—", description: "Called with the full updated list when files are added." },
@@ -100,7 +99,7 @@ level: molecule
 - `<label>` element wraps the drop zone — clicking anywhere in the zone activates the hidden `<input type="file">`
 - Hidden `<input type="file">` receives `aria-label` from `i18nStrings.inputLabel` (default: "Upload files")
 - `aria-disabled` set on both the `<label>` and `<input>` when `disabled` is true
-- `aria-invalid` and `aria-describedby` applied to the input via `getErrorFieldProps()` when `error` and `errorMessage` are set
+- `aria-invalid` and `aria-describedby` applied to the input via `getErrorFieldProps()` when `error` is set
 - File list renders as `<ul aria-label="Selected files">` with each file as `<li>`
 - File meta paragraph uses `aria-live="polite" aria-atomic="true"` to announce status changes (Done, Uploading, error)
 - Zone error message uses `role="alert"` for immediate announcement

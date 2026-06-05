@@ -80,18 +80,9 @@ level: atom
 
 <ComponentPreview code={"import { Badge } from \"@geeklego/ui\"\n\n<Badge variant=\"soft\" color=\"success\">\n  <span aria-hidden=\"true\" className=\"inline-block w-[6px] h-[6px] rounded-full bg-current\" />\n  Active\n</Badge>"}>
   <div className="flex items-center gap-3">
-    <Badge variant="soft" color="success">
-      <span aria-hidden="true" className="inline-block w-[6px] h-[6px] rounded-full bg-current" />
-      Active
-    </Badge>
-    <Badge variant="soft" color="warning">
-      <span aria-hidden="true" className="inline-block w-[6px] h-[6px] rounded-full bg-current" />
-      Pending
-    </Badge>
-    <Badge variant="soft" color="error">
-      <span aria-hidden="true" className="inline-block w-[6px] h-[6px] rounded-full bg-current" />
-      Failed
-    </Badge>
+    <Badge variant="soft" color="success"><span aria-hidden="true" className="inline-block w-[6px] h-[6px] rounded-full bg-current" /> Active</Badge>
+    <Badge variant="soft" color="warning"><span aria-hidden="true" className="inline-block w-[6px] h-[6px] rounded-full bg-current" /> Pending</Badge>
+    <Badge variant="soft" color="error"><span aria-hidden="true" className="inline-block w-[6px] h-[6px] rounded-full bg-current" /> Failed</Badge>
   </div>
 </ComponentPreview>
 
@@ -117,8 +108,8 @@ level: atom
 
 ## Dark Mode
 
-<ComponentPreview code={"<div data-theme=\"dark\" className=\"bg-primary p-8 rounded-lg max-w-2xl\">\n  <div className=\"flex items-center gap-3 flex-wrap\">\n    <Badge variant=\"solid\" color=\"success\">Success</Badge>\n    <Badge variant=\"soft\" color=\"warning\">Warning</Badge>\n    <Badge variant=\"dot\" color=\"error\" dotLabel=\"offline\" />\n  </div>\n</div>"}>
-  <div data-theme="dark" className="bg-primary p-8 rounded-lg max-w-2xl">
+<ComponentPreview code={"<div data-theme=\"dark\" className=\"bg-[var(--color-bg-primary)] p-8 rounded-lg max-w-2xl\">\n  <div className=\"flex items-center gap-3 flex-wrap\">\n    <Badge variant=\"solid\" color=\"success\">Success</Badge>\n    <Badge variant=\"soft\" color=\"warning\">Warning</Badge>\n    <Badge variant=\"dot\" color=\"error\" dotLabel=\"offline\" />\n  </div>\n</div>"}>
+  <div data-theme="dark" className="bg-[var(--color-bg-primary)] p-8 rounded-lg max-w-2xl">
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-2">
         <span className="text-body-sm text-[var(--color-text-tertiary)]">solid</span>

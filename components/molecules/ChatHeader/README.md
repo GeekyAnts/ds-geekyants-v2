@@ -96,6 +96,7 @@ import { Phone, X } from 'lucide-react';
 | `--chat-header-px` | Horizontal padding (inline start/end) |
 | `--chat-header-py` | Vertical padding (block) |
 | `--chat-header-gap` | Gap between avatar, info column, and actions |
+| `--chat-header-title-gap` | Vertical gap between participant name and status row |
 | `--chat-header-action-gap` | Gap between individual action buttons |
 | `--chat-header-min-width` | Minimum width of the header |
 | `--chat-header-title-color` | Participant name text color |

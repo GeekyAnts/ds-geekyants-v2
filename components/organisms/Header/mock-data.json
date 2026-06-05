@@ -1,5 +1,7 @@
 {
   "default": {
+    "variant": "default",
+    "position": "sticky",
     "schema": false,
     "i18nStrings": {
       "navLabel": "Primary",
@@ -21,65 +23,62 @@
 
   "variants": [
     {
-      "name": "Minimal",
-      "description": "Brand + CTA only, no nav",
-      "brand": { "href": "/", "name": "Geeklego" },
-      "nav": [],
-      "actions": [
-        { "type": "button", "variant": "primary", "label": "Get started" }
-      ]
-    },
-    {
-      "name": "Standard",
-      "description": "Brand + nav + actions",
+      "name": "Default",
+      "description": "Surface bg, bottom border — standard website header",
+      "variant": "default",
       "brand": { "href": "/", "name": "Geeklego" },
       "nav": [
         { "href": "/", "label": "Home", "isActive": true },
-        { "href": "/dashboard", "label": "Dashboard" },
-        { "href": "/docs", "label": "Docs" },
-        { "href": "/components", "label": "Components" }
+        { "href": "/dashboard", "label": "Dashboard" }
       ],
       "actions": [
-        { "type": "button", "variant": "ghost", "label": "Sign in" },
         { "type": "button", "variant": "primary", "label": "Get started" }
       ]
     },
     {
-      "name": "App Shell",
-      "description": "Nav + icon actions + avatar",
+      "name": "Transparent",
+      "description": "No background or border — blends with parent surface",
+      "variant": "transparent",
       "brand": { "href": "/", "name": "Geeklego" },
       "nav": [
-        { "href": "/", "label": "Dashboard", "isActive": true },
-        { "href": "/settings", "label": "Settings" },
-        { "href": "/help", "label": "Help" }
+        { "href": "/", "label": "Home", "isActive": true },
+        { "href": "/about", "label": "About" }
       ],
       "actions": [
-        { "type": "button", "variant": "ghost", "iconOnly": true, "label": "Notifications" },
-        { "type": "avatar", "initials": "JD", "size": "sm" }
+        { "type": "button", "variant": "primary", "label": "Get started" }
+      ]
+    },
+    {
+      "name": "Floating",
+      "description": "Overlay background, subtle border, shadow — for fixed headers",
+      "variant": "floating",
+      "brand": { "href": "/", "name": "Geeklego" },
+      "nav": [
+        { "href": "/", "label": "Home", "isActive": true },
+        { "href": "/features", "label": "Features" },
+        { "href": "/pricing", "label": "Pricing" }
+      ],
+      "actions": [
+        { "type": "button", "variant": "primary", "label": "Get started" }
       ]
     }
   ],
 
-  "sizes": [
+  "positions": [
     {
-      "name": "Icon + label nav",
-      "description": "NavItem atoms with icon and label",
-      "nav": [
-        { "href": "/", "label": "Home", "icon": "Home", "isActive": true },
-        { "href": "/dashboard", "label": "Dashboard", "icon": "LayoutDashboard" },
-        { "href": "/docs", "label": "Docs", "icon": "BookOpen" }
-      ]
+      "name": "Sticky",
+      "description": "Sticks to top on scroll — default",
+      "position": "sticky"
     },
     {
-      "name": "Label-only nav",
-      "description": "NavItem atoms with label only, no icon",
-      "nav": [
-        { "href": "/", "label": "Home", "isActive": true },
-        { "href": "/dashboard", "label": "Dashboard" },
-        { "href": "/docs", "label": "Docs" },
-        { "href": "/components", "label": "Components" },
-        { "href": "/about", "label": "About" }
-      ]
+      "name": "Static",
+      "description": "Flows in normal document order",
+      "position": "static"
+    },
+    {
+      "name": "Fixed",
+      "description": "Fixed to viewport top, removed from flow",
+      "position": "fixed"
     }
   ],
 

@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  forwardRef,
   memo,
   useState,
   useId,
@@ -309,7 +310,7 @@ TabsPanelComp.displayName = 'TabsPanel';
 
 // ── Compound component — attach slots as static properties ────────────────────
 
-const TabsRoot = memo(({
+const TabsRoot = memo(forwardRef<HTMLDivElement, TabsProps>(({
   value: controlledValue,
   defaultValue = '',
   onChange,
@@ -322,7 +323,7 @@ const TabsRoot = memo(({
   className,
   children,
   ...rest
-}: TabsProps) => {
+}, ref) => {
   const i18n = useComponentI18n('tabs', i18nStrings);
   const baseId = useId();
 
@@ -387,12 +388,12 @@ const TabsRoot = memo(({
 
   return (
     <TabsContext.Provider value={contextValue}>
-      <div className={rootClasses} {...rest}>
+      <div ref={ref} className={rootClasses} {...rest}>
         {children}
       </div>
     </TabsContext.Provider>
   );
-});
+}));
 TabsRoot.displayName = 'Tabs';
 
 export const Tabs = Object.assign(TabsRoot, {

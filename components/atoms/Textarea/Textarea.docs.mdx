@@ -70,9 +70,9 @@ level: atom
 
 ## Loading
 
-<ComponentPreview code={"import { Textarea } from \"@geeklego/ui\"\n\n<Textarea placeholder=\"Processing\u2026\" isLoading rows={3} />"}>
+<ComponentPreview code={"import { Textarea } from \"@geeklego/ui\"\n\n<Textarea placeholder=\"Processing\u2026\" loading rows={3} />"}>
   <div className="w-80">
-      <Textarea placeholder="Processing…" isLoading rows={3} />
+      <Textarea placeholder="Processing…" loading rows={3} />
     </div>
 </ComponentPreview>
 
@@ -97,13 +97,13 @@ level: atom
 
 ## Dark Mode
 
-<ComponentPreview code={"<div data-theme=\"dark\" className=\"flex flex-col gap-4 p-8 bg-primary rounded-[var(--radius-component-lg)] max-w-2xl w-96\">\n  <Textarea variant=\"default\" placeholder=\"Default\" rows={3} />\n  <Textarea variant=\"filled\" placeholder=\"Filled\" rows={3} />\n  <Textarea placeholder=\"Error\" error rows={3} />\n  <Textarea placeholder=\"Disabled\" disabled rows={3} />\n</div>"}>
-  <div data-theme="dark" className="flex flex-col gap-4 p-8 bg-primary rounded-[var(--radius-component-lg)] max-w-2xl w-96">
+<ComponentPreview code={"<div data-theme=\"dark\" className=\"flex flex-col gap-4 p-8 bg-[var(--color-bg-primary)] rounded-[var(--radius-component-lg)] max-w-2xl w-96\">\n  <Textarea variant=\"default\" placeholder=\"Default\" rows={3} />\n  <Textarea variant=\"filled\" placeholder=\"Filled\" rows={3} />\n  <Textarea placeholder=\"Error\" error rows={3} />\n  <Textarea placeholder=\"Disabled\" disabled rows={3} />\n</div>"}>
+  <div data-theme="dark" className="flex flex-col gap-4 p-8 bg-[var(--color-bg-primary)] rounded-[var(--radius-component-lg)] max-w-2xl w-96">
       <Textarea variant="default" placeholder="Default" rows={3} />
       <Textarea variant="filled" placeholder="Filled" rows={3} />
       <Textarea variant="flushed" placeholder="Flushed" rows={3} />
       <Textarea variant="default" placeholder="Error state" error rows={3} />
-      <Textarea variant="default" placeholder="Loading…" isLoading rows={3} />
+      <Textarea variant="default" placeholder="Loading…" loading rows={3} />
       <Textarea variant="default" placeholder="Disabled" disabled rows={3} />
     </div>
 </ComponentPreview>
@@ -116,7 +116,7 @@ level: atom
     { name: "size", type: "'sm' | 'md' | 'lg'", defaultValue: "'md'", description: "Padding and typography scale." },
     { name: "resize", type: "'none' | 'vertical' | 'horizontal' | 'both'", defaultValue: "'vertical'", description: "Resize handle behaviour." },
     { name: "error", type: "boolean", defaultValue: "false", description: "Error state — shows error border and sets aria-invalid." },
-    { name: "isLoading", type: "boolean", defaultValue: "false", description: "Loading state — shows spinner and disables interaction." },
+    { name: "loading", type: "boolean", defaultValue: "false", description: "Loading state — shows spinner and disables interaction." },
     { name: "rows", type: "number", defaultValue: "4", description: "Number of visible text rows." },
     { name: "disabled", type: "boolean", defaultValue: "false", description: "Disables interaction." },
     { name: "placeholder", type: "string", defaultValue: "—", description: "Placeholder text." },
@@ -130,7 +130,7 @@ level: atom
 - Renders a native `<textarea>` — full browser and assistive technology support
 - Always associate with a `<label>` via `htmlFor` + `id`, or pass `aria-label` for unlabeled textareas
 - `aria-invalid="true"` set when `error` is true — pair with `aria-describedby` pointing to an error message
-- `aria-busy="true"` set when `isLoading` is true
+- `aria-busy="true"` set when `loading` is true
 - `disabled` sets both the HTML `disabled` attribute and `aria-disabled`
 
 ### Keyboard Interaction

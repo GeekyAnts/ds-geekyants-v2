@@ -1,0 +1,214 @@
+.ed-component-page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 24px 28px 80px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.ed-component-preview {
+  border: 1px solid var(--ed-border);
+  background: var(--ed-bg-panel);
+  padding: 20px;
+  margin-bottom: 0;
+  border-radius: var(--ed-radius-lg);
+  box-shadow: var(--ed-shadow-xs);
+}
+
+/* ── Token table shell ── */
+.ed-comptok-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 18px 13px;
+  border-bottom: 1px solid var(--ed-border);
+}
+
+.ed-comptok-title {
+  font-size: var(--ed-text-sm);
+  font-weight: var(--ed-weight-semibold);
+  color: var(--ed-text-secondary);
+}
+
+.ed-comptok-count {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ed-text-disabled);
+  background: var(--ed-bg-subtle);
+  padding: 1px 7px;
+  border-radius: 10px;
+}
+
+.ed-comptok-empty {
+  padding: 32px;
+  text-align: center;
+  color: var(--ed-text-muted);
+  font-size: var(--ed-text-sm);
+}
+
+.ed-comptok-table {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Variant tabs ── */
+.ed-comptok-tabs {
+  display: flex;
+  gap: 0;
+  padding: 0 18px;
+  border-bottom: 1px solid var(--ed-border);
+  background: var(--ed-bg-subtle);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.ed-comptok-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.ed-comptok-tab {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 9px 12px 8px;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  color: var(--ed-text-muted);
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: color var(--ed-motion-fast), border-color var(--ed-motion-fast);
+  margin-bottom: -1px;
+}
+.ed-comptok-tab:hover {
+  color: var(--ed-text-secondary);
+}
+.ed-comptok-tab--active {
+  color: var(--ed-accent);
+  border-bottom-color: var(--ed-accent);
+  font-weight: 600;
+}
+
+.ed-comptok-tab-label {
+  letter-spacing: 0.01em;
+}
+
+.ed-comptok-tab-count {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--ed-text-disabled);
+  background: var(--ed-surface);
+  padding: 1px 5px;
+  border-radius: 9px;
+}
+
+/* ── Category section ── */
+.ed-comptok-category {
+  border-bottom: 1px solid var(--ed-border-soft);
+}
+.ed-comptok-category:last-child {
+  border-bottom: none;
+}
+
+.ed-comptok-category-header {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  width: 100%;
+  padding: 10px 18px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background var(--ed-motion-fast);
+}
+.ed-comptok-category-header:hover {
+  background: var(--ed-bg-subtle);
+}
+
+.ed-comptok-category-icon {
+  font-size: 12px;
+  line-height: 1;
+  opacity: 0.6;
+  flex-shrink: 0;
+}
+
+.ed-comptok-category-name {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ed-text-secondary);
+  flex: 1;
+}
+
+.ed-comptok-category-count {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--ed-text-disabled);
+  background: var(--ed-bg-subtle);
+  padding: 1px 6px;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+.ed-comptok-category-chevron {
+  font-size: 14px;
+  color: var(--ed-text-muted);
+  flex-shrink: 0;
+  width: 16px;
+  text-align: center;
+}
+
+/* ── Token rows ── */
+.ed-comptok-token-list {
+  display: flex;
+  flex-direction: column;
+  padding: 2px 0 8px;
+}
+
+.ed-comptok-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 7px 18px 7px 36px;
+  cursor: pointer;
+  transition: background var(--ed-motion-fast);
+  border-left: 2px solid transparent;
+}
+.ed-comptok-row:hover {
+  background: var(--ed-bg-subtle);
+}
+
+.ed-comptok-row--selected {
+  background: color-mix(in srgb, var(--ed-accent) 8%, transparent);
+  border-left-color: var(--ed-accent);
+}
+.ed-comptok-row--selected:hover {
+  background: color-mix(in srgb, var(--ed-accent) 12%, transparent);
+}
+
+.ed-comptok-row-name {
+  font-size: 12px;
+  font-family: var(--ed-font-mono, monospace);
+  color: var(--ed-text);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ed-comptok-row-value {
+  font-size: 11px;
+  font-family: var(--ed-font-mono, monospace);
+  color: var(--ed-text-muted);
+  flex-shrink: 0;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: right;
+}

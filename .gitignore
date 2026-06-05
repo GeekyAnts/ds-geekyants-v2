@@ -18,6 +18,7 @@ Thumbs.db
 *.swo
 .idea/
 .vscode/
+.cursor/
 
 # ─── Claude Code (local settings) ──────────────────────────────────────────
 .claude/settings.local.json
@@ -26,9 +27,12 @@ Thumbs.db
 # ─── Logs & cache ────────────────────────────────────────────────────────────
 *.log
 npm-debug.log*
+pnpm-debug.log*
 .cache/
 .eslintcache
 .turbo/
+.vite/
+coverage/
 
 # ─── Vitest / Playwright ─────────────────────────────────────────────────────
 /test-results/
@@ -39,8 +43,10 @@ npm-debug.log*
 # ─── TypeScript ──────────────────────────────────────────────────────────────
 *.tsbuildinfo
 
-# ─── npm lock file (monorepo uses pnpm — pnpm-lock.yaml is canonical) ────────
+# ─── Lock files (pnpm-lock.yaml is canonical) ────────────────────────────────
 package-lock.json
+yarn.lock
+bun.lockb
 
 # ─── Storybook assets (demo files not needed) ────────────────────────────────
 stories/assets/*.svg
@@ -61,8 +67,13 @@ dev.log
 # ─── Temporary / working files ───────────────────────────────────────────────
 validate-css-gen.js
 app/roundtrip-analysis.md
+untitled folder/
+
+# ─── External skill stubs (.claude/skills/ is canonical) ─────────────────────
+.agents/
 
 # ─── Internal / non-public docs ──────────────────────────────────────────────
+internal/
 COMPONENT-CHECKLIST.md
 PUBLIC-REPO-SETUP.md
 docs/migration-guides.md

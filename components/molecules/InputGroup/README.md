@@ -1,31 +1,65 @@
 # InputGroup
 
-A molecule that wraps an `Input` atom with start and/or end addon elements — icons, text labels, or interactive elements (e.g., a `Button`) — sharing a unified border and visual boundary.
+A molecule that composes an input with addon elements — icons, text labels, or buttons — sharing a unified border and visual boundary. Uses a **composition API** with slot components.
 
 ## Description
 
-`InputGroup` is the standard way to attach prefix or suffix decorations to a text input. The group container owns the border, background, radius, hover state, and focus-within indicator so the composition reads as a single visual unit. The inner `Input` always renders in `unstyled` mode — all visual treatment comes from the group.
+`InputGroup` provides a flexible way to attach prefix or suffix decorations to a text input. The group container owns the border, background, radius, and hover/focus-within states. Child slot components handle their own visual treatment:
+
+- **`InputGroup.Input`** — wraps the Input atom in unstyled mode; fills available space
+- **`InputGroup.Addon`** — icon, text, or kbd with muted background and separator border
+- **`InputGroup.Button`** — action button fused with the group boundary (radius clipped on inner edge)
 
 Addons can be:
-- **Decorative** — icon or short text label (e.g., `$`, `USD`, `+1`). Pass `aria-hidden="true"` on the content for purely decorative items.
-- **Interactive** — a `Button` component used as a submit action for the field.
+- **Decorative** — icon or short text label (e.g., `$`, `USD`, `+1`). Pass `aria-hidden="true"` on purely decorative content.
+- **Interactive** — a `InputGroup.Button` used as a submit or action button.
 
 ---
 
-## Props
+## Composition API
+
+```tsx
+<InputGroup variant="default" size="md">
+  <InputGroup.Addon align="inline-start">
+    <Search aria-hidden="true" />
+  </InputGroup.Addon>
+  <InputGroup.Input placeholder="Search…" />
+  <InputGroup.Button variant="primary" size="xs">Go</InputGroup.Button>
+</InputGroup>
+```
+
+### Slot Components
+
+| Slot | Purpose | Key props |
+|---|---|---|
+| `InputGroup.Input` | Text input field | All `<input>` props (placeholder, type, value, onChange, etc.) |
+| `InputGroup.Addon` | Icon, text, or kbd decoration | `align` — `'inline-start'` (default) \| `'inline-end'` \| `'block-start'` \| `'block-end'` |
+| `InputGroup.Button` | Action button fused with group | `size` — `'sm'` \| `'md'` (default) \| `'lg'` |
+
+### Addon Alignment
+
+| `align` value | Visual position | Separator edge |
+|---|---|---|
+| `inline-start` | Before the input | Right edge of addon |
+| `inline-end` | After the input | Left edge of addon |
+| `block-start` | Above the input | Bottom edge of addon |
+| `block-end` | Below the input | Top edge of addon |
+
+---
+
+## Props (InputGroup root)
 
 | Prop | Type | Default | Description |
 |---|---|---|---|
-| `prefix` | `ReactNode` | — | Node shown in the start addon slot (icon, text, any node). |
-| `suffix` | `ReactNode` | — | Node shown in the end addon slot (icon, text, `Button`, any node). |
 | `variant` | `'default' \| 'filled' \| 'flushed' \| 'unstyled'` | `'default'` | Visual style applied to the group container. |
 | `size` | `'sm' \| 'md' \| 'lg'` | `'md'` | Height and typography scale. |
-| `error` | `boolean` | `false` | Error state — shows error border; passed to inner Input. |
-| `isLoading` | `boolean` | `false` | Loading state — shows spinner; disables interaction; passed to inner Input. |
-| `disabled` | `boolean` | `false` | Disables the group. Mutes addon appearance and input. |
-| `wrapperClassName` | `string` | — | Extra class names for the outer group wrapper. |
-| `aria-label` | `string` | — | Accessible label for the `role="group"` element. Recommended when no visible label is present. |
-| `...rest` | `InputHTMLAttributes` | — | All standard `<input>` attributes (value, onChange, placeholder, name, id, type, etc.) passed to the inner Input. |
+| `error` | `boolean` | `false` | Error state — shows error border on the group. |
+| `loading` | `boolean` | `false` | Loading state — disables interaction. |
+| `disabled` | `boolean` | `false` | Disables the entire group. Mutes addon appearance. |
+| `className` | `string` | — | Extra class names for the group wrapper. |
+| `aria-label` | `string` | — | Accessible label for the `role="group"` element. |
+| `children` | `ReactNode` | — | Composition children: InputGroup.Input, InputGroup.Addon, InputGroup.Button. |
+| `i18nStrings` | `InputGroupI18nStrings` | — | Optional i18n strings for placeholder text. |
 
 ---
 
@@ -48,6 +82,8 @@ Addons can be:
 | `--input-group-addon-text` | Addon text/icon colour |
 | `--input-group-addon-text-disabled` | Addon text colour when disabled |
 | `--input-group-addon-px-{sm\|md\|lg}` | Addon horizontal padding per size |
+| `--input-group-button-border-inline` | Separator border between fused button and input |
+| `--input-group-button-border-inline-hover` | Button separator border on hover |
 | `--input-group-shadow` | Box shadow at rest (flat in light/dark) |
 | `--input-group-shadow-hover` | Box shadow on hover (flat in light/dark) |
 
@@ -97,35 +133,39 @@ Addon padding scales with size via `--input-group-addon-px-{size}`.
 |---|---|---|
 | `role="group"` | Group `<div>` | Groups the label, input, and addons as one logical unit |
 | `aria-label` | Group `<div>` | Recommended when no visible `<label>` is present |
-| `aria-disabled` | Inner `<input>` | Set alongside `disabled` by the inner Input atom |
+| `aria-disabled` | Group `<div>` | Set when `disabled` or `loading` is true |
 | `aria-invalid` | Inner `<input>` | Set by the inner Input atom when `error={true}` |
-| `aria-busy` | Inner `<input>` | Set by the inner Input atom when `isLoading={true}` |
+| `aria-busy` | Inner `<input>` | Set by the inner Input atom when `loading={true}` |
 | `aria-describedby` | `...rest` → inner `<input>` | Pass to connect a hint/error message element |
 
-**Decorative addons** — icon or text-label addons that are purely decorative should have `aria-hidden="true"` applied to their content (not the container span):
+**Decorative addons** — icon or text-label addons that are purely decorative should have `aria-hidden="true"` applied to their content:
 
 ```tsx
-<InputGroup
-  prefix={<Search size="var(--size-icon-sm)" aria-hidden="true" />}
-/>
+<InputGroup.Addon align="inline-start">
+  <Search size="var(--size-icon-sm)" aria-hidden="true" />
+</InputGroup.Addon>
 ```
 
-**Semantic addons** — text prefixes with meaning (e.g., `+1` country code) should be read by screen readers. Omit `aria-hidden` and ensure the group `aria-label` describes the full field intent:
+**Semantic addons** — text prefixes with meaning (e.g., `+1` country code) should be read by screen readers. Omit `aria-hidden`:
 
 ```tsx
-<InputGroup
-  aria-label="Phone number"
-  prefix={<span>+1</span>}
-/>
+<InputGroup.Addon align="inline-start">
+  <span>+1</span>
+</InputGroup.Addon>
 ```
 
-**Interactive suffix** — a `Button` used as suffix retains its own accessible name and keyboard behaviour. No additional ARIA needed:
+**Interactive button suffix** — `InputGroup.Button` retains its own accessible name and keyboard behaviour:
 
 ```tsx
-<InputGroup
-  aria-label="Newsletter signup"
-  suffix={<Button variant="primary" size="sm">Subscribe</Button>}
-/>
+<InputGroup.Button variant="primary" size="xs">Subscribe</InputGroup.Button>
+```
+
+**Icon-only button suffix** — provide `aria-label` on the button:
+
+```tsx
+<InputGroup.Button variant="ghost" size="xs" aria-label="Copy to clipboard">
+  <Copy size="var(--size-icon-sm)" aria-hidden="true" />
+</InputGroup.Button>
 ```
 
 ### Keyboard Interaction
@@ -135,6 +175,7 @@ Addon padding scales with size via `--input-group-addon-px-{size}`.
 | `Tab` | Moves focus to the inner input (addons are not focusable unless they contain interactive elements) |
 | Standard input keys | Character input, selection, deletion |
 | `Tab` (with button suffix) | Continues to the Button in the suffix slot |
+| `Enter` / `Space` | Activates the focused button |
 
 ---
 
@@ -142,50 +183,58 @@ Addon padding scales with size via `--input-group-addon-px-{size}`.
 
 ```tsx
 import { InputGroup } from '@geeklego/ui/components/molecules/InputGroup';
-import { Button } from '@geeklego/ui/components/atoms/Button';
-import { Search, Mail } from 'lucide-react';
+import { Search, Mail, Copy } from 'lucide-react';
 
 // Icon prefix
-<InputGroup
-  aria-label="Search"
-  placeholder="Search…"
-  prefix={<Search size="var(--size-icon-sm)" aria-hidden="true" />}
-/>
+<InputGroup aria-label="Search">
+  <InputGroup.Addon align="inline-start">
+    <Search size="var(--size-icon-sm)" aria-hidden="true" />
+  </InputGroup.Addon>
+  <InputGroup.Input placeholder="Search…" />
+</InputGroup>
 
 // Text prefix + suffix (currency input)
-<InputGroup
-  aria-label="Amount in USD"
-  type="number"
-  placeholder="0.00"
-  prefix={<span aria-hidden="true">$</span>}
-  suffix={<span aria-hidden="true">USD</span>}
-/>
+<InputGroup aria-label="Amount in USD">
+  <InputGroup.Addon align="inline-start">
+    <span aria-hidden="true">$</span>
+  </InputGroup.Addon>
+  <InputGroup.Input placeholder="0.00" type="number" />
+  <InputGroup.Addon align="inline-end">
+    <span aria-hidden="true">USD</span>
+  </InputGroup.Addon>
+</InputGroup>
 
-// Button suffix (newsletter signup)
-<InputGroup
-  aria-label="Newsletter signup"
-  type="email"
-  placeholder="your@email.com"
-  prefix={<Mail size="var(--size-icon-sm)" aria-hidden="true" />}
-  suffix={<Button variant="primary" size="sm">Subscribe</Button>}
-/>
+// Button suffix (CTA)
+<InputGroup aria-label="Newsletter signup">
+  <InputGroup.Addon align="inline-start">
+    <Mail size="var(--size-icon-sm)" aria-hidden="true" />
+  </InputGroup.Addon>
+  <InputGroup.Input placeholder="your@email.com" type="email" />
+  <InputGroup.Button>Subscribe</InputGroup.Button>
+</InputGroup>
+
+// Icon-only button suffix (copy action)
+<InputGroup aria-label="Copy link">
+  <InputGroup.Input placeholder="https://example.com" />
+  <InputGroup.Button aria-label="Copy link">
+    <Copy size="var(--size-icon-sm)" aria-hidden="true" />
+  </InputGroup.Button>
+</InputGroup>
 
 // Error state
-<InputGroup
-  aria-label="Email"
-  type="email"
-  placeholder="you@example.com"
-  error
-  aria-describedby="email-error"
-/>
+<InputGroup aria-label="Email" error aria-describedby="email-error">
+  <InputGroup.Addon align="inline-start">
+    <Mail size="var(--size-icon-sm)" aria-hidden="true" />
+  </InputGroup.Addon>
+  <InputGroup.Input type="email" placeholder="you@example.com" />
+</InputGroup>
 <span id="email-error">Enter a valid email address.</span>
 
 // Filled variant, large size
-<InputGroup
-  variant="filled"
-  size="lg"
-  placeholder="Search docs…"
-  prefix={<Search size="var(--size-icon-md)" aria-hidden="true" />}
-  aria-label="Documentation search"
-/>
+<InputGroup variant="filled" size="lg" aria-label="Documentation search">
+  <InputGroup.Addon align="inline-start">
+    <Search size="var(--size-icon-md)" aria-hidden="true" />
+  </InputGroup.Addon>
+  <InputGroup.Input placeholder="Search docs…" />
+</InputGroup>
 ```

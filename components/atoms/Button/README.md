@@ -13,7 +13,7 @@ A versatile button atom with six visual variants, five sizes, loading/disabled s
 |---|---|---|---|
 | `variant` | `'primary' \| 'secondary' \| 'outline' \| 'ghost' \| 'destructive' \| 'link'` | `'primary'` | Visual style |
 | `size` | `'xs' \| 'sm' \| 'md' \| 'lg' \| 'xl'` | `'md'` | Height and typography scale |
-| `isLoading` | `boolean` | `false` | Shows spinner, preserves dimensions, disables interaction |
+| `loading` | `boolean` | `false` | Shows spinner, preserves dimensions, disables interaction |
 | `leftIcon` | `ReactNode` | — | Icon rendered before the label |
 | `rightIcon` | `ReactNode` | — | Icon rendered after the label |
 | `iconOnly` | `boolean` | `false` | Square button; hides label visually, uses it as `aria-label` |
@@ -179,7 +179,7 @@ import { Plus, ArrowRight, Trash2, Settings } from 'lucide-react';
 </Button>
 
 // Loading — preserves dimensions
-<Button variant="primary" isLoading>Saving…</Button>
+<Button variant="primary" loading>Saving…</Button>
 
 // Continue with right icon
 <Button variant="secondary" rightIcon={<ArrowRight size="var(--size-icon-md)" />}>

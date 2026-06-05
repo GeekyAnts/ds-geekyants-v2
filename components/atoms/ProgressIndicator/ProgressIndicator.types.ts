@@ -40,4 +40,6 @@ export interface ProgressIndicatorProps extends Omit<HTMLAttributes<HTMLDivEleme
    * Defaults to `false`.
    */
   disabled?: boolean;
+  /** Override localised strings for this instance. */
+  i18nStrings?: import('../../utils/i18n').ProgressIndicatorI18nStrings;
 }

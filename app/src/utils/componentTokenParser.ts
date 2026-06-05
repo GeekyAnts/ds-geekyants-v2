@@ -1,3 +1,4 @@
+import { componentCatalog } from '../../../components/catalog'
 import type { ComponentTokenGroup, ComponentTokenSection, TypographyMapping } from '../types.ts'
 
 // ─── Default typography mappings per component ────────────────────────────────
@@ -19,35 +20,13 @@ export const COMPONENT_TYPOGRAPHY_DEFAULTS: Record<string, TypographyMapping[]> 
 }
 
 // ─── Component level classification ──────────────────────────────────────────
-// Maps every known component name to its design-system level tier.
-// Components not in this map fall back to 'unknown'.
+// Derived from the canonical catalog.ts (single source of truth for component
+// names and their design-system level tiers). Components not in the map fall
+// back to 'unknown'.
 export const COMPONENT_LEVEL_MAP: Record<string, 'atom' | 'molecule' | 'organism'> = {
-  // L1 — Atoms (no component imports)
-  Avatar: 'atom', Badge: 'atom', BreadcrumbItem: 'atom', Button: 'atom',
-  ChatBubble: 'atom', Checkbox: 'atom', Chip: 'atom', ColorSwatch: 'atom',
-  Divider: 'atom', EmptyState: 'atom', FileInput: 'atom', Heading: 'atom',
-  Image: 'atom', Input: 'atom', Item: 'atom', Label: 'atom',
-  Link: 'atom', List: 'atom', NavItem: 'atom', ProgressBar: 'atom',
-  ProgressIndicator: 'atom', Quote: 'atom', Radio: 'atom', Rating: 'atom',
-  SegmentedControl: 'atom', Select: 'atom', Skeleton: 'atom', SkipLink: 'atom',
-  Slider: 'atom', Spinner: 'atom', Stack: 'atom', Switch: 'atom',
-  Tag: 'atom', Textarea: 'atom', ThemeSwitcher: 'atom', Toggle: 'atom',
-  TreeItem: 'atom', TypingIndicator: 'atom', Video: 'atom', VisuallyHidden: 'atom',
-  // L2 — Molecules (import L1 atoms only)
-  AlertBanner: 'molecule', Breadcrumb: 'molecule', ButtonGroup: 'molecule',
-  Card: 'molecule', ChatHeader: 'molecule', ChatInputBar: 'molecule',
-  ChatMessage: 'molecule', Combobox: 'molecule', DateInput: 'molecule',
-  DropdownMenu: 'molecule', Fieldset: 'molecule', FileUpload: 'molecule',
-  FormField: 'molecule', InputGroup: 'molecule', Navbar: 'molecule',
-  NumberInput: 'molecule', Pagination: 'molecule', Popover: 'molecule',
-  RadioGroup: 'molecule', SearchBar: 'molecule', StatCard: 'molecule',
-  Stepper: 'molecule', Toast: 'molecule', Tooltip: 'molecule', TreeView: 'molecule',
-  // L3 — Organisms (import L2 + L1)
-  Accordion: 'organism', AreaChart: 'organism', BarChart: 'organism',
-  Carousel: 'organism', Chat: 'organism', ColorPicker: 'organism',
-  DataTable: 'organism', Datepicker: 'organism', Drawer: 'organism',
-  Footer: 'organism', Form: 'organism', Header: 'organism',
-  Modal: 'organism', Sidebar: 'organism', Tabs: 'organism',
+  ...Object.fromEntries(componentCatalog.atoms.map(n => [n, 'atom' as const])),
+  ...Object.fromEntries(componentCatalog.molecules.map(n => [n, 'molecule' as const])),
+  ...Object.fromEntries(componentCatalog.organisms.map(n => [n, 'organism' as const])),
 }
 
 // ─── Auto-categorization heuristics ──────────────────────────────────────────
@@ -86,10 +65,7 @@ export async function autoCategorizeComponent(
 const MARKER = '/* ─── GENERATED COMPONENT TOKENS'
 const COMPONENT_COMMENT_RE = /\/\*[─\s]*?([\w][\w ]*?)\s*—\s*generated\s+([\d-]+)[─\s]*\*\//g
 // Matches section headers like: /* ── Shared ── */ or /* ── Primary (filled + shadow) ── */
-// Label is capped at 80 chars so that descriptive multi-clause comments
-// (e.g. "Attached: outer radius matches the Button's own radius") are not
-// promoted to section titles. Longer comments fall through and are ignored.
-const SECTION_COMMENT_RE = /\/\*\s*──\s*([^\n*]{1,80}?)\s*─+\s*\*\//g
+const SECTION_COMMENT_RE = /\/\*\s*──\s*(.+?)\s*─+\s*\*\//g
 const TOKEN_RE = /(--[\w-]+):\s*(.+?);/g
 
 export function parseComponentTokens(cssContent: string): ComponentTokenGroup[] {
@@ -101,7 +77,15 @@ export function parseComponentTokens(cssContent: string): ComponentTokenGroup[] 
 
   for (let i = 0; i < matches.length; i++) {
     const match = matches[i]
-    const componentName = match[1].trim()
+    let componentName = match[1].trim()
+    // Strip version suffixes (e.g. "Sidebar v3" → "Sidebar")
+    componentName = componentName.replace(/\s+v\d+(?:\.\d+)?$/, '')
+    // Normalize abbreviated names to canonical catalog names
+    const COMPONENT_NAME_ALIASES: Record<string, string> = {
+      'Picker': 'ColorPicker',
+      'Swatch': 'ColorSwatch',
+    }
+    componentName = COMPONENT_NAME_ALIASES[componentName] ?? componentName
     const generatedDate = match[2]
     const startIdx = match.index! + match[0].length
     const endIdx = i + 1 < matches.length ? matches[i + 1].index! : section.length
@@ -239,10 +223,9 @@ export function generateComponentTokensCss(groups: ComponentTokenGroup[]): strin
   return lines.join('\n')
 }
 
-export type TokenCategory = 'color' | 'spacing' | 'size' | 'icon' | 'radius' | 'shadow' | 'motion' | 'layer' | 'border' | 'content' | 'aspect-ratio' | 'unit' | 'other'
+export type TokenCategory = 'color' | 'spacing' | 'size' | 'icon' | 'radius' | 'shadow' | 'motion' | 'layer' | 'border' | 'other'
 
 export function detectTokenCategory(value: string): TokenCategory {
-  // Existing var(--…) branches — unchanged. Order preserved for parity.
   if (value === 'transparent' || value.startsWith('var(--color-')) return 'color'
   if (value.startsWith('var(--spacing-')) return 'spacing'
   if (value.startsWith('var(--size-')) return 'size'
@@ -252,31 +235,6 @@ export function detectTokenCategory(value: string): TokenCategory {
   if (value.startsWith('var(--duration-') || value.startsWith('var(--ease-')) return 'motion'
   if (value.startsWith('var(--layer-')) return 'layer'
   if (value.startsWith('var(--border-')) return 'border'
-  if (value.startsWith('var(--content-')) return 'content'
-
-  // New branches — only reached when no existing var(--…) prefix matched.
-
-  // calc(...) wrapping a single var(--…): inherit the inner var's category.
-  if (value.startsWith('calc(')) {
-    const innerMatch = value.match(/var\((--[\w-]+)/)
-    if (innerMatch) {
-      return detectTokenCategory(`var(${innerMatch[1]})`)
-    }
-  }
-
-  // Color literals: rgba/rgb/hsl/color-mix/hex
-  if (/^(rgba?|hsla?|color-mix|hwb|lab|lch|oklab|oklch)\(/i.test(value)) return 'color'
-  if (/^#[0-9a-f]{3,8}$/i.test(value)) return 'color'
-
-  // Aspect ratio: "16/9", "1 / 1", etc.
-  if (/^\d+(\.\d+)?\s*\/\s*\d+(\.\d+)?$/.test(value)) return 'aspect-ratio'
-
-  // Raw length values: 1.5rem, 24px, 1em → size
-  if (/^-?\d+(\.\d+)?(rem|px|em)$/.test(value)) return 'size'
-
-  // Percentage / viewport units: 75%, 85vh, 100vw
-  if (/^-?\d+(\.\d+)?(%|vh|vw|vmin|vmax)$/.test(value)) return 'unit'
-
   return 'other'
 }
 
@@ -360,7 +318,7 @@ const FILL_OPTIONS: SemanticOption[] = [
   // Special
   { label: 'control-thumb', value: 'var(--color-control-thumb)', group: 'Special' },
   { label: 'overlay-backdrop', value: 'var(--color-overlay-backdrop)', group: 'Special' },
-  { label: 'color-picker-default', value: 'var(--color-picker-default)', group: 'Special' },
+  { label: 'picker-default-color', value: 'var(--picker-default-color)', group: 'Special' },
   { label: 'ring', value: 'var(--color-ring)', group: 'Special' },
   // Data series
   { label: 'data-series-1', value: 'var(--color-data-series-1)', group: 'Data' },
@@ -436,6 +394,8 @@ export function getSemanticOptions(category: TokenCategory, tokenName?: string, 
     }
     case 'spacing':
       return [
+        { label: '0', value: 'var(--spacing-0)' },
+        { label: 'px', value: 'var(--spacing-px)' },
         { label: 'component-xs', value: 'var(--spacing-component-xs)' },
         { label: 'component-sm', value: 'var(--spacing-component-sm)' },
         { label: 'component-md', value: 'var(--spacing-component-md)' },
@@ -455,23 +415,18 @@ export function getSemanticOptions(category: TokenCategory, tokenName?: string, 
         { label: 'component-lg', value: 'var(--size-component-lg)' },
         { label: 'component-xl', value: 'var(--size-component-xl)' },
         { label: 'component-2xl', value: 'var(--size-component-2xl)' },
-        { label: 'control-indicator-sm', value: 'var(--size-control-indicator-sm)' },
-        { label: 'control-indicator-md', value: 'var(--size-control-indicator-md)' },
-        { label: 'control-indicator-lg', value: 'var(--size-control-indicator-lg)' },
-        { label: 'indicator-xs', value: 'var(--size-indicator-xs)' },
-        { label: 'indicator-sm', value: 'var(--size-indicator-sm)' },
-        { label: 'indicator-md', value: 'var(--size-indicator-md)' },
-        { label: 'indicator-lg', value: 'var(--size-indicator-lg)' },
-        { label: 'indicator-xl', value: 'var(--size-indicator-xl)' },
-        { label: 'overlay-sm', value: 'var(--size-overlay-sm)' },
-        { label: 'overlay-md', value: 'var(--size-overlay-md)' },
-        { label: 'overlay-lg', value: 'var(--size-overlay-lg)' },
-        { label: 'overlay-xl', value: 'var(--size-overlay-xl)' },
-        { label: 'overlay-max-height', value: 'var(--size-overlay-max-height)' },
-        { label: 'overlay-height-sm', value: 'var(--size-overlay-height-sm)' },
-        { label: 'overlay-height-md', value: 'var(--size-overlay-height-md)' },
-        { label: 'overlay-height-lg', value: 'var(--size-overlay-height-lg)' },
-        { label: 'overlay-height-xl', value: 'var(--size-overlay-height-xl)' },
+        { label: 'control-indicator-sm', value: 'var(--control-indicator-size-sm)' },
+        { label: 'control-indicator-md', value: 'var(--control-indicator-size-md)' },
+        { label: 'control-indicator-lg', value: 'var(--control-indicator-size-lg)' },
+        { label: 'overlay-sm', value: 'var(--overlay-size-sm)' },
+        { label: 'overlay-md', value: 'var(--overlay-size-md)' },
+        { label: 'overlay-lg', value: 'var(--overlay-size-lg)' },
+        { label: 'overlay-xl', value: 'var(--overlay-size-xl)' },
+        { label: 'overlay-max-height', value: 'var(--overlay-max-height)' },
+        { label: 'overlay-height-sm', value: 'var(--overlay-height-size-sm)' },
+        { label: 'overlay-height-md', value: 'var(--overlay-height-size-md)' },
+        { label: 'overlay-height-lg', value: 'var(--overlay-height-size-lg)' },
+        { label: 'overlay-height-xl', value: 'var(--overlay-height-size-xl)' },
         { label: 'fixed-0', value: 'var(--size-fixed-0)' },
         { label: 'fixed-1', value: 'var(--size-fixed-1)' },
         { label: 'fixed-2', value: 'var(--size-fixed-2)' },
@@ -543,43 +498,6 @@ export function getSemanticOptions(category: TokenCategory, tokenName?: string, 
         { label: 'focus-ring', value: 'var(--border-focus-ring)' },
         { label: 'width-hairline', value: 'var(--border-width-hairline)' },
         { label: 'width-thick', value: 'var(--border-width-thick)' },
-      ]
-    case 'content':
-      return [
-        // Overflow
-        { label: 'overflow-label', value: 'var(--content-overflow-label)', group: 'Overflow' },
-        { label: 'overflow-body', value: 'var(--content-overflow-body)', group: 'Overflow' },
-        { label: 'overflow-visible', value: 'var(--content-overflow-visible)', group: 'Overflow' },
-        // Whitespace
-        { label: 'whitespace-label', value: 'var(--content-whitespace-label)', group: 'Whitespace' },
-        { label: 'whitespace-body', value: 'var(--content-whitespace-body)', group: 'Whitespace' },
-        // Text overflow
-        { label: 'text-overflow-label', value: 'var(--content-text-overflow-label)', group: 'Text Overflow' },
-        // Line clamp
-        { label: 'lines-single', value: 'var(--content-lines-single)', group: 'Lines' },
-        { label: 'lines-description', value: 'var(--content-lines-description)', group: 'Lines' },
-        { label: 'lines-body', value: 'var(--content-lines-body)', group: 'Lines' },
-        // Max width
-        { label: 'max-width-xs', value: 'var(--content-max-width-xs)', group: 'Max Width' },
-        { label: 'max-width-sm', value: 'var(--content-max-width-sm)', group: 'Max Width' },
-        { label: 'max-width-overlay-sm', value: 'var(--content-max-width-overlay-sm)', group: 'Max Width' },
-        { label: 'max-width-md', value: 'var(--content-max-width-md)', group: 'Max Width' },
-        { label: 'max-width-lg', value: 'var(--content-max-width-lg)', group: 'Max Width' },
-        { label: 'max-width-xl', value: 'var(--content-max-width-xl)', group: 'Max Width' },
-        { label: 'max-width-full', value: 'var(--content-max-width-full)', group: 'Max Width' },
-        // Min width
-        { label: 'min-width-0', value: 'var(--content-min-width-0)', group: 'Min Width' },
-        { label: 'min-width-xs', value: 'var(--content-min-width-xs)', group: 'Min Width' },
-        { label: 'min-width-sm', value: 'var(--content-min-width-sm)', group: 'Min Width' },
-        { label: 'min-width-md', value: 'var(--content-min-width-md)', group: 'Min Width' },
-      ]
-    case 'aspect-ratio':
-      return [
-        { label: '1/1 (square)', value: '1/1' },
-        { label: '4/3', value: '4/3' },
-        { label: '3/4 (portrait)', value: '3/4' },
-        { label: '16/9 (widescreen)', value: '16/9' },
-        { label: '21/9 (ultrawide)', value: '21/9' },
       ]
     default:
       return []

@@ -264,6 +264,109 @@ The `"floating"` variant renders the sidebar with rounded corners and a drop sha
   </SidebarProvider>
 </ComponentPreview>
 
+## Collapsed Icon Rail
+
+With `defaultOpen={false}` and `collapsible="icon"`, the sidebar collapses to a narrow icon rail. Hovering reveals tooltips. Click the rail or trigger to expand.
+
+<ComponentPreview code={"import { Sidebar, SidebarProvider } from \"@geeklego/ui\"\nimport { Home, Settings, Users } from \"lucide-react\"\n\n<SidebarProvider defaultOpen={false}>\n  <Sidebar collapsible=\"icon\">\n    <Sidebar.Header>\n      <Sidebar.Menu>\n        <Sidebar.MenuItem>\n          <Sidebar.MenuButton size=\"lg\" tooltip=\"Acme Inc\" icon={<Home size={16} />}>Acme Inc</Sidebar.MenuButton>\n        </Sidebar.MenuItem>\n      </Sidebar.Menu>\n    </Sidebar.Header>\n    <Sidebar.Content>\n      <Sidebar.Group>\n        <Sidebar.GroupContent>\n          <Sidebar.Menu>\n            <Sidebar.MenuItem>\n              <Sidebar.MenuButton icon={<Home size={14} />} isActive tooltip=\"Dashboard\">Dashboard</Sidebar.MenuButton>\n            </Sidebar.MenuItem>\n            <Sidebar.MenuItem>\n              <Sidebar.MenuButton icon={<Settings size={14} />} tooltip=\"Settings\">Settings</Sidebar.MenuButton>\n            </Sidebar.MenuItem>\n            <Sidebar.MenuItem>\n              <Sidebar.MenuButton icon={<Users size={14} />} tooltip=\"Team\">Team</Sidebar.MenuButton>\n            </Sidebar.MenuItem>\n          </Sidebar.Menu>\n        </Sidebar.GroupContent>\n      </Sidebar.Group>\n    </Sidebar.Content>\n    <Sidebar.Footer>\n      <Sidebar.Menu>\n        <Sidebar.MenuItem>\n          <Sidebar.MenuButton size=\"lg\" icon={<Users size={14} />} tooltip=\"User\">User</Sidebar.MenuButton>\n        </Sidebar.MenuItem>\n      </Sidebar.Menu>\n    </Sidebar.Footer>\n    <Sidebar.Rail />\n  </Sidebar>\n  <div className=\"flex flex-1 flex-col\">\n    <header className=\"flex h-[var(--sidebar-header-height)] items-center gap-2 border-b border-[var(--color-border-subtle)] px-4\">\n      <Sidebar.Trigger />\n    </header>\n    <main className=\"flex-1 p-6\">\n      <p className=\"text-body-sm text-[var(--color-text-secondary)]\">Icon-rail collapsed state</p>\n    </main>\n  </div>\n</SidebarProvider>"}>
+  <SidebarProvider defaultOpen={false}>
+    <Sidebar collapsible="icon">
+      <Sidebar.Header>
+        <Sidebar.Menu>
+          <Sidebar.MenuItem>
+            <Sidebar.MenuButton size="lg" tooltip="Acme Inc" icon={<Home size={16} />}>Acme Inc</Sidebar.MenuButton>
+          </Sidebar.MenuItem>
+        </Sidebar.Menu>
+      </Sidebar.Header>
+      <Sidebar.Content>
+        <Sidebar.Group>
+          <Sidebar.GroupContent>
+            <Sidebar.Menu>
+              <Sidebar.MenuItem>
+                <Sidebar.MenuButton icon={<Home size={14} />} isActive tooltip="Dashboard">Dashboard</Sidebar.MenuButton>
+              </Sidebar.MenuItem>
+              <Sidebar.MenuItem>
+                <Sidebar.MenuButton icon={<Settings size={14} />} tooltip="Settings">Settings</Sidebar.MenuButton>
+              </Sidebar.MenuItem>
+              <Sidebar.MenuItem>
+                <Sidebar.MenuButton icon={<Users size={14} />} tooltip="Team">Team</Sidebar.MenuButton>
+              </Sidebar.MenuItem>
+            </Sidebar.Menu>
+          </Sidebar.GroupContent>
+        </Sidebar.Group>
+      </Sidebar.Content>
+      <Sidebar.Footer>
+        <Sidebar.Menu>
+          <Sidebar.MenuItem>
+            <Sidebar.MenuButton size="lg" icon={<Users size={14} />} tooltip="User">User</Sidebar.MenuButton>
+          </Sidebar.MenuItem>
+        </Sidebar.Menu>
+      </Sidebar.Footer>
+      <Sidebar.Rail />
+    </Sidebar>
+    <div className="flex flex-1 flex-col">
+      <header className="flex h-[var(--sidebar-header-height)] items-center gap-2 border-b border-[var(--color-border-subtle)] px-4">
+        <Sidebar.Trigger />
+      </header>
+      <main className="flex-1 p-6">
+        <p className="text-body-sm text-[var(--color-text-secondary)]">Icon-rail collapsed state</p>
+      </main>
+    </div>
+  </SidebarProvider>
+</ComponentPreview>
+
+## SSR-Safe Persistence
+
+With `persist` on `SidebarProvider`, the open state is saved to `localStorage` and restored after hydration — never at render time. There are no React hydration warnings. Toggle the sidebar and reload the page to verify.
+
+<ComponentPreview code={"import { Sidebar, SidebarProvider } from \"@geeklego/ui\"\nimport { Home, Settings, Users } from \"lucide-react\"\n\n<SidebarProvider persist defaultOpen={true}>\n  <Sidebar collapsible=\"icon\">\n    <Sidebar.Header>\n      <Sidebar.Menu>\n        <Sidebar.MenuItem>\n          <Sidebar.MenuButton size=\"lg\" tooltip=\"Acme Inc\" icon={<Home size={16} />}>Acme Inc</Sidebar.MenuButton>\n        </Sidebar.MenuItem>\n      </Sidebar.Menu>\n    </Sidebar.Header>\n    <Sidebar.Content>\n      <Sidebar.Group>\n        <Sidebar.GroupContent>\n          <Sidebar.Menu>\n            <Sidebar.MenuItem>\n              <Sidebar.MenuButton icon={<Home size={14} />} isActive tooltip=\"Dashboard\">Dashboard</Sidebar.MenuButton>\n            </Sidebar.MenuItem>\n            <Sidebar.MenuItem>\n              <Sidebar.MenuButton icon={<Settings size={14} />} tooltip=\"Settings\">Settings</Sidebar.MenuButton>\n            </Sidebar.MenuItem>\n            <Sidebar.MenuItem>\n              <Sidebar.MenuButton icon={<Users size={14} />} tooltip=\"Team\">Team</Sidebar.MenuButton>\n            </Sidebar.MenuItem>\n          </Sidebar.Menu>\n        </Sidebar.GroupContent>\n      </Sidebar.Group>\n    </Sidebar.Content>\n    <Sidebar.Footer>\n      <Sidebar.Menu>\n        <Sidebar.MenuItem>\n          <Sidebar.MenuButton size=\"lg\" icon={<Users size={14} />} tooltip=\"User\">User</Sidebar.MenuButton>\n        </Sidebar.MenuItem>\n      </Sidebar.Menu>\n    </Sidebar.Footer>\n    <Sidebar.Rail />\n  </Sidebar>\n  <div className=\"flex flex-1 flex-col\">\n    <header className=\"flex h-[var(--sidebar-header-height)] items-center gap-2 border-b border-[var(--color-border-subtle)] px-4\">\n      <Sidebar.Trigger />\n      <span className=\"text-body-sm text-[var(--color-text-secondary)]\">persist=true \u2014 state restored from localStorage, no hydration mismatch</span>\n    </header>\n    <main className=\"flex-1 p-6\">\n      <p className=\"text-body-sm text-[var(--color-text-secondary)]\">Toggle the sidebar. Reload the page. The state persists without a React hydration warning.</p>\n    </main>\n  </div>\n</SidebarProvider>"}>
+  <SidebarProvider persist defaultOpen={true}>
+    <Sidebar collapsible="icon">
+      <Sidebar.Header>
+        <Sidebar.Menu>
+          <Sidebar.MenuItem>
+            <Sidebar.MenuButton size="lg" tooltip="Acme Inc" icon={<Home size={16} />}>Acme Inc</Sidebar.MenuButton>
+          </Sidebar.MenuItem>
+        </Sidebar.Menu>
+      </Sidebar.Header>
+      <Sidebar.Content>
+        <Sidebar.Group>
+          <Sidebar.GroupContent>
+            <Sidebar.Menu>
+              <Sidebar.MenuItem>
+                <Sidebar.MenuButton icon={<Home size={14} />} isActive tooltip="Dashboard">Dashboard</Sidebar.MenuButton>
+              </Sidebar.MenuItem>
+              <Sidebar.MenuItem>
+                <Sidebar.MenuButton icon={<Settings size={14} />} tooltip="Settings">Settings</Sidebar.MenuButton>
+              </Sidebar.MenuItem>
+              <Sidebar.MenuItem>
+                <Sidebar.MenuButton icon={<Users size={14} />} tooltip="Team">Team</Sidebar.MenuButton>
+              </Sidebar.MenuItem>
+            </Sidebar.Menu>
+          </Sidebar.GroupContent>
+        </Sidebar.Group>
+      </Sidebar.Content>
+      <Sidebar.Footer>
+        <Sidebar.Menu>
+          <Sidebar.MenuItem>
+            <Sidebar.MenuButton size="lg" icon={<Users size={14} />} tooltip="User">User</Sidebar.MenuButton>
+          </Sidebar.MenuItem>
+        </Sidebar.Menu>
+      </Sidebar.Footer>
+      <Sidebar.Rail />
+    </Sidebar>
+    <div className="flex flex-1 flex-col">
+      <header className="flex h-[var(--sidebar-header-height)] items-center gap-2 border-b border-[var(--color-border-subtle)] px-4">
+        <Sidebar.Trigger />
+        <span className="text-body-sm text-[var(--color-text-secondary)]">persist=true — state restored from localStorage, no hydration mismatch</span>
+      </header>
+      <main className="flex-1 p-6">
+        <p className="text-body-sm text-[var(--color-text-secondary)]">Toggle the sidebar. Reload the page. The state persists without a React hydration warning.</p>
+      </main>
+    </div>
+  </SidebarProvider>
+</ComponentPreview>
+
 ## Dark Mode
 
 <ComponentPreview code={"import { Sidebar, SidebarProvider } from \"@geeklego/ui\"\nimport { Home, Settings, Users, Bell } from \"lucide-react\"\n\n<div\n  data-theme=\"dark\"\n  className=\"flex h-[500px] bg-[var(--color-bg-primary)] rounded-[var(--radius-component-lg)] max-w-2xl overflow-hidden\"\n>\n  <SidebarProvider>\n    <Sidebar collapsible=\"icon\">\n      <Sidebar.Header>\n        <Sidebar.Menu>\n          <Sidebar.MenuItem>\n            <Sidebar.MenuButton size=\"lg\" tooltip=\"Acme Inc\" icon={<Home size={16} />}>Acme Inc</Sidebar.MenuButton>\n          </Sidebar.MenuItem>\n        </Sidebar.Menu>\n      </Sidebar.Header>\n      <Sidebar.Content>\n        <Sidebar.Group>\n          <Sidebar.GroupLabel>Platform</Sidebar.GroupLabel>\n          <Sidebar.GroupContent>\n            <Sidebar.Menu>\n              <Sidebar.MenuItem>\n                <Sidebar.MenuButton icon={<Home size={14} />} isActive tooltip=\"Dashboard\">Dashboard</Sidebar.MenuButton>\n              </Sidebar.MenuItem>\n              <Sidebar.MenuItem>\n                <Sidebar.MenuButton icon={<Settings size={14} />} tooltip=\"Settings\">Settings</Sidebar.MenuButton>\n              </Sidebar.MenuItem>\n              <Sidebar.MenuItem>\n                <Sidebar.MenuButton icon={<Users size={14} />} tooltip=\"Team\">Team</Sidebar.MenuButton>\n              </Sidebar.MenuItem>\n            </Sidebar.Menu>\n          </Sidebar.GroupContent>\n        </Sidebar.Group>\n      </Sidebar.Content>\n      <Sidebar.Footer>\n        <Sidebar.Menu>\n          <Sidebar.MenuItem>\n            <Sidebar.MenuButton size=\"lg\" icon={<Bell size={14} />} tooltip=\"Notifications\">Notifications</Sidebar.MenuButton>\n          </Sidebar.MenuItem>\n        </Sidebar.Menu>\n      </Sidebar.Footer>\n      <Sidebar.Rail />\n    </Sidebar>\n    <div className=\"flex flex-1 flex-col\">\n      <header className=\"flex h-[var(--sidebar-header-height)] items-center gap-2 border-b border-[var(--color-border-subtle)] px-4\">\n        <Sidebar.Trigger />\n      </header>\n      <main className=\"flex-1 p-6\">\n        <p className=\"text-body-sm text-[var(--color-text-secondary)]\">Dark mode</p>\n      </main>\n    </div>\n  </SidebarProvider>\n</div>"}>

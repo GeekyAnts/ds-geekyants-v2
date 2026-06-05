@@ -12,7 +12,7 @@ export interface FileInputProps extends Omit<InputHTMLAttributes<HTMLInputElemen
   /** Error state — shows error border and sets aria-invalid. */
   error?: boolean;
   /** Loading state — shows spinner in browse area and disables interaction. */
-  isLoading?: boolean;
+  loading?: boolean;
   /** i18n string overrides for placeholder, browse label, and multi-file label. */
   i18nStrings?: FileInputI18nStrings;
   /** Additional class names applied to the outer wrapper element. */

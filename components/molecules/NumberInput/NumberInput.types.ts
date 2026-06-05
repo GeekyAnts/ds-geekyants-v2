@@ -1,6 +1,6 @@
 import type { InputHTMLAttributes } from 'react';
 import type { InputVariant, InputSize } from '../../atoms/Input/Input.types';
-import type { NumberInputI18nStrings } from '../../utils/i18n/GeeklegoI18nProvider.types';
+import type { NumberInputI18nStrings } from '../../utils/i18n';
 
 export type { InputVariant as NumberInputVariant, InputSize as NumberInputSize };
 

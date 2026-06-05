@@ -51,7 +51,7 @@
     },
     "disabled":   { "placeholder": "Cannot edit this field", "disabled": true, "rows": 4 },
     "error":      { "defaultValue": "This field contains an error.", "error": true, "rows": 4 },
-    "loading":    { "placeholder": "Processing…", "isLoading": true, "rows": 4 }
+    "loading":    { "placeholder": "Processing…", "loading": true, "rows": 4 }
   },
   "edge_cases": {
     "empty_placeholder":   { "placeholder": "", "rows": 4 },

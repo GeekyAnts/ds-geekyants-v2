@@ -38,6 +38,17 @@ Per-component catalogue of system-generated strings that must be externalizable 
 | `Datepicker` | L3 | `components/organisms/Datepicker/` | `"Open calendar"` (trigger aria-label), `"Previous month"` / `"Next month"` (nav buttons), `"Today"` (today cue), month names, weekday names | `DatepickerI18nStrings` | ✅ Done |
 | `ColorPicker` | L3 | `components/organisms/ColorPicker/` | `"Color"` (group label), `"Color spectrum…"` (spectrum aria-label), `"Hue"`, `"Opacity"`, `"Hex"`, `"R"`, `"G"`, `"B"`, `"H"`, `"S"`, `"L"` (channel labels), `"Preset colors"`, `"Copy hex"`, `"Copied!"` | `ColorPickerI18nStrings` | ✅ Done |
 | `Carousel` | L3 | `components/organisms/Carousel/` | `"Previous slide"` (prev button aria-label), `"Next slide"` (next button aria-label), `(n) => "Go to slide N"` (dot aria-label fn), `(n, total) => "N of Total"` (slide label + live region fn), `"Pause auto-play"`, `"Resume auto-play"` (autoplay toggle) | `CarouselI18nStrings` | ✅ Done |
+| `ProductCard` | L2 | `components/molecules/ProductCard/` | `"Add to cart"` (CTA default), `"reviews"` (count suffix), `"Sale price"` (price aria-label prefix), `"Original price"` (del aria-label prefix) | `ProductCardI18nStrings` | ✅ Done |
+| `ThemeSwitcher` | L1 | `components/atoms/ThemeSwitcher/` | `"Theme"` (group aria-label), `"System theme"` / `"Light theme"` / `"Dark theme"` (default option labels) | `ThemeSwitcherI18nStrings` | ✅ Done |
+| `Video` | L1 | `components/atoms/Video/` | `"Your browser does not support the video element."` (fallback text) | `VideoI18nStrings` | ✅ Done |
+| `ProgressIndicator` | L1 | `components/atoms/ProgressIndicator/` | `"${v}%"` (aria-valuetext format) | `ProgressIndicatorI18nStrings` | ✅ Done |
+| `DateInput` | L2 | `components/molecules/DateInput/` | `"MM/DD/YYYY"` (placeholder default), `"Please enter a valid date."` (invalid date error), `"Date is required."` (required error) | `DateInputI18nStrings` | ✅ Done |
+| `FormField` | L2 | `components/molecules/FormField/` | `"(required)"`, `"(Optional)"` (delegates to Label atom) | `FormFieldI18nStrings` | ✅ Done |
+| `Calendar` | L2 | `components/molecules/Calendar/` | `"Previous month"`, `"Next month"`, `"Today"`, month/weekday name arrays | `CalendarI18nStrings` | ✅ Done |
+| `ChatHeader` | L2 | `components/molecules/ChatHeader/` | `"Online"`, `"Away"`, `"Offline"` (status labels) | `ChatHeaderI18nStrings` | ✅ Done |
+| `InputGroup` | L2 | `components/molecules/InputGroup/` | `"Search…"` (placeholder default) | `InputGroupI18nStrings` | ✅ Done |
+| `NumberInput` | L2 | `components/molecules/NumberInput/` | `"Decrease value"`, `"Increase value"` (stepper aria-labels) | `NumberInputI18nStrings` | ✅ Done |
+| `StatCard` | L2 | `components/molecules/StatCard/` | `"Loading"` (spinner label), `"Trending up"`, `"Trending down"` (SR trend labels) | `StatCardI18nStrings` | ✅ Done |
 
 ### Upcoming components (apply on creation)
 
@@ -81,6 +92,11 @@ These components contain no hardcoded system strings. They only need RTL logical
 | `List` | L1 | ✅ Done — `pl-*` → `ps-*` for bullet/ordered indent |
 | `TreeItem` | L1 | ✅ Done — `ml-auto` → `ms-auto` (×2), `paddingLeft` → `paddingInlineStart` |
 | `ProgressBar` | L1 | No directional classes |
+| `SegmentedControl` | L1 | No directional classes |
+| `Slider` | L1 | No directional classes |
+| `Stack` | L1 | No directional classes |
+| `VisuallyHidden` | L1 | No directional classes |
+| `Quote` | L1 | Decorative punctuation (`"— "` em dash in figcaption) — no i18n needed |
 
 ---
 

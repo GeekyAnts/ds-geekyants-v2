@@ -20,7 +20,8 @@
     { "size": "xs", "value": 55, "label": "Extra-small (2px)" },
     { "size": "sm", "value": 55, "label": "Small (4px)" },
     { "size": "md", "value": 55, "label": "Medium (8px)" },
-    { "size": "lg", "value": 55, "label": "Large (16px)" }
+    { "size": "lg", "value": 55, "label": "Large (16px)" },
+    { "size": "xl", "value": 55, "label": "Extra-large (32px)" }
   ],
   "states": {
     "empty":         { "value": 0,         "label": "Not started" },

@@ -2,7 +2,7 @@
 import { defineConfig, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
-import autoprefixer from 'autoprefixer';
+
 import path from 'path';
 import fs from 'fs/promises';
 import { fileURLToPath } from 'node:url';
@@ -120,6 +120,24 @@ function tokenApiPlugin(): Plugin {
           return;
         }
 
+        if (url === '/api/sync-build' && req.method === 'POST') {
+          try {
+            const { exec } = await import('child_process');
+            const { promisify } = await import('util');
+            const execAsync = promisify(exec);
+            
+            await execAsync('npm run sync-build', { cwd: dirname });
+            
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({ success: true }));
+          } catch (e: any) {
+            res.setHeader('Content-Type', 'application/json');
+            res.statusCode = 500;
+            res.end(JSON.stringify({ success: false, error: e.message }));
+          }
+          return;
+        }
+
         next();
       });
     }
@@ -134,11 +152,7 @@ export default defineConfig({
     tailwindcss(),
     tokenApiPlugin(),
   ],
-  css: {
-    postcss: {
-      plugins: [autoprefixer()]
-    }
-  },
+  css: {},
   server: {
     port: 5176
   },

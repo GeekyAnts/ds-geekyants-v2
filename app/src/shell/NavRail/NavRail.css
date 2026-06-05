@@ -1,0 +1,189 @@
+.ed-nav-rail {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--ed-bg);
+  overflow: hidden;
+}
+
+/* Search slot — wraps EdInput; we hide its label, kill its gap */
+.ed-nav-rail__search {
+  padding: 10px 12px 8px;
+  border-bottom: 1px solid var(--ed-border-soft);
+  flex-shrink: 0;
+}
+.ed-nav-rail__search .ed-field { gap: 0; }
+.ed-nav-rail__search .ed-input {
+  height: 30px;
+  font-size: var(--ed-text-base);
+}
+
+.ed-nav-rail__content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 6px 0 16px;
+}
+
+/* Section group */
+.ed-nav-rail__section {
+  margin: 6px 0 2px;
+}
+
+.ed-nav-rail__section-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px 6px 18px;
+  cursor: pointer;
+  user-select: none;
+  height: 26px;
+  position: relative;
+  color: var(--ed-text-muted);
+  transition: color var(--ed-motion-fast);
+}
+.ed-nav-rail__section-header:hover { color: var(--ed-text); }
+
+.ed-nav-rail__section-label {
+  font-family: var(--ed-font-sans);
+  font-size: 10.5px;
+  font-weight: var(--ed-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: inherit;
+  flex: 1;
+}
+
+.ed-nav-rail__section-chevron {
+  display: inline-flex;
+  align-items: center;
+  color: var(--ed-text-faint);
+  flex-shrink: 0;
+}
+
+/* Item rows */
+.ed-nav-rail__items,
+.ed-nav-rail__section-items {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 2px 8px 4px;
+}
+
+.ed-nav-rail__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  height: 28px;
+  padding: 0 10px;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  font-family: var(--ed-font-sans);
+  font-size: var(--ed-text-base);
+  font-weight: var(--ed-weight-regular);
+  color: var(--ed-text);
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--ed-motion-fast), color var(--ed-motion-fast);
+  white-space: nowrap;
+}
+.ed-nav-rail__item > span:first-child {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ed-nav-rail__item:hover {
+  background: var(--ed-bg-subtle);
+  color: var(--ed-text-strong);
+}
+
+.ed-nav-rail__item--active {
+  background: var(--ed-accent-tint);
+  color: var(--ed-accent);
+  font-weight: var(--ed-weight-medium);
+}
+.ed-nav-rail__item--active:hover {
+  background: var(--ed-accent-soft);
+  color: var(--ed-accent);
+}
+[data-ed-theme="dark"] .ed-nav-rail__item--active {
+  background: var(--ed-accent-tint);
+  color: var(--ed-accent);
+}
+
+.ed-nav-rail__item-token {
+  font-family: var(--ed-font-mono);
+  font-size: 11.5px;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ed-nav-rail__item-count {
+  margin-left: auto;
+  padding: 0 6px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--ed-font-mono);
+  font-size: 10.5px;
+  font-weight: var(--ed-weight-medium);
+  color: var(--ed-text-faint);
+  background: var(--ed-bg-subtle);
+  border-radius: 999px;
+  line-height: 1;
+}
+.ed-nav-rail__item--active .ed-nav-rail__item-count {
+  background: var(--ed-accent-soft);
+  color: var(--ed-accent);
+}
+
+/* ── Nested tier sections (Atoms / Molecules / Organisms inside COMPONENTS) ── */
+.ed-nav-rail__section-items .ed-nav-rail__section {
+  margin: 2px 0 0;
+}
+.ed-nav-rail__section-items .ed-nav-rail__section-header {
+  padding-left: 26px;
+  height: 24px;
+}
+
+/* Vertical trunk line beside each tier's item list */
+.ed-nav-rail__section-items .ed-nav-rail__section-items {
+  position: relative;
+  padding: 1px 8px 6px 28px;
+}
+.ed-nav-rail__section-items .ed-nav-rail__section-items::before {
+  content: '';
+  position: absolute;
+  left: 18px;
+  top: 0;
+  bottom: 8px;
+  width: 1px;
+  background: var(--ed-border);
+  border-radius: 1px;
+}
+
+/* L-shaped branch on each leaf item */
+.ed-nav-rail__item--sub {
+  position: relative;
+  padding-left: 18px;
+  font-size: 12.5px;
+}
+.ed-nav-rail__item--sub::before {
+  content: '';
+  position: absolute;
+  left: -10px;
+  top: 50%;
+  width: 10px;
+  height: 1px;
+  background: var(--ed-border);
+}
+
+@media (max-width: 1280px) {
+  .ed-nav-rail__section-header { padding-left: 14px; padding-right: 10px; }
+  .ed-nav-rail__items,
+  .ed-nav-rail__section-items { padding: 2px 6px 4px; }
+}

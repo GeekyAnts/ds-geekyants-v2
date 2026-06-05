@@ -1,22 +1,15 @@
 "use client"
-import { forwardRef, memo, useState, useMemo, useCallback, useRef } from 'react';
+import { forwardRef, memo, useMemo } from 'react';
 import type { ButtonHTMLAttributes } from 'react';
 import { Monitor, Sun, Moon } from 'lucide-react';
-import { useRovingTabindex } from '../../utils/keyboard/useRovingTabindex';
+import { useSingleSelectGroup } from '../../utils/keyboard/useSingleSelectGroup';
+import { useComponentI18n } from '../../utils/i18n/useGeeklegoI18n';
 import type {
   ThemeSwitcherProps,
   ThemeSwitcherOption,
   ThemeSwitcherSize,
   ThemeMode,
 } from './ThemeSwitcher.types';
-
-// ── Static constants ──────────────────────────────────────────────────────────
-
-const defaultOptions: ThemeSwitcherOption[] = [
-  { value: 'system', label: 'System theme', icon: <Monitor /> },
-  { value: 'light',  label: 'Light theme',  icon: <Sun /> },
-  { value: 'dark',   label: 'Dark theme',   icon: <Moon /> },
-];
 
 /**
  * sizeMap keys are static strings so Tailwind v4 JIT scanner can detect them.
@@ -64,21 +57,15 @@ const pressedClasses = [
 
 // ── Internal item component ───────────────────────────────────────────────────
 
-interface ThemeSwitcherItemProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'onClick' | 'onSelect'> {
+interface ThemeSwitcherItemProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'onClick'> {
   option: ThemeSwitcherOption;
   isPressed: boolean;
   size: ThemeSwitcherSize;
-  onSelect: (value: ThemeMode) => void;
 }
 
 const ThemeSwitcherItem = memo(
   forwardRef<HTMLButtonElement, ThemeSwitcherItemProps>(
-    ({ option, isPressed, size, onSelect, ...props }, ref) => {
-      const handleClick = useCallback(
-        () => onSelect(option.value),
-        [onSelect, option.value],
-      );
-
+    ({ option, isPressed, size, ...props }, ref) => {
       const itemClasses = useMemo(
         () => [baseItemClasses, sizeMap[size].button, isPressed ? pressedClasses : unpressedClasses].join(' '),
         [size, isPressed],
@@ -88,10 +75,7 @@ const ThemeSwitcherItem = memo(
         <button
           ref={ref}
           type="button"
-          aria-pressed={isPressed}
-          aria-label={option.label}
           className={itemClasses}
-          onClick={handleClick}
           {...props}
         >
           {/* Icon sized via CSS [&>svg] — CSS props support CSS vars, SVG attrs do not */}
@@ -117,49 +101,27 @@ export const ThemeSwitcher = memo(
         value,
         defaultValue = 'system',
         onChange,
-        options = defaultOptions,
+        options: optionsProp,
         size = 'md',
+        i18nStrings,
         className,
         ...rest
       },
       ref,
     ) => {
-      const isControlled = value !== undefined;
-      const [internalValue, setInternalValue] = useState<ThemeMode>(defaultValue);
-      const currentValue = isControlled ? value! : internalValue;
+      const i18n = useComponentI18n('themeSwitcher', i18nStrings);
+      const defaultOptions = useMemo(() => [
+        { value: 'system' as const, label: i18n.systemLabel!, icon: <Monitor /> },
+        { value: 'light' as const,  label: i18n.lightLabel!,   icon: <Sun /> },
+        { value: 'dark' as const,   label: i18n.darkLabel!,    icon: <Moon /> },
+      ], [i18n]);
+      const options = optionsProp ?? defaultOptions;
 
-      const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
-
-      const currentIndex = useMemo(
-        () => Math.max(0, options.findIndex(o => o.value === currentValue)),
-        [options, currentValue],
-      );
-
-      const handleSelect = useCallback(
-        (newValue: ThemeMode) => {
-          if (newValue === currentValue) return;
-          if (!isControlled) setInternalValue(newValue);
-          onChange?.(newValue);
-        },
-        [currentValue, isControlled, onChange],
-      );
-
-      const handleActiveIndexChange = useCallback(
-        (index: number) => {
-          const newValue = options[index]?.value;
-          if (!newValue) return;
-          if (!isControlled) setInternalValue(newValue);
-          onChange?.(newValue);
-          buttonRefs.current[index]?.focus();
-        },
-        [options, isControlled, onChange],
-      );
-
-      const { handleKeyDown, getItemProps } = useRovingTabindex({
-        itemCount: options.length,
-        activeIndex: currentIndex,
-        orientation: 'horizontal',
-        onActiveIndexChange: handleActiveIndexChange,
+      const { containerProps, getSegmentProps, selectedValue } = useSingleSelectGroup<ThemeMode>({
+        options,
+        value,
+        defaultValue,
+        onChange,
       });
 
       const containerClasses = useMemo(
@@ -181,21 +143,19 @@ export const ThemeSwitcher = memo(
       return (
         <div
           ref={ref}
-          role="group"
-          aria-label="Theme"
+          aria-label={i18n.groupLabel}
           className={containerClasses}
-          onKeyDown={handleKeyDown}
+          {...containerProps}
           {...rest}
         >
           {options.map((option, index) => (
             <ThemeSwitcherItem
               key={option.value}
-              ref={el => { buttonRefs.current[index] = el; }}
               option={option}
-              isPressed={option.value === currentValue}
+              isPressed={option.value === selectedValue}
               size={size}
-              onSelect={handleSelect}
-              {...getItemProps(index)}
+              aria-label={option.label}
+              {...getSegmentProps(index)}
             />
           ))}
         </div>

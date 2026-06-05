@@ -78,9 +78,6 @@ export type * from './atoms/Select/Select.types';
 export * from './atoms/Skeleton/Skeleton';
 export type * from './atoms/Skeleton/Skeleton.types';
 
-export * from './atoms/SkipLink/SkipLink';
-export type * from './atoms/SkipLink/SkipLink.types';
-
 export * from './atoms/Slider/Slider';
 export type * from './atoms/Slider/Slider.types';
 
@@ -111,8 +108,8 @@ export type * from './atoms/TreeItem/TreeItem.types';
 export * from './atoms/Video/Video';
 export type * from './atoms/Video/Video.types';
 
-export * from './atoms/VisuallyHidden/VisuallyHidden';
-export type * from './atoms/VisuallyHidden/VisuallyHidden.types';
+export * from './utils/accessibility/VisuallyHidden';
+export type * from './utils/accessibility/VisuallyHidden.types';
 
 export * from './atoms/ChatBubble/ChatBubble';
 export type * from './atoms/ChatBubble/ChatBubble.types';
@@ -136,6 +133,9 @@ export type * from './molecules/Card/Card.types';
 
 export * from './molecules/Combobox/Combobox';
 export type * from './molecules/Combobox/Combobox.types';
+
+export * from './molecules/Calendar/Calendar';
+export type * from './molecules/Calendar/Calendar.types';
 
 export * from './molecules/DateInput/DateInput';
 export type * from './molecules/DateInput/DateInput.types';
@@ -166,6 +166,9 @@ export type * from './molecules/Pagination/Pagination.types';
 
 export * from './molecules/Popover/Popover';
 export type * from './molecules/Popover/Popover.types';
+
+export * from './molecules/ProductCard/ProductCard';
+export type * from './molecules/ProductCard/ProductCard.types';
 
 export * from './molecules/RadioGroup/RadioGroup';
 export type * from './molecules/RadioGroup/RadioGroup.types';
@@ -234,6 +237,9 @@ export type * from './organisms/Header/Header.types';
 
 export * from './organisms/Modal/Modal';
 export type * from './organisms/Modal/Modal.types';
+
+export * from './organisms/PieChart/PieChart';
+export type * from './organisms/PieChart/PieChart.types';
 
 export * from './organisms/Sidebar/Sidebar';
 export type * from './organisms/Sidebar/Sidebar.types';
@@ -311,6 +317,7 @@ export type {
   DataTableI18nStrings,
   ColorPickerI18nStrings,
   CarouselI18nStrings,
+  CalendarI18nStrings,
 } from './utils/i18n/GeeklegoI18nProvider.types';
 
 // StructuredData

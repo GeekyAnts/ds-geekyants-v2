@@ -1,13 +1,13 @@
 import type { HTMLAttributes, ReactNode } from 'react';
-import type { StatCardI18nStrings } from '../../utils/i18n/GeeklegoI18nProvider.types';
+import type { StatCardI18nStrings } from '../../utils/i18n';
 
 export type StatCardVariant = 'elevated' | 'outlined' | 'filled' | 'ghost';
 export type StatCardSize = 'sm' | 'md' | 'lg';
 export type StatCardTrend = 'up' | 'down' | 'neutral';
 
 export interface StatCardProps extends Omit<HTMLAttributes<HTMLElement>, 'children'> {
-  /** The metric label (e.g. "Total Revenue"). */
-  label: string;
+  /** The metric label (e.g. "Total Revenue"). Optional when the context already establishes the metric name (e.g., nested inside a titled chart). */
+  label?: string;
   /** The primary metric value (e.g. "$12,450" or a ReactNode). */
   value: ReactNode;
   /**
@@ -29,7 +29,7 @@ export interface StatCardProps extends Omit<HTMLAttributes<HTMLElement>, 'childr
   /** Typography and spacing scale. Defaults to 'md'. */
   size?: StatCardSize;
   /** Replaces the card content with a skeleton/spinner loading state. */
-  isLoading?: boolean;
+  loading?: boolean;
   /** Per-instance string overrides for i18n (SR trend labels, loading label). */
   i18nStrings?: StatCardI18nStrings;
 }
