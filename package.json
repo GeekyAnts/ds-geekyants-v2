@@ -50,7 +50,7 @@
     }
   },
   "scripts": {
-    "dev": "vite --config vite.config.ts app",
+    "dev": "vite --config vite.config.mts app",
     "build": "npm run build:css",
     "storybook": "storybook dev -p 6006",
     "lint": "eslint",
