@@ -74,7 +74,7 @@ const BACKDROP_CLASSES = [
 ].join(' ');
 
 const PANEL_BASE_CLASSES = [
-  'relative flex flex-col',
+  'flex flex-col',
   'bg-[var(--drawer-bg)]',
   'border border-[var(--drawer-border-color)]',
   'shadow-[var(--drawer-shadow)]',
