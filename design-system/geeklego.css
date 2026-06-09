@@ -5,6 +5,7 @@
    ============================================================================= */
 
    @import "tailwindcss";
+   @source not "../.claude";
 
    /* =============================================================================
       @theme — CSS-first design token registration (Tailwind v4 syntax)

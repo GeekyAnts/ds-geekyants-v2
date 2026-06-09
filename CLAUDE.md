@@ -31,7 +31,6 @@ Geeklego is **not** a Shadcn converter. It is a competitor. It does not referenc
 ```
 geeklego/
 ├── CLAUDE.md                            ← this file
-├── skills-lock.json                     ← version lock for externally sourced skills (see .agents/)
 ├── design-system/
 │   ├── geeklego.css                     ← single source of truth for all tokens
 │   └── geeklego.default.css             ← default/backup copy
@@ -39,32 +38,41 @@ geeklego/
 │   ├── atoms/                           ← L1 (no component imports)
 │   ├── molecules/                       ← L2 (imports L1 only)
 │   ├── organisms/                       ← L3 (imports L2 + L1)
-│   ├── templates/                       ← L4 (imports L3 and below)
-│   └── utils/                           ← keyboard hooks, ARIA helpers, StructuredData
+│   └── utils/                           ← keyboard hooks, ARIA helpers, StructuredData, i18n, security
 ├── app/                                 ← token editor (runs via npm run dev)
+├── scripts/                             ← token validator, metadata gen, screenshots, dedup helpers
+├── docs/                                ← published docs (token system, best practices, migration guides)
+├── internal/                            ← internal notes, checklists, blog drafts (not published)
 ├── stories/                             ← root-level Storybook stories
 ├── .storybook/                          ← Storybook config
-├── .agents/skills/                      ← externally sourced agent skills (managed via skills-lock.json)
-│   └── web-accessibility/               ← WCAG 2.1 a11y skill (sourced from supercent-io/skills-template)
+├── .agents/skills/                      ← skill copies: component-builder, figma-sync, i18n,
+│                                          screenshot-workflow, security, state-handling
 └── .claude/                             ← project-local agents, skills, references
 ```
+
+> **Note:** `components/templates/` (L4) does **not** exist yet — no templates have been built. `skills-lock.json` is documented further down but is also not present in the repo as checked out.
 
 ---
 
 ## Development Commands
 
 ```bash
-npm run dev              # Token editor app (http://localhost:5173)
+npm run dev              # Token editor app — runs `vite --config vite.config.mts app` (http://localhost:5173)
 npm run storybook        # Storybook (http://localhost:6006)
-npm run build            # Build token editor
 npm run build-storybook  # Build Storybook static site
 npx vitest               # Run tests (Storybook stories via Vitest + Playwright browser)
 npx vitest components/atoms/Button/Button.stories.tsx  # Single test
 npx tsc --noEmit         # Type-check (covers app/ only — components checked by Storybook/Vite)
-npm run validate-tokens  # Check for broken var() references in geeklego.css
+npm run validate-tokens  # Check geeklego.css for broken var() refs + within-block dupes (runs scripts/validate-tokens.ts)
+npm run lint             # ESLint (flat config)
+npm run lint-css         # Stylelint on design-system/geeklego.css (.stylelintrc.mjs, with tier-guard plugin)
+npm run build            # Library build: tsup (components/index.ts + catalog.ts → esm/cjs + .d.ts) then build:css
+npm run build:css        # Compile design-system/geeklego.css → dist/geeklego.css (minified) via Tailwind CLI
 ```
 
-No lint script configured. One `package.json`, one `npm run dev`. Node >= 20.0.0 required.
+`npm run build` bundles the library with `tsup` (no config file — CLI flags only) and then compiles the CSS. There is no separate build for the token editor app; verify component/token changes with Storybook + `npx vitest`. Node >= 20.0.0; package.json also pins `pnpm >= 9.0.0`.
+
+Other `scripts/` helpers (run with `npx tsx scripts/<name>`): `dedup-component-tokens.cjs`, `generate-metadata.ts`, `catalog.ts`, `take-screenshots.mjs`, `fix-replacement-chars.mjs`. `validate-tokens.test.ts` is the test for the token validator.
 
 ---
 
@@ -107,7 +115,7 @@ The token editor is a full React + Vite app for editing design tokens visually. 
 
 Key internals:
 - **Routing** — hash-based routing via `RouterProvider` (`routing/`), supports foundations/semantic/components/token/home route types
-- **Custom Vite plugin** (`vite.config.ts`) — provides API endpoints (`/api/load-tokens`, `/api/save-tokens`, `/api/component-tokens`, etc.) that parse `geeklego.css` into a JS token object and write it back
+- **Custom Vite plugin** (`vite.config.mts`) — provides API endpoints (`/api/load-tokens`, `/api/save-tokens`, `/api/component-tokens`, etc.) that parse `geeklego.css` into a JS token object and write it back
 - **Live reload** — watches `geeklego.css` for changes and pushes updates to the browser via WebSocket
 - **Backup** — automatically maintains `geeklego.default.css` as a backup copy
 - **Staging** (`state/staging.ts`) — all edits flow through a staging layer (in-memory Map + localStorage) before export; `stage()` / `unstage()` / `commitToExport()` / `discardAll()`
@@ -396,31 +404,14 @@ Additional skill-specific references live in `.claude/skills/component-builder/r
 
 ---
 
-## External Skills — `.agents/` and `skills-lock.json`
+## Skills — `.claude/skills/` and `.agents/skills/`
 
-The `.agents/skills/` directory holds externally sourced skills managed by `skills-lock.json`. These are pulled from GitHub repos (not written locally) and should not be edited by hand.
+Project skills live in two parallel locations, both holding the same set: **component-builder, figma-sync, i18n, screenshot-workflow, security, state-handling**.
 
-```json
-// skills-lock.json format
-{
-  "version": 1,
-  "skills": {
-    "<skill-name>": {
-      "source": "<org>/<repo>",
-      "sourceType": "github",
-      "computedHash": "<integrity-hash>"
-    }
-  }
-}
-```
+- `.claude/skills/` — the project-local source of truth, read by Claude Code.
+- `.agents/skills/` — a mirror of the same skills for the agent runtime.
 
-Currently installed external skills:
-
-| Skill | Source | Purpose |
-|---|---|---|
-| `web-accessibility` | `supercent-io/skills-template` | WCAG 2.1 a11y — use for accessibility audits and remediation outside the component-builder flow |
-
-Project-local skills (authored in-repo) live in `.claude/skills/` and are not in `skills-lock.json`.
+> **Note:** There is currently no `skills-lock.json` and no externally sourced skill (the previously documented `web-accessibility` skill is not present). All skills above are authored in-repo. If a lockfile-managed external-skill workflow is reintroduced, document its format here.
 
 ---
 
@@ -436,70 +427,15 @@ Opt-in via `schema?: boolean` prop (default `false`). Two levels: Microdata on L
 
 ## Existing Components
 
-**L1 Atoms**
+Location is always `components/{level}/{ComponentName}/`. Run `ls components/atoms` etc. for the live list — the lists below were accurate as of June 2026.
 
-| Component | Location |
-|---|---|
-| Avatar | `components/atoms/Avatar/` |
-| Badge | `components/atoms/Badge/` |
-| BreadcrumbItem | `components/atoms/BreadcrumbItem/` |
-| Checkbox | `components/atoms/Checkbox/` |
-| Divider | `components/atoms/Divider/` |
-| EmptyState | `components/atoms/EmptyState/` |
-| FileInput | `components/atoms/FileInput/` |
-| Heading | `components/atoms/Heading/` |
-| Image | `components/atoms/Image/` |
-| Input | `components/atoms/Input/` |
-| Item | `components/atoms/Item/` |
-| Label | `components/atoms/Label/` |
-| Link | `components/atoms/Link/` |
-| List | `components/atoms/List/` |
-| NavItem | `components/atoms/NavItem/` |
-| ProgressBar | `components/atoms/ProgressBar/` |
-| Quote | `components/atoms/Quote/` |
-| Radio | `components/atoms/Radio/` |
-| Rating | `components/atoms/Rating/` |
-| SegmentedControl | `components/atoms/SegmentedControl/` |
-| Select | `components/atoms/Select/` |
-| Skeleton | `components/atoms/Skeleton/` |
-| Slider | `components/atoms/Slider/` |
-| Spinner | `components/atoms/Spinner/` |
-| Switch | `components/atoms/Switch/` |
-| Textarea | `components/atoms/Textarea/` |
-| ThemeSwitcher | `components/atoms/ThemeSwitcher/` |
-| Toggle | `components/atoms/Toggle/` |
-| TreeItem | `components/atoms/TreeItem/` |
-| VisuallyHidden | `components/atoms/VisuallyHidden/` |
+**L1 Atoms** (`components/atoms/`): Avatar, Badge, BreadcrumbItem, Button, ChatBubble, Checkbox, Chip, ColorSwatch, Divider, EmptyState, FileInput, Heading, Image, Input, Item, Label, Link, List, NavItem, ProgressBar, ProgressIndicator, Quote, Radio, Rating, SegmentedControl, Select, Skeleton, Slider, Spinner, Stack, Switch, Tag, Textarea, ThemeSwitcher, Toggle, TreeItem, TypingIndicator, Video
 
-**L2 Molecules**
+**L2 Molecules** (`components/molecules/`): AlertBanner, Breadcrumb, ButtonGroup, Calendar, Card, ChatHeader, ChatInputBar, ChatMessage, Combobox, DateInput, DropdownMenu, Fieldset, FileUpload, FormField, InputGroup, Navbar, NumberInput, Pagination, Popover, ProductCard, RadioGroup, SearchBar, StatCard, Stepper, Toast, Tooltip, TreeView
 
-| Component | Location |
-|---|---|
-| AlertBanner | `components/molecules/AlertBanner/` |
-| Breadcrumb | `components/molecules/Breadcrumb/` |
-| ButtonGroup | `components/molecules/ButtonGroup/` |
-| Card | `components/molecules/Card/` |
-| Combobox | `components/molecules/Combobox/` |
-| DateInput | `components/molecules/DateInput/` |
-| DropdownMenu | `components/molecules/DropdownMenu/` |
-| Fieldset | `components/molecules/Fieldset/` |
-| Pagination | `components/molecules/Pagination/` |
-| Popover | `components/molecules/Popover/` |
-| SearchBar | `components/molecules/SearchBar/` |
-| Stepper | `components/molecules/Stepper/` |
-| Toast | `components/molecules/Toast/` |
-| Tooltip | `components/molecules/Tooltip/` |
-| TreeView | `components/molecules/TreeView/` |
+**L3 Organisms** (`components/organisms/`): Accordion, AreaChart, BarChart, Carousel, Chat, ColorPicker, DataTable, Datepicker, Drawer, Footer, Form, Header, Modal, PieChart, Sidebar, Tabs
 
-**L3 Organisms**
-
-| Component | Location |
-|---|---|
-| AreaChart | `components/organisms/AreaChart/` |
-| BarChart | `components/organisms/BarChart/` |
-| Header | `components/organisms/Header/` |
-| Modal | `components/organisms/Modal/` |
-| Sidebar | `components/organisms/Sidebar/` |
+**L4 Templates:** none built yet (`components/templates/` does not exist).
 
 **Utility modules (not components):** `useRovingTabindex`, `useFocusTrap`, `useEscapeDismiss`, `useClickOutside` (in `components/utils/keyboard/`), ARIA helpers (`components/utils/accessibility/aria-helpers.ts`), StructuredData (`components/utils/StructuredData/`), i18n helpers (`components/utils/i18n/`), security utilities (`components/utils/security/`).
 
@@ -507,12 +443,10 @@ Opt-in via `schema?: boolean` prop (default `false`). Two levels: Microdata on L
 
 ## Priority Component Build Order
 
-Most L1 atoms and L2 molecules are built. Remaining work:
+The full atom, molecule, and organism layers are built (see "Existing Components"). Remaining work:
 
-**L1 Atoms (remaining):** Button · Chip · Tag
-**L2 Molecules (remaining):** FormField · InputGroup · Navbar
-**L3 Organisms (remaining):** Footer · Accordion · Tabs · DataTable · HeroSection
-**L4 Templates:** DashboardLayout · AuthLayout · LandingLayout
+**L3 Organisms:** HeroSection
+**L4 Templates (none built yet):** DashboardLayout · AuthLayout · LandingLayout
 
 ---
 
