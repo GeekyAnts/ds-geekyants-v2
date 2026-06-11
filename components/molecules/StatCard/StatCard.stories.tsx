@@ -181,13 +181,13 @@ export const States: Story = {
 
 export const EmbeddedInChart: Story = {
   render: () => (
-    <div className="card-shell max-w-sm rounded-[var(--radius-component-lg)] border border-[var(--color-border-default)] bg-[var(--color-background-card)] overflow-hidden">
+    <div className="card-shell max-w-sm rounded-[var(--radius-component-lg)] border border-[var(--color-border-default)] bg-[var(--color-surface-default)] overflow-hidden">
       <div className="card-header-row">
         <span className="card-header-title">Revenue Overview</span>
         <button
           type="button"
           aria-label="More information about Revenue Overview"
-          className="text-[var(--color-text-muted)] hover:text-[var(--color-text-default)] transition-default rounded-[var(--radius-component-sm)] focus-ring"
+          className="text-[var(--color-text-tertiary)] hover:text-[var(--color-text-primary)] transition-default rounded-[var(--radius-component-sm)] focus-ring"
         >
           <HelpCircle size="var(--size-icon-md)" aria-hidden="true" />
         </button>

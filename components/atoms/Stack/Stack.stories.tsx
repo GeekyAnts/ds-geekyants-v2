@@ -127,7 +127,7 @@ export const States: Story = {
 
 export const DarkMode: Story = {
   render: () => (
-    <div data-theme="dark" className="p-[var(--spacing-layout-sm)] bg-[var(--color-surface-page)] max-w-2xl rounded-[var(--radius-component-lg)]">
+    <div data-theme="dark" className="p-[var(--spacing-layout-sm)] bg-[var(--color-bg-primary)] max-w-2xl rounded-[var(--radius-component-lg)]">
       <Stack direction="column" gap="md">
         <span className="text-label-sm text-[var(--color-text-secondary)]">Dark mode — column gap md</span>
         <Stack direction="row" gap="sm">

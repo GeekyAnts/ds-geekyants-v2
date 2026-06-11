@@ -162,6 +162,17 @@ Tier 2 — Semantics    → purpose aliases (:root block)
 
 Never skip a level: **primitive → semantic → component**. A component token must always alias a semantic. If no semantic exists for the intent, create one first (aliasing a primitive), then create the component token from it. Never reference a primitive directly from a component token. Never hardcode a value. See `.claude/references/worked-examples.md` for concrete examples.
 
+### Token Block Verification — Required Before Every Component
+
+Before writing any new component TSX, the four-step gate:
+
+1. Run `npm run validate-tokens` to establish a baseline (must exit 0).
+2. Write the component token block in `design-system/geeklego.css` first.
+3. Run `npm run validate-tokens` again — must exit 0 before writing TSX.
+4. After writing TSX, run `npm run validate-tokens` one more time — Pass 2 scans `*.tsx` for `var(--)` references and confirms a matching CSS definition exists.
+
+Missing CSS class rules (e.g. `.slider-input`, `::-webkit-slider-thumb`) are *not* caught by `validate-tokens` — see `.claude/skills/component-builder/references/common-token-mistakes.md` ❌18.
+
 ---
 
 ## Component Architecture — 5-Level Hierarchy
@@ -373,6 +384,16 @@ React 19 · TypeScript 5.7+ · Tailwind CSS v4.2 · Vite 6 · Storybook 10 · Vi
 47. **Use `ps-*`/`pe-*` for content padding and `start-*`/`end-*` for icon inset positioning** (RTL-safe logical properties).
 48. **Apply `sanitizeHref()` to every `href` prop** before passing it to an `<a>` element. Import from `../../utils/security/sanitize` (relative path). Wrap in `useMemo` per the performance pattern.
 49. **Read `.claude/skills/state-handling/SKILL.md`** when adding or auditing visual states (loading, disabled, error, selected). Use `getLoadingProps()`, `getDisabledProps()`, `getErrorFieldProps()` from `components/utils/accessibility/aria-helpers.ts`. Minimum requirement: L3 organisms must have a `loading` prop.
+
+---
+
+## Wrapper Components Own ARIA Wiring
+
+When a component wraps a form control (FormField, Fieldset, InputGroup) or composes parts that need to be linked (disclosure + panel, label + control + error), the **wrapper** generates IDs via `useId()` and injects `aria-describedby` / `aria-invalid` / `aria-controls` / `aria-labelledby` onto its child using `React.cloneElement`. Never push this wiring to the consumer. Use `joinDescribedBy()` / `mergeDescribedBy()` patterns to preserve any consumer-supplied `aria-describedby` tokens when cloning.
+
+## Dark Mode — Reading Token Values
+
+Never use `getComputedStyle()` to read color token values. It returns the computed light-mode value regardless of `data-theme`. Read token values directly from the CSS source (e.g. parse `design-system/geeklego.css`) when you need a JS-side hex for an SVG numeric prop, an SSR fallback, or a swatch preview.
 
 ---
 

@@ -28,9 +28,9 @@ Read these files at the start of every component generation session. Do not skip
 | `CLAUDE.md` (project root) | Full project context, architecture rules, naming conventions, token chain rule, 5-file structure, "Never Do" / "Always Do" lists |
 | `design-system/geeklego.css` | Live source of truth — all primitives, semantics, existing component tokens |
 | `.claude/references/semantic-html-guide.md` | Element decision table, form/table/heading/landmark patterns |
-| `components/utils/accessibility/index.ts` | ARIA helper types and functions for disclosure, navigation, live regions, loading/disabled states |
+| `components/utils/accessibility/aria-helpers.ts` | ARIA helper types and functions for disclosure, navigation, live regions, loading/disabled states |
 
-All paths are relative to `packages/geeklego/` inside the monorepo root. If starting from the monorepo root, prefix all paths with `packages/geeklego/`.
+All paths are relative to the repo root.
 
 Scan `geeklego.css` to know what tokens already exist. Every component you generate must integrate with what's already there — never duplicate, never conflict.
 
@@ -45,7 +45,7 @@ Scan `geeklego.css` to know what tokens already exist. Every component you gener
 | `references/seo-guide.md` | When implementing SEO — Schema.org patterns, cascade rules, semantic HTML rules, and the step 4.7 checklist |
 | `references/token-quick-reference.md` | When you need to look up available token names while writing component tokens |
 | `references/design-standards.md` | Design quality rules: shadow elevation, spacing rhythm, variant distinctness, transitions, states, dark mode, inline style policy, prop naming |
-| `references/common-token-mistakes.md` | 15 real-world regressions with wrong/right examples — check before finalizing any token block |
+| `references/common-token-mistakes.md` | 19 real-world regressions with wrong/right examples — check before finalizing any token block |
 | `references/verification-checklist.md` | Full post-generation checklist: token integrity, registration, theme, a11y, i18n, RTL, reuse audit |
 | `design-system/SIZE_TAXONOMY.md` | **Every component generation session** — determines which size scale (Micro/Standard/Extended/Avatar/Overlay) to use. Read before Phase 1 step 5. |
 | `.claude/references/storybook-stories.md` | When writing the 8 required stories — full template with JSX examples |
@@ -722,7 +722,7 @@ Must cover: `default`, `variants` (array), `sizes` (array), `states` (object: lo
 
 ## Common Token Mistakes
 
-**Read `references/common-token-mistakes.md` for 15 real-world regressions** with wrong/right examples and detection commands:
+**Read `references/common-token-mistakes.md` for 19 real-world regressions** with wrong/right examples and detection commands:
 
 | # | Mistake | Detection |
 |---|---|---|
@@ -741,6 +741,10 @@ Must cover: `default`, `variants` (array), `sizes` (array), `states` (object: lo
 | 13 | Hardcoding color when shared semantic exists | Search for `--color-overlay-backdrop`, etc. |
 | 14 | Cross-component token chaining | LHS prefix != RHS prefix in `var()` reference |
 | 15 | Variant state asymmetry | All state groups must have same prefix pattern |
+| 16 | Inlining a styled interactive control instead of extracting it as an atom | BarChart's `<select>` should be `<Select>` atom |
+| 17 | TSX referencing component tokens not defined in `geeklego.css` | `validate-tokens` Pass 2 scans TSX `var()` refs against CSS |
+| 18 | Missing CSS class rules for non-Tailwind class names (Slider case) | Grep every `className` for non-Tailwind classes; verify each has a CSS rule |
+| 19 | Child-component token prefix pollution in parent's block (Navbar/NavItem) | Use CSS class rule to override child's token directly; never create intermediate `--parent-child-*` tokens |
 
 Check for regressions before finalizing any token block.
 

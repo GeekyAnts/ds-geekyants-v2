@@ -300,3 +300,55 @@ creates an inconsistent visual pattern across components.
 rg '--[a-z]+-[a-z]+-[a-z]+-.*--[a-z]+-[a-z]+-[a-z]+-' design-system/geeklego.css | rg -v 'generated|:root'
 # For each match, verify: does every visual state have the same prefix pattern?
 ```
+
+**❌ 16 — Inlining a styled interactive control instead of extracting it as an atom (BarChart case)**
+
+BarChart contained a styled `<select>` with a custom chevron, border, hover background, and focus ring. That is a full Select atom — not a `<select>` inlined in a chart. Because the control was inlined, BarChart was mis-classified as L1 Atom. The corrected tree:
+
+```
+BarChart (Molecule — L2)
+└── Select (Atom — L1)   ← must exist and be approved before BarChart is written
+```
+
+**Decision rule:** if you are giving a native HTML control custom visual styling (border, background, radius, hover, focus ring), it is an atom waiting to be born. The parent that uses it becomes a molecule or higher.
+
+**❌ 17 — TSX referencing component tokens that never made it into geeklego.css (ProductCard / ChatHeader case)**
+
+ProductCard's TSX referenced ~30 `--product-card-*` tokens that were never defined in `geeklego.css`. ChatHeader referenced `--chat-header-title-gap` with the same omission. Both passed the legacy CSS-only token check because the validator did not cross-reference TSX `var()` usage against CSS definitions.
+
+The fix lives in `validate-tokens`: pass 2 scans every `*.tsx` for `var(--)` and confirms a matching `--name:` exists in `geeklego.css`. Run it after writing TSX — never defer.
+
+**❌ 18 — Missing CSS class rules for a non-Tailwind class name (Slider case)**
+
+The Slider component's TSX referenced `.slider-input` and several pseudo-element selectors (`::-webkit-slider-thumb`, `::-moz-range-track`) that were never added to `geeklego.css`. The component shipped looking like a browser-default unstyled range input for months.
+
+`validate-tokens` only checks `var()` references — it does not check CSS class names. After writing TSX, grep every `className` for non-Tailwind class names and verify each one has a matching rule in `geeklego.css`:
+
+```bash
+rg -o 'className="([^"]+)"' components/ --include '*.tsx'
+```
+
+Cross-reference against CSS rules in `geeklego.css`. Standard Tailwind utilities (`.bg-*`, `.text-*`, `.flex`, `.gap-*`, `.rounded-*`, etc.) are exempt.
+
+**❌ 19 — Child-component token prefix pollution in a parent's block (Navbar / NavItem case)**
+
+Navbar's token block defined `--navbar-item-height-sm/md/lg` and `--navbar-item-label-*`. The `--navbar-item-*` prefix conceptually overlaps with NavItem's `--navitem-*` namespace. The size tokens were dead — no CSS class rule consumed them. The label tokens were never referenced by any file.
+
+The correct pattern is a CSS class rule that overrides the child's token directly. The child's tokens re-resolve via CSS cascade — no intermediate tokens needed.
+
+```css
+/* ✅ Correct — CSS class rule overrides child token directly */
+.navbar-size-sm {
+  --navitem-height: var(--size-component-sm);
+}
+.navbar-variant-underline {
+  --navitem-bg-active: transparent;
+  --navitem-text-active: var(--color-action-primary);
+}
+
+/* ❌ Wrong — intermediate tokens in parent block pollute child namespace */
+/* In Navbar token block: */
+  --navbar-item-height-sm: var(--size-component-sm);
+```
+
+**Detection:** after writing a parent's tokens, search for any token whose `--[parent]-{part}-*` pattern has `{part}` matching another component's name. If found, remove the token and add a CSS class rule that overrides the child's token directly.
