@@ -1,0 +1,15 @@
+Card — package install notes
+=============================
+
+No NEW Radix package is required for Card.
+
+Card is pure presentation (no focus trap / keyboard nav / portal / aria-state),
+so per references/radix-primitive-map.md it does NOT use a Radix behavioral
+primitive.
+
+The only Radix dependency it touches is @radix-ui/react-slot (for `asChild`),
+which the repo already ships (it powers Button's asChild) — nothing to install.
+
+If, hypothetically, this had needed a Radix primitive, the command would be:
+    npm install @radix-ui/react-<name>
+(run per-component, when you reach it — NOT executed here per test instructions).

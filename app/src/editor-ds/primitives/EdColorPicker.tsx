@@ -1,7 +1,7 @@
 import { forwardRef, useState, useCallback, useEffect, useRef, memo } from 'react'
 import type { CSSProperties, PointerEvent, KeyboardEvent } from 'react'
 import type { EdColorPickerProps } from './EdColorPicker.types'
-import { hexToHsv, hsvToHex, hexToRgb, rgbToHex } from '../../utils/colorUtils'
+import { hexToHsv, hsvToHex, hexToRgb, rgbToHex, oklchStringToHex } from '../../utils/colorUtils'
 import './EdColorPicker.css'
 
 // ── Colour math helpers ────────────────────────────────────────────────────────
@@ -21,8 +21,14 @@ function parseHex(hex: string): { r: number; g: number; b: number } | null {
   return null
 }
 
-function normalise(hex: string): string {
-  const rgb = parseHex(hex)
+function normalise(value: string): string {
+  // OKLCH values (the Tailwind-v4-standard palette form) are converted to their
+  // hex equivalent so the hex/HSV picker surface can display and edit them.
+  if (value.trim().toLowerCase().startsWith('oklch(')) {
+    const hex = oklchStringToHex(value)
+    if (hex) return hex.toUpperCase()
+  }
+  const rgb = parseHex(value)
   if (!rgb) return '#000000'
   return rgbToHex(rgb.r, rgb.g, rgb.b).toUpperCase()
 }

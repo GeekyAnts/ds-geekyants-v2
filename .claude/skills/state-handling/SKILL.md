@@ -12,12 +12,20 @@ description: >
   "active state", or any request to add/fix component feedback behaviour.
 ---
 
-# Geeklego — Component State Handling
+# Geeklego — Component State Handling (v2)
 
 Visual states make components feel alive and trustworthy. A component without a loading state
 leaves users wondering if something is broken. A disabled state without proper ARIA leaves screen
 reader users confused. This skill ensures every component handles visual state correctly —
 consistently, accessibly, and in alignment with the design system.
+
+> **v2 architecture (read `CLAUDE.md` first).** State styling uses **standard semantic Tailwind
+> utilities** (`bg-muted`, `text-muted-foreground`, `text-destructive`, `ring-ring`) — registered
+> via `@theme inline` in `design-system/v2/semantics.css`. There is **no component-token tier**:
+> never add `--{component}-*` blocks and never use `bg-[var(--token)]` arbitraries for a value that
+> has a registered utility. No atom/molecule/organism folders — components are flat under
+> `components/v2/<Name>/`. Prefer Radix primitives (`data-[state=…]`, `data-disabled`) for stateful
+> a11y wiring before reaching for `aria-helpers`. Reference component: `components/v2/Button/`.
 
 ---
 
@@ -56,8 +64,7 @@ loading?: boolean;
 // 3. Replace the data area with Skeleton when loading
 {loading ? (
   <Skeleton
-    variant="box"
-    height="var(--{component}-loading-height)"
+    className="h-40 w-full rounded-md"
     aria-label="Loading chart data"
   />
 ) : data.length > 0 ? (
@@ -66,6 +73,9 @@ loading?: boolean;
   /* empty state */
 )}
 ```
+
+Size the skeleton with standard utilities (`h-40 w-full rounded-md`) so it matches the
+target area's dimensions. No component-token height var.
 
 ### Spinner pattern (buttons and inline atoms)
 
@@ -81,15 +91,10 @@ loading?: boolean;
 </span>
 ```
 
-### Token naming
+### Sizing
 
-Always add loading tokens to `geeklego.css` **before** writing the component:
-
-```css
-/* In the component token block */
---{component}-loading-height:  var(--size-component-2xl);
---{component}-loading-radius:  var(--radius-component-md);
-```
+No loading tokens. Size the skeleton with standard utilities (`h-40`, `w-full`, `rounded-md`)
+so it matches the dimensions of the content it replaces — no layout shift on resolve.
 
 ### ARIA rule
 
@@ -101,32 +106,39 @@ Always add loading tokens to `geeklego.css` **before** writing the component:
 
 ## Disabled State
 
+For a native form element, prefer the standard ShadCN/Tailwind disabled-state utilities
+in the `cva` base (the Button reference uses exactly these):
+
+```ts
+// In the cva base string (button-variants.ts reference)
+"disabled:pointer-events-none disabled:opacity-50"
+```
+
 ```tsx
 // Types
 disabled?: boolean;
 
-// Component
+// Component — pass the native disabled attr; the cva base styles it via disabled:* utilities
 const isDisabled = disabled || loading;
 
-// ARIA — use getDisabledProps() from aria-helpers.ts
-{...getDisabledProps(isDisabled)}
-
-// CSS classes (component token pattern)
-className={[
-  isDisabled && 'bg-[var(--{component}-bg-disabled)]',
-  isDisabled && 'text-[var(--{component}-text-disabled)]',
-  isDisabled && 'border-[var(--{component}-border-disabled)]',
-  isDisabled && 'cursor-not-allowed pointer-events-none',
-].filter(Boolean).join(' ')}
+<button disabled={isDisabled} className={cn(thingVariants({ variant, size }), className)}>
 ```
 
-### Token naming
+For a Radix-based or non-`<button>` element that can't use the native `disabled` attribute,
+style off Radix's `data-disabled` / `aria-disabled` with state variants:
 
-```css
---{component}-bg-disabled:     var(--color-action-disabled);
---{component}-text-disabled:   var(--color-text-disabled);
---{component}-border-disabled: var(--color-border-default);
+```tsx
+// ARIA — Radix primitives expose data-disabled natively; only reach for getDisabledProps()
+// from components/utils/accessibility/aria-helpers.ts when no Radix primitive applies.
+className={cn(
+  "data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+  "aria-disabled:pointer-events-none aria-disabled:opacity-50",
+)}
 ```
+
+No component-token disabled vars. The standard `opacity-50` muting is the v2 convention
+(it re-themes for free); use semantic utilities (`bg-muted`, `text-muted-foreground`) only
+when a variant needs an explicit muted fill rather than reduced opacity.
 
 ---
 
@@ -138,25 +150,26 @@ Always provide a secondary cue beyond color (icon, border + text, or both).
 // Types
 error?: string;
 
-// ARIA — use getErrorFieldProps() from aria-helpers.ts
+// ARIA — use getErrorFieldProps() from components/utils/accessibility/aria-helpers.ts
 const errorId = useId();
 {...getErrorFieldProps(!!error, errorId)}
 
-// Error message element
+// Error styling uses the standard `destructive` semantic on the field + message:
+//   input:  aria-invalid:border-destructive aria-invalid:ring-destructive
+//   message:
 {error && (
-  <span id={errorId} className="text-body-sm text-[var(--color-status-error)] flex items-center gap-[var(--spacing-component-xs)]">
-    <AlertCircle className="shrink-0" aria-hidden="true" />
+  <span id={errorId} className="flex items-center gap-1.5 text-sm text-destructive">
+    <AlertCircle className="size-4 shrink-0" aria-hidden="true" />
     {error}
   </span>
 )}
 ```
 
-### Token naming
+### Token usage
 
-```css
---{component}-border-error:    var(--color-border-error);
---{component}-text-error:      var(--color-status-error);
-```
+No component-token error vars. Use the standard `destructive` semantic
+(`text-destructive`, `border-destructive`, `ring-destructive`) — it is in the v2
+semantic set and re-themes in dark mode automatically.
 
 ---
 
@@ -167,11 +180,11 @@ const errorId = useId();
 selected?: boolean;   // for list items, options, chips
 isActive?: boolean;   // for nav items
 
-// CSS classes
-className={[
-  selected && 'bg-[var(--{component}-bg-selected)]',
-  selected && 'text-[var(--{component}-text-selected)]',
-].filter(Boolean).join(' ')}
+// CSS classes — standard semantics (no component tokens). For a Radix primitive,
+// prefer its data-state hook: data-[state=active]:bg-accent, data-[state=checked]:…
+className={cn(
+  selected && 'bg-accent text-accent-foreground',
+)}
 
 // ARIA
 aria-selected={selected || undefined}
@@ -181,46 +194,46 @@ aria-current={isActive ? 'page' : undefined}
 
 ---
 
-## Audit Checklist — By Component Type
+## Audit Checklist — By Component Kind
 
-### L1 Interactive Atoms (Button, Input, Select, Checkbox, Radio, Switch, Toggle)
-- [ ] `disabled` prop → visual + ARIA
+(There are no atom/molecule/organism tiers in v2 — these are functional groupings only.)
+
+### Interactive controls (Button, Input, Select, Checkbox, Radio, Switch, Toggle)
+- [ ] `disabled` prop → visual (`disabled:opacity-50` / `data-[disabled]`) + ARIA
 - [ ] `loading` prop if async (Button, Submit)
-- [ ] `error` prop for form controls
-- [ ] `selected`/`checked` for choice controls
+- [ ] `error` prop for form controls (`aria-invalid` + `text-destructive`)
+- [ ] `selected`/`checked` for choice controls (prefer Radix `data-[state=checked]`)
 
-### L1 Display Atoms (Avatar, Badge, Chip, Tag, Spinner, Skeleton)
+### Display elements (Avatar, Badge, Chip, Tag, Spinner, Skeleton)
 - [ ] `loading` for Avatar (shimmer circle)
-- [ ] No disabled needed for purely decorative atoms
+- [ ] No disabled needed for purely decorative elements
 
-### L2 Molecules (Card, SearchBar, FormField, Pagination, Breadcrumb)
+### Composite / section components (Card, SearchBar, FormField, Pagination, Breadcrumb)
 - [ ] `loading` prop → Skeleton placeholder for content area
-- [ ] Pass `disabled`/`error` down to constituent atoms
+- [ ] Pass `disabled`/`error` down to constituent controls
 
-### L3 Organisms (Sidebar, AreaChart, BarChart, DataTable, Modal, Accordion)
-- [ ] `loading` prop → Skeleton box at organism height
-- [ ] `error` state for data-fetch failure (AlertBanner or inline error)
+### Data / overlay components (Sidebar, charts, DataTable, Dialog, Accordion)
+- [ ] `loading` prop → Skeleton box at the content area's size
+- [ ] `error` state for data-fetch failure (inline error or alert)
 
 ---
 
 ## Rules
 
-1. **Always add loading tokens to `geeklego.css` first** — `--{component}-loading-height`, `--{component}-loading-radius`.
+1. **No component-token tier and no `bg-[var(--…)]` arbitraries.** Style state with standard
+   semantic utilities (`bg-muted`, `text-destructive`, `ring-ring`) and `disabled:`/`data-[state=…]`
+   variants. Size skeletons with standard sizing utilities — no `--{component}-loading-*` vars.
 2. **Never double-set `aria-busy`** — it belongs on the root; `<Skeleton>` sets its own.
 3. **Never use color alone** for error — pair with icon or text label.
 4. **Never render a spinner and a skeleton simultaneously** on the same component.
-5. **Use `getLoadingProps()`, `getDisabledProps()`, `getErrorFieldProps()`** from `components/utils/accessibility/aria-helpers.ts`.
+5. **Prefer Radix state hooks** (`data-[state=…]`, `data-disabled`) over hand-wiring ARIA;
+   reach for `getLoadingProps()`/`getDisabledProps()`/`getErrorFieldProps()` from
+   `components/utils/accessibility/aria-helpers.ts` only when no Radix primitive provides it.
 6. **Preserve layout dimensions during loading** — skeleton must match the target area's size.
 
 ---
 
 ## Reference
 
-Full code examples and token chains → `.claude/skills/state-handling/references/patterns.md`
-
-Existing components with loading state:
-- `Button` — inline Spinner (`loading`)
-- `Item` — full Skeleton (`loading`)
-- `AreaChart` — Skeleton box (`loading`)
-- `BarChart` — Skeleton box (`loading`)
-- `Avatar` — Skeleton circle (`loading`)
+Full code examples → `.claude/skills/state-handling/references/patterns.md`
+v2 reference component (canonical disabled-state styling) → `components/v2/Button/`

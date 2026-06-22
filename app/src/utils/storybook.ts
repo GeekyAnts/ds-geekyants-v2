@@ -1,8 +1,11 @@
 // ─── Storybook Story URL Mapping ─────────────────────────────────────────────
 // Maps token editor component names (camelCase) to Storybook story URLs.
-// Component lists are derived from catalog.ts (single source of truth).
-
-import { componentCatalog } from '../../../components/catalog'
+//
+// NOTE (v2 / §7.5 cut): the old `components/catalog` was deleted along with the
+// 3-tier components, so there are no catalog-derived component sets anymore.
+// COMPONENT_LEVEL_MAP is now empty — every consumer (ComponentPreview*) therefore
+// resolves to the no-preview state, which is correct until the component UI is
+// stripped in the rebuild plan's Phase 5.
 
 function toCamel(pascal: string): string {
   return pascal.charAt(0).toLowerCase() + pascal.slice(1)
@@ -35,18 +38,8 @@ const STORY_OVERRIDES: Readonly<Record<string, readonly string[]>> = {
   sidebar:         ['Default', 'CollapsedIconRail', 'CollapsibleOffcanvas', 'States', 'DarkMode'],
 }
 
-// Component Sets — derived from the canonical catalog.ts
-const ATOM_COMPONENTS = new Set(componentCatalog.atoms.map(toCamel))
-const MOLECULE_COMPONENTS = new Set(componentCatalog.molecules.map(toCamel))
-const ORGANISM_COMPONENTS = new Set(componentCatalog.organisms.map(toCamel))
-
-export const COMPONENT_LEVEL_MAP: Readonly<Record<string, StoryLevel>> = (() => {
-  const map: Record<string, StoryLevel> = {}
-  for (const name of ATOM_COMPONENTS) map[name] = 'atom'
-  for (const name of MOLECULE_COMPONENTS) map[name] = 'molecule'
-  for (const name of ORGANISM_COMPONENTS) map[name] = 'organism'
-  return map
-})()
+// Component Sets — formerly derived from the deleted catalog.ts. Empty in v2.
+export const COMPONENT_LEVEL_MAP: Readonly<Record<string, StoryLevel>> = {}
 
 const TIER_LABEL: Record<StoryLevel, string> = {
   atom: 'Atoms',

@@ -100,12 +100,13 @@ getSafeExternalLinkProps('https://example.com', '_blank', 'sponsored noopener')
 Always use a **direct relative import** — never the barrel (`index.ts`) in component code:
 
 ```typescript
-// Correct — direct file import
-import { sanitizeHref } from '../../utils/security/sanitize';
-import { getSafeExternalLinkProps } from '../../utils/security/sanitize';
+// Correct — direct file import. From a v2 component (components/v2/<Name>/<Name>.tsx) utils
+// are three levels up:
+import { sanitizeHref } from '../../../utils/security/sanitize';
+import { getSafeExternalLinkProps } from '../../../utils/security/sanitize';
 
 // Wrong — barrel import in component code
-import { sanitizeHref } from '../../utils/security';
+import { sanitizeHref } from '../../../utils/security';
 ```
 
 The barrel exists only for external consumers building on top of Geeklego.
@@ -114,7 +115,7 @@ The barrel exists only for external consumers building on top of Geeklego.
 
 ## useMemo Wrapping
 
-Wrap `sanitizeHref` calls in `useMemo` to follow the project performance pattern (rule 35):
+Wrap `sanitizeHref` calls in `useMemo` so the sanitized value is stable across renders:
 
 ```typescript
 // Correct — memoized

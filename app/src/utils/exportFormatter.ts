@@ -1,21 +1,24 @@
 import { structuredPatch } from 'diff'
-import type { GeeklegoTokens, ComponentTokenGroup } from '../types'
-import { generateCss } from './cssGenerator'
-import { generateComponentTokensCss } from './componentTokenParser'
+import type { GeeklegoTokensV2 } from '../types'
+import { generateGeeklegoV2 } from './cssGenerator'
 import type { StagedNewToken } from '../state/staging'
 
-/**
- * Generate the original CSS from the base tokens (primitives/semantics + component tokens).
- */
-export function generateOriginalCss(tokens: GeeklegoTokens, componentGroups?: ComponentTokenGroup[]): string {
-  const base = generateCss(tokens)
-  if (!componentGroups || componentGroups.length === 0) return base
-  return base + '\n\n' + generateComponentTokensCss(componentGroups)
+/** Concatenate the three v2 file strings into one combined CSS string for diffing/export. */
+function combineV2Css(tokens: GeeklegoTokensV2): string {
+  const { primitives, semantics, dark } = generateGeeklegoV2(tokens)
+  return [primitives, semantics, dark].join('\n\n')
 }
 
-function applyNewTokenToTree(modifiedTokens: GeeklegoTokens, newToken: StagedNewToken): void {
+/**
+ * Generate the original CSS from the base tokens (v2: primitives + flat semantics + dark).
+ */
+export function generateOriginalCss(tokens: GeeklegoTokensV2): string {
+  return combineV2Css(tokens)
+}
+
+function applyNewTokenToTree(modifiedTokens: GeeklegoTokensV2, newToken: StagedNewToken): void {
   const { treePath, value } = newToken
-  const sem = modifiedTokens.semantics.light as unknown as Record<string, Record<string, unknown>>
+  const sem = modifiedTokens.semantics.light
   const prims = modifiedTokens.primitives as unknown as Record<string, Record<string, unknown>>
 
   switch (treePath.kind) {
@@ -38,12 +41,9 @@ function applyNewTokenToTree(modifiedTokens: GeeklegoTokens, newToken: StagedNew
       break
     }
     case 'semanticColorGroup':
-      if (!sem[treePath.group]) break
-      ;(sem[treePath.group] as Record<string, string>)[treePath.key] = value
-      break
     case 'semanticFlat':
-      if (!sem[treePath.group]) break
-      ;(sem[treePath.group] as Record<string, string>)[treePath.key] = value
+      // v2 flat semantics: the staged new semantic is keyed directly by its bare key.
+      sem[treePath.key] = value
       break
   }
 }
@@ -53,10 +53,10 @@ function applyNewTokenToTree(modifiedTokens: GeeklegoTokens, newToken: StagedNew
  * Used both for generating merged CSS and for POSTing to /api/save-tokens.
  */
 export function generateMergedTokens(
-  tokens: GeeklegoTokens,
+  tokens: GeeklegoTokensV2,
   stagedEdits: Map<string, string>,
   stagedNewTokens?: ReadonlyMap<string, StagedNewToken>
-): GeeklegoTokens {
+): GeeklegoTokensV2 {
   if (stagedEdits.size === 0 && (!stagedNewTokens || stagedNewTokens.size === 0)) return structuredClone(tokens)
 
   const modifiedTokens = structuredClone(tokens)
@@ -65,70 +65,25 @@ export function generateMergedTokens(
     const parts = tokenName.replace(/^--/, '').split('-')
     if (parts.length < 2) continue
 
+    // v2 flat semantics: a staged edit keyed by the CSS name `--<semanticKey>` maps
+    // directly onto modifiedTokens.semantics.light[semanticKey]. Match these first.
+    const semanticKey = tokenName.replace(/^--/, '')
+    if (semanticKey in modifiedTokens.semantics.light) {
+      modifiedTokens.semantics.light[semanticKey] = stagedValue
+      continue
+    }
+
     if (tokenName.startsWith('--color-')) {
       const colorName = parts.slice(1).join('-')
-      const isSemanticColor =
-        tokenName.startsWith('--color-bg-') ||
-        tokenName.startsWith('--color-surface-') ||
-        tokenName.startsWith('--color-text-') ||
-        tokenName.startsWith('--color-border-') ||
-        tokenName.startsWith('--color-action-') ||
-        tokenName.startsWith('--color-status-') ||
-        tokenName.startsWith('--color-state-') ||
-        tokenName.startsWith('--color-data-series-')
-
-      if (isSemanticColor) {
-        // --color-action-primary → semantics.light.action.primary
-        // --color-data-series-1 → semantics.light.dataSeries['1']
-        const semanticMap = modifiedTokens.semantics.light as any
-        if (tokenName.startsWith('--color-data-series-')) {
-          const key = parts.slice(2).join('-')
-          if (semanticMap.dataSeries && key in semanticMap.dataSeries) {
-            semanticMap.dataSeries[key] = stagedValue
+      // Primitive color: --color-brand-500 → primitives.colors.brand['500']
+      for (const [family, shades] of Object.entries(modifiedTokens.primitives.colors)) {
+        if (colorName.startsWith(family + '-')) {
+          const shade = colorName.slice(family.length + 1)
+          if (shade in shades) {
+            modifiedTokens.primitives.colors[family][shade] = stagedValue
           }
-        } else {
-          const semanticPrefix = parts[1] // bg, surface, text, border, action, status, state
-          const semanticSuffix = parts.slice(2).join('-')
-          if (semanticMap[semanticPrefix] && semanticMap[semanticPrefix][semanticSuffix] !== undefined) {
-            semanticMap[semanticPrefix][semanticSuffix] = stagedValue
-          }
+          break
         }
-      } else {
-        // Primitive color: --color-brand-500 → primitives.colors.brand['500']
-        for (const [family, shades] of Object.entries(modifiedTokens.primitives.colors)) {
-          if (colorName.startsWith(family + '-')) {
-            const shade = colorName.slice(family.length + 1)
-            if (shade in shades) {
-              modifiedTokens.primitives.colors[family][shade] = stagedValue
-            }
-            break
-          }
-        }
-      }
-    } else if (tokenName.startsWith('--spacing-component-')) {
-      const key = parts.slice(3).join('-')
-      if (key in modifiedTokens.semantics.light.spacingComponent) {
-        modifiedTokens.semantics.light.spacingComponent[key] = stagedValue
-      }
-    } else if (tokenName.startsWith('--spacing-layout-')) {
-      const key = parts.slice(3).join('-')
-      if (key in modifiedTokens.semantics.light.spacingLayout) {
-        modifiedTokens.semantics.light.spacingLayout[key] = stagedValue
-      }
-    } else if (tokenName.startsWith('--radius-component-')) {
-      const key = parts.slice(3).join('-')
-      if (key in modifiedTokens.semantics.light.radiusComponent) {
-        modifiedTokens.semantics.light.radiusComponent[key] = stagedValue
-      }
-    } else if (tokenName.startsWith('--layer-')) {
-      const key = parts.slice(1).join('-')
-      if (key in modifiedTokens.semantics.light.layer) {
-        modifiedTokens.semantics.light.layer[key] = stagedValue
-      }
-    } else if (tokenName.startsWith('--border-')) {
-      const key = parts.slice(1).join('-')
-      if (key in modifiedTokens.semantics.light.borders) {
-        modifiedTokens.semantics.light.borders[key] = stagedValue
       }
     } else if (tokenName.startsWith('--font-size-') || tokenName.startsWith('--font-weight-') ||
                tokenName.startsWith('--line-height-') || tokenName.startsWith('--letter-spacing-')) {
@@ -193,21 +148,6 @@ export function generateMergedTokens(
       if (key in modifiedTokens.primitives.iconSize) {
         modifiedTokens.primitives.iconSize[key] = stagedValue
       }
-    } else if (tokenName.startsWith('--shadow-')) {
-      const key = parts.slice(1).join('-')
-      if (key in modifiedTokens.semantics.light.shadows) {
-        modifiedTokens.semantics.light.shadows[key] = stagedValue
-      }
-    } else if (tokenName.startsWith('--content-')) {
-      const key = parts.slice(1).join('-')
-      if (key in modifiedTokens.semantics.light.contentFlexibility) {
-        modifiedTokens.semantics.light.contentFlexibility[key] = stagedValue
-      }
-    } else if (tokenName.startsWith('--size-component-')) {
-      const key = parts.slice(3).join('-')
-      if (key in modifiedTokens.semantics.light.sizeComponent) {
-        modifiedTokens.semantics.light.sizeComponent[key] = stagedValue
-      }
     }
   }
 
@@ -222,27 +162,13 @@ export function generateMergedTokens(
 
 /**
  * Generate the merged CSS by applying staged edits on top of the original tokens.
- * Includes component tokens with staged edits applied so the diff reflects component changes.
  */
 export function generateMergedCss(
-  tokens: GeeklegoTokens,
+  tokens: GeeklegoTokensV2,
   stagedEdits: Map<string, string>,
-  stagedNewTokens?: ReadonlyMap<string, StagedNewToken>,
-  componentGroups?: ComponentTokenGroup[]
+  stagedNewTokens?: ReadonlyMap<string, StagedNewToken>
 ): string {
-  const base = generateCss(generateMergedTokens(tokens, stagedEdits, stagedNewTokens))
-  if (!componentGroups || componentGroups.length === 0) return base
-  const mergedGroups = componentGroups.map(group => ({
-    ...group,
-    sections: group.sections.map(section => ({
-      ...section,
-      tokens: section.tokens.map(token => {
-        const sv = stagedEdits.get(token.name)
-        return sv !== undefined ? { ...token, value: sv } : token
-      }),
-    })),
-  }))
-  return base + '\n\n' + generateComponentTokensCss(mergedGroups)
+  return combineV2Css(generateMergedTokens(tokens, stagedEdits, stagedNewTokens))
 }
 
 /**

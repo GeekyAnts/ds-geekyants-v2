@@ -3,14 +3,12 @@ import { ChevronRight, ChevronDown } from 'lucide-react'
 import { EdInput, EdScrollArea } from '../../editor-ds/primitives'
 import { getRecentlyEdited, subscribeToRecentlyEdited } from '../../state/recentlyEdited'
 import { getAllPinned, subscribeToPinnedChanges } from '../../state/pinning'
-import type { ClassifiedTokens, KnownComponent } from '../../ia'
-import type { ComponentTokenGroup } from '../../types'
+import type { ClassifiedTokens } from '../../ia'
 import type { RoutePath } from '../../routing'
 import './NavRail.css'
 
 interface NavRailProps {
   classification: ClassifiedTokens
-  componentGroups: ComponentTokenGroup[]
   currentRoute: RoutePath
   onNavigate: (route: RoutePath) => void
   onOpenCommandPalette?: () => void
@@ -51,14 +49,12 @@ function isRouteActive(route: RoutePath, target: RoutePath): boolean {
   switch (route.type) {
     case 'foundations': return route.category === (target as { type: 'foundations'; category: string }).category
     case 'semantic': return route.category === (target as { type: 'semantic'; category: string }).category
-    case 'components': return route.componentName === (target as { type: 'components'; componentName: string }).componentName
     default: return false
   }
 }
 
 export function NavRail({
   classification,
-  componentGroups,
   currentRoute,
   onNavigate,
   onOpenCommandPalette,
@@ -144,33 +140,6 @@ export function NavRail({
                 {cat.tokens.length > 0 && <span className="ed-nav-rail__item-count">{cat.tokens.length}</span>}
               </button>
             ))}
-          </CollapsibleSection>
-        )}
-
-        {componentGroups.length > 0 && (
-          <CollapsibleSection label="COMPONENTS" defaultOpen>
-            {(['atom', 'molecule', 'organism', 'unknown'] as const).map(level => {
-              const group = componentGroups.filter(g => g.level === level)
-              if (group.length === 0) return null
-              const label = level === 'atom' ? 'Atoms'
-                : level === 'molecule' ? 'Molecules'
-                : level === 'organism' ? 'Organisms'
-                : 'Other'
-              return (
-                <CollapsibleSection key={level} label={label} defaultOpen={level !== 'unknown'}>
-                  {group.map(g => (
-                    <button
-                      key={g.componentName}
-                      type="button"
-                      className={`ed-nav-rail__item ed-nav-rail__item--sub ${isRouteActive(currentRoute, { type: 'components', componentName: g.componentName as KnownComponent }) ? 'ed-nav-rail__item--active' : ''}`}
-                      onClick={() => onNavigate({ type: 'components', componentName: g.componentName as KnownComponent })}
-                    >
-                      <span>{g.componentName.charAt(0).toUpperCase() + g.componentName.slice(1)}</span>
-                    </button>
-                  ))}
-                </CollapsibleSection>
-              )
-            })}
           </CollapsibleSection>
         )}
       </EdScrollArea>

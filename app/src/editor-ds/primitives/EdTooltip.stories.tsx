@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react-vite'
 import { EdTooltip } from './EdTooltip'
 import { EdTooltipProps } from './EdTooltip.types'
 

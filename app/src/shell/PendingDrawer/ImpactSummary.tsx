@@ -1,20 +1,20 @@
 import { useMemo } from 'react'
 import type { TokenGraph } from '../../graph/build'
-import type { GeeklegoTokens } from '../../types'
+import type { GeeklegoTokensV2 } from '../../types'
 import { EdButton, EdChip } from '../../editor-ds/primitives'
 
 interface ImpactSummaryProps {
   tokenName: string
   currentValue: string
   graph: TokenGraph | null
-  tokens: GeeklegoTokens
+  tokens: GeeklegoTokensV2
   stagedValues: Map<string, string>
 }
 
 function countAffectedTokens(
   tokenName: string,
   graph: TokenGraph,
-  tokens: GeeklegoTokens,
+  tokens: GeeklegoTokensV2,
   currentStaged: Map<string, string>
 ): { semantic: number; component: number; instances: number } {
   const node = graph.nodes.get(tokenName)

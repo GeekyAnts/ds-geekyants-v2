@@ -1,6 +1,25 @@
 # State Handling — Code Patterns Reference
 
-Full worked examples for every visual state. Each section shows: token chain, CSS classes, TypeScript prop, and ARIA wiring.
+> **⚠️ v2 translation note (read first).** The code below was authored for the old 3-tier system.
+> The *concepts* still hold (skeleton-vs-spinner choice, ARIA wiring, "never color alone" for
+> errors, preserve dimensions during loading), but translate the mechanics to v2 before copying:
+> - **No component-token tier.** Ignore the `--{component}-*-disabled/-error/-selected/-loading`
+>   token chains and the "`geeklego.css` addition" blocks — they do not exist in v2. Use standard
+>   semantic utilities: `bg-muted` / `text-muted-foreground` for muted, `text-destructive`
+>   `border-destructive` `ring-destructive` for error, `bg-accent text-accent-foreground` for
+>   selected, `disabled:opacity-50 disabled:pointer-events-none` for disabled.
+> - **No `bg-[var(--token)]` arbitraries** where a registered utility exists — write `bg-muted`,
+>   not `bg-[var(--…)]`.
+> - **No `memo(forwardRef)`** — v2 uses plain `forwardRef` + `displayName`.
+> - **No `../../atoms/…` imports** — v2 components are flat under `components/v2/<Name>/`; import
+>   siblings relatively and `cn` from `../lib/cn`. `aria-helpers` lives at
+>   `components/utils/accessibility/aria-helpers.ts` (reached as `../../../utils/...` from a v2
+>   component) — but prefer Radix `data-[state=…]`/`data-disabled` hooks first.
+>
+> See `components/v2/Button/` for the canonical v2 disabled/loading styling. The SKILL.md sections
+> above already show the v2-correct snippets; this file is kept for the decision tables and rationale.
+
+Full worked examples for every visual state. Each section shows: CSS classes, TypeScript prop, and ARIA wiring.
 
 ---
 

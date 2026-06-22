@@ -1,4 +1,0 @@
-name: component-builder
-display_name: Geeklego Component Builder
-short_description: Generate production-grade React components for the Geeklego design system with tokens, stories, types, README, and mock data.
-default_prompt: Build a [component name] for the Geeklego design system

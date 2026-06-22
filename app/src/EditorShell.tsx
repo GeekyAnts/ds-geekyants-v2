@@ -14,10 +14,9 @@ import { OnboardingTour } from './components/OnboardingTour'
 import { EdSkeleton } from './editor-ds/primitives'
 import { getPendingCount, subscribeToPendingChanges, stage, getAllStaged, discardAll, getStagedNewTokens } from './state/staging'
 import { generateMergedTokens } from './utils/exportFormatter'
-import { parseComponentTokens, generateComponentTokensCss } from './utils/componentTokenParser'
 import { buildTokenGraph, type TokenGraph } from './graph/build'
 import { classifyTokens } from './ia'
-import type { GeeklegoTokens, ComponentTokenGroup } from './types'
+import type { GeeklegoTokensV2 } from './types'
 import './EditorShell.css'
 
 interface TokenEntry {
@@ -25,7 +24,7 @@ interface TokenEntry {
   value: string
 }
 
-// Maps a primitives top-level key to the CSS variable prefix used in geeklego.css.
+// Maps a primitives top-level key to the CSS variable prefix used in the v2 design system.
 // Mirrors emission rules in utils/cssGenerator.ts.
 const PRIMITIVE_PREFIX: Record<string, string> = {
   colors: 'color',
@@ -46,27 +45,7 @@ const PRIMITIVE_PREFIX: Record<string, string> = {
   breakpoints: 'breakpoint',
 }
 
-// Maps a semantics top-level key to the CSS variable prefix.
-const SEMANTIC_PREFIX: Record<string, string> = {
-  bg: 'color-bg',
-  surface: 'color-surface',
-  text: 'color-text',
-  border: 'color-border',
-  action: 'color-action',
-  status: 'color-status',
-  state: 'color-state',
-  dataSeries: 'color-data-series',
-  shadows: 'shadow',
-  spacingComponent: 'spacing-component',
-  spacingLayout: 'spacing-layout',
-  sizeComponent: 'size-component',
-  radiusComponent: 'radius-component',
-  layer: 'layer',
-  borders: 'border',
-  typographySemantics: 'typography',
-}
-
-function flattenTokens(tokens: GeeklegoTokens): TokenEntry[] {
+function flattenTokens(tokens: GeeklegoTokensV2): TokenEntry[] {
   const entries: TokenEntry[] = []
 
   const prims = tokens.primitives as unknown as Record<string, unknown>
@@ -89,54 +68,19 @@ function flattenTokens(tokens: GeeklegoTokens): TokenEntry[] {
     }
   }
 
-  const semantics = tokens.semantics?.light as unknown as Record<string, unknown> | undefined
+  // v2 semantics are a FLAT map: { primary: 'var(--color-brand-900)', border: '…' }.
+  // The CSS var name is the key verbatim (e.g. --primary, --border).
+  const semantics = tokens.semantics?.light
   if (semantics) {
-    for (const group of Object.keys(semantics)) {
-      const prefix = SEMANTIC_PREFIX[group]
-      if (!prefix) continue
-      const values = semantics[group]
-      if (!values || typeof values !== 'object') continue
-      for (const [k, v] of Object.entries(values as Record<string, unknown>)) {
-        if (typeof v === 'string') {
-          entries.push({ name: `--${prefix}-${k}`, value: v })
-        } else if (v && typeof v === 'object') {
-          // Two-level nesting (e.g. typographySemantics["display-hero"]["size"] → --typography-display-hero-size)
-          for (const [k2, v2] of Object.entries(v as Record<string, unknown>)) {
-            if (typeof v2 === 'string') {
-              entries.push({ name: `--${prefix}-${k}-${k2}`, value: v2 })
-            }
-          }
-        }
-      }
+    for (const [k, v] of Object.entries(semantics)) {
+      entries.push({ name: `--${k}`, value: v })
     }
   }
 
   return entries
 }
 
-// classifyTokens patterns expect names without the leading "--", and semantic
-// categories match on bare prefixes (surface-, content-, interactive-, status-,
-// layout-) — not the color-surface-* form used in geeklego.css. Map accordingly.
-const SEMANTIC_CLASSIFIER_PREFIX: Record<string, string> = {
-  bg: 'background',
-  surface: 'surface',
-  text: 'content',
-  border: 'border',
-  action: 'interactive',
-  status: 'status',
-  state: 'state',
-  dataSeries: 'data-series',
-  shadows: 'shadow',
-  spacingComponent: 'spacing-component',
-  spacingLayout: 'layout-spacing',
-  sizeComponent: 'layout-size',
-  radiusComponent: 'radius-component',
-  layer: 'layout-layer',
-  borders: 'border-width',
-  typographySemantics: 'typography',
-}
-
-function collectTokenNames(tokens: GeeklegoTokens): string[] {
+function collectTokenNames(tokens: GeeklegoTokensV2): string[] {
   const names: string[] = []
   const prims = tokens.primitives as unknown as Record<string, unknown>
   for (const category of Object.keys(prims)) {
@@ -157,25 +101,11 @@ function collectTokenNames(tokens: GeeklegoTokens): string[] {
     }
   }
 
-  const semantics = tokens.semantics?.light as unknown as Record<string, unknown> | undefined
+  // v2 semantics: classifier names are the flat ShadCN keys, sans leading "--".
+  const semantics = tokens.semantics?.light
   if (semantics) {
-    for (const group of Object.keys(semantics)) {
-      const prefix = SEMANTIC_CLASSIFIER_PREFIX[group]
-      if (!prefix) continue
-      const values = semantics[group]
-      if (!values || typeof values !== 'object') continue
-      for (const [k, v] of Object.entries(values as Record<string, unknown>)) {
-        if (typeof v === 'string') {
-          names.push(`${prefix}-${k}`)
-        } else if (v && typeof v === 'object') {
-          // Two-level nesting (e.g. typographySemantics["display-hero"]["size"] → typography-display-hero-size)
-          for (const k2 of Object.keys(v as Record<string, unknown>)) {
-            if (typeof (v as Record<string, unknown>)[k2] === 'string') {
-              names.push(`${prefix}-${k}-${k2}`)
-            }
-          }
-        }
-      }
+    for (const k of Object.keys(semantics)) {
+      names.push(k)
     }
   }
   return names
@@ -184,8 +114,7 @@ function collectTokenNames(tokens: GeeklegoTokens): string[] {
 function EditorShellContent() {
   const { route, navigate } = useRouter()
 
-  const [tokens, setTokens] = useState<GeeklegoTokens | null>(null)
-  const [componentGroups, setComponentGroups] = useState<ComponentTokenGroup[]>([])
+  const [tokens, setTokens] = useState<GeeklegoTokensV2 | null>(null)
   const [selectedTokenName, setSelectedTokenName] = useState<string | null>(null)
   const [previewTheme, setPreviewTheme] = useState<'light' | 'dark'>('dark')
   const [commandOpen, setCommandOpen] = useState(false)
@@ -203,20 +132,10 @@ function EditorShellContent() {
     let cancelled = false
     async function load() {
       try {
-        const [tokenRes, componentRes] = await Promise.all([
-          fetch('/api/load-tokens'),
-          fetch('/api/component-tokens'),
-        ])
+        const tokenRes = await fetch('/api/load-tokens')
         const tokenData = await tokenRes.json()
-        const componentData = await componentRes.json()
-        if (!cancelled) {
-          if (tokenData.success && tokenData.tokens) {
-            setTokens(tokenData.tokens)
-          }
-          if (componentData.success && componentData.css) {
-            const groups = parseComponentTokens(componentData.css)
-            setComponentGroups(groups || [])
-          }
+        if (!cancelled && tokenData.success && tokenData.tokens) {
+          setTokens(tokenData.tokens)
         }
       } catch {
         if (!cancelled) setTokens(null)
@@ -231,16 +150,11 @@ function EditorShellContent() {
     const hot = import.meta.hot
     if (hot) {
       const handler = () => {
-        Promise.all([
-          fetch('/api/load-tokens').then(r => r.json()),
-          fetch('/api/component-tokens').then(r => r.json()),
-        ]).then(([tokenData, componentData]) => {
-          if (tokenData.success && tokenData.tokens) setTokens(tokenData.tokens)
-          if (componentData.success && componentData.css) {
-            const groups = parseComponentTokens(componentData.css)
-            setComponentGroups(groups || [])
-          }
-        })
+        fetch('/api/load-tokens')
+          .then(r => r.json())
+          .then((tokenData) => {
+            if (tokenData.success && tokenData.tokens) setTokens(tokenData.tokens)
+          })
       }
       hot.on('geeklego:tokens-updated', handler)
       return () => { hot.off('geeklego:tokens-updated', handler) }
@@ -309,16 +223,11 @@ function EditorShellContent() {
 
     discardAll()
 
-    const [loadRes, reloadCompRes] = await Promise.all([
-      fetch('/api/load-tokens'),
-      fetch('/api/component-tokens'),
-    ])
+    const loadRes = await fetch('/api/load-tokens')
     const loadJson = await loadRes.json()
-    const reloadCompJson = await reloadCompRes.json()
     if (loadJson.success) setTokens(loadJson.tokens)
-    if (reloadCompJson.success) setComponentGroups(parseComponentTokens(reloadCompJson.css))
 
-    // Rebuild dist/geeklego.css for consuming packages
+    // Rebuild dist CSS for consuming packages
     fetch('/api/sync-build', { method: 'POST' }).catch(err => {
       console.warn('Post-restore CSS build failed:', err)
     })
@@ -328,23 +237,11 @@ function EditorShellContent() {
     if (!tokens) return
     const staged = getAllStaged()
 
-    // Apply staged edits to component groups
-    const mergedComponentGroups = componentGroups.map(group => ({
-      ...group,
-      sections: group.sections.map(section => ({
-        ...section,
-        tokens: section.tokens.map(token => {
-          const sv = staged.get(token.name)
-          return sv !== undefined ? { ...token, value: sv } : token
-        }),
-      })),
-    }))
-
-    // Apply staged edits + new tokens to primitives/semantics tokens
+    // Apply staged edits + new tokens to the flat v2 token model
     const mergedTokens = generateMergedTokens(tokens, staged, getStagedNewTokens())
 
     try {
-      // Save primitives + semantics
+      // Save the three v2 files (primitives + semantics + dark)
       const primRes = await fetch('/api/save-tokens', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -352,18 +249,6 @@ function EditorShellContent() {
       })
       const primJson = await primRes.json()
       if (!primJson.success) throw new Error(primJson.error ?? 'Save tokens failed')
-
-      // Save component tokens (only if there are any component groups)
-      if (mergedComponentGroups.length > 0) {
-        const compCss = generateComponentTokensCss(mergedComponentGroups)
-        const compRes = await fetch('/api/save-component-tokens', {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/plain' },
-          body: compCss,
-        })
-        const compJson = await compRes.json()
-        if (!compJson.success) throw new Error(compJson.error ?? 'Save component tokens failed')
-      }
 
       discardAll()
 
@@ -388,16 +273,11 @@ function EditorShellContent() {
       }
 
       // Reload tokens from the freshly written CSS
-      const [loadRes, reloadCompRes] = await Promise.all([
-        fetch('/api/load-tokens'),
-        fetch('/api/component-tokens'),
-      ])
+      const loadRes = await fetch('/api/load-tokens')
       const loadJson = await loadRes.json()
-      const reloadCompJson = await reloadCompRes.json()
       if (loadJson.success) setTokens(loadJson.tokens)
-      if (reloadCompJson.success) setComponentGroups(parseComponentTokens(reloadCompJson.css))
 
-      // Rebuild dist/geeklego.css for consuming packages
+      // Rebuild dist CSS for consuming packages
       fetch('/api/sync-build', { method: 'POST' }).catch(err => {
         console.warn('Post-export CSS build failed:', err)
       })
@@ -405,7 +285,23 @@ function EditorShellContent() {
       console.error('Export failed:', err)
       throw err
     }
-  }, [tokens, componentGroups])
+  }, [tokens])
+
+  // Multi-target export: trigger the IR / design.md generators (Node scripts behind the
+  // dev API) and return the generated file's contents + on-disk path so the modal can offer
+  // a download. These scripts read the on-disk design-system/v2/*.css — they reflect the
+  // last SAVED state, not unsaved staged edits. The modal's UI copy says so; if the user
+  // wants staged edits reflected, they export CSS first (which saves the v2 files).
+  const handleExportTarget = useCallback(
+    async (target: 'ir' | 'design-md'): Promise<{ content: string; path: string }> => {
+      const endpoint = target === 'ir' ? '/api/export-ir' : '/api/export-design-md'
+      const res = await fetch(endpoint, { method: 'POST' })
+      const json = await res.json()
+      if (!json.success) throw new Error(json.error ?? `${target} export failed`)
+      return { content: json.content as string, path: json.path as string }
+    },
+    [],
+  )
 
   const handleSelectToken = useCallback((tokenName: string) => {
     setSelectedTokenName(tokenName)
@@ -433,7 +329,6 @@ function EditorShellContent() {
       {classification && (
         <NavRail
           classification={classification}
-          componentGroups={componentGroups}
           currentRoute={route}
           onNavigate={navigate}
           onOpenCommandPalette={() => setCommandOpen(true)}
@@ -442,14 +337,12 @@ function EditorShellContent() {
 
       <ContextPane
         tokens={tokens}
-        componentGroups={componentGroups}
         onSelectToken={handleSelectToken}
       />
 
       <Inspector
         selectedTokenName={selectedTokenName}
         tokens={tokens}
-        componentGroups={componentGroups}
         graph={graph}
         onStageEdit={handleStageEdit}
         onClose={() => setSelectedTokenName(null)}
@@ -460,7 +353,6 @@ function EditorShellContent() {
         onToggle={() => setPendingDrawerOpen(o => !o)}
         pendingCount={pendingCount}
         tokens={tokens}
-        componentGroups={componentGroups}
         onOpenExport={() => setExportOpen(true)}
       />
 
@@ -476,7 +368,6 @@ function EditorShellContent() {
         open={pendingModalOpen}
         onClose={() => setPendingModalOpen(false)}
         tokens={tokens}
-        componentGroups={componentGroups}
       />
 
       {exportOpen && (
@@ -484,9 +375,9 @@ function EditorShellContent() {
           isOpen={exportOpen}
           onClose={() => setExportOpen(false)}
           onExport={handleExport}
+          onExportTarget={handleExportTarget}
           onRestoreDefault={handleRestoreDefault}
           tokens={tokens}
-          componentGroups={componentGroups}
           hasBlockers={false}
         />
       )}

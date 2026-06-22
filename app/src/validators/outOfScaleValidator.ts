@@ -1,4 +1,4 @@
-import type { GeeklegoTokens } from '../types'
+import type { GeeklegoTokensV2 } from '../types'
 import type { ValidatorResult } from './types'
 
 const BASIC_SCALE = [0, 2, 4, 8, 12, 16, 24, 32, 48, 64, 96]
@@ -43,7 +43,7 @@ function extractSpacingPx(value: string): number | null {
 export function checkOutOfScale(
   tokenName: string,
   value: string,
-  tokens: GeeklegoTokens,
+  tokens: GeeklegoTokensV2,
   thresholdPx = 2
 ): ValidatorResult[] {
   const results: ValidatorResult[] = []

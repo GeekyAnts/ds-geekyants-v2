@@ -2,13 +2,13 @@ import type { StorybookConfig } from '@storybook/react-vite';
 import type { InlineConfig } from 'vite';
 
 const config: StorybookConfig = {
+  // v2 only — render the ShadCN/Radix slice under components/v2/.
+  // Legacy stories/** (broken Configure.mdx + 3-tier DesignSystem) and the
+  // editor-ds stories under app/** are intentionally not globbed.
   stories: [
-    "../stories/**/*.mdx",
-    "../stories/**/*.stories.@(js|jsx|mjs|ts|tsx)",
-    "../components/**/*.stories.@(js|jsx|mjs|ts|tsx)"
+    "../components/v2/**/*.stories.@(ts|tsx)",
   ],
   addons: [
-    "@storybook/addon-vitest",
     "@storybook/addon-a11y",
     "@storybook/addon-docs",
   ],

@@ -1,62 +1,109 @@
-# Geeklego
+# GeekLego
 
-An open-source, design-system-first React component library built on Tailwind CSS v4. Fork it, customize it, and ship it as your own.
+An open-source, design-system-first React component library built on **Tailwind CSS v4 + Radix UI**, using a **2-tier token model** (primitives → standard ShadCN/Tailwind semantics).
 
-**58 production-ready components** — atoms, molecules, and organisms — with a visual token editor, Storybook, and built-in Claude Code skills for AI-assisted development.
+Fork it, customize the brand palette, and ship your own themed component library.
 
-## Get Started
+## Get started
 
 ```bash
-git clone https://github.com/GeekyAnts/geeklego.git
+git clone https://github.com/geeklego/geeklego.git
 cd geeklego
-pnpm install
-pnpm dev:all
+npm install
+npm run dev:all
 ```
 
 This starts two tools side-by-side:
 
 | URL | What it is |
 |---|---|
-| `localhost:5173` | Token editor — visually edit colours, fonts, and spacing |
-| `localhost:6006` | Storybook — browse and interact with all 58 components |
+| `http://localhost:5173` | Token Editor — edit primitives, semantics, and themes |
+| `http://localhost:6006` | Storybook — browse v2 components |
 
 ## Requirements
 
 - Node.js 20+
-- pnpm 9.15.0 (`npm install -g pnpm@9.15.0`)
 - React 19
 - Tailwind CSS v4
 
 ## Scripts
 
 ```bash
-pnpm dev:all     # Token editor + Storybook (recommended)
-pnpm dev         # Token editor only (localhost:5173)
-pnpm storybook   # Storybook only (localhost:6006)
-pnpm build       # Build the library
+npm run dev:all          # Token editor + Storybook (recommended)
+npm run dev              # Token editor only
+npm run storybook        # Storybook only
+npm run build            # Build library (JS + CSS)
+npm run validate-tokens  # Validate primitive → semantic token chain
+npm run lint             # ESLint (includes v2 import discipline)
+npm run lint-css         # Stylelint over design-system/v2
+npx vitest run           # Unit tests
+npx tsc --noEmit         # Type-check
 ```
 
-## What's Included
+## Architecture (v2)
 
-- **31 atoms, 15 molecules, 5 organisms** — production-grade, accessible React components
-- **Token editor** — visual design system manager with live preview
-- **Design system** — three-tier token chain (primitives → semantics → components)
-- **Claude Code skills** — generate components, sync Figma, run audits, add i18n and more via slash commands
-- **Storybook** — interactive component browser with full prop controls
-- **TypeScript** — fully typed, no `@types` packages needed
-
-## Claude Code Skills
-
-This repo ships with built-in AI skills for Claude Code. Open the repo in Claude Code and run:
-
-```bash
-/component-builder build a Tooltip atom
-/security
-/i18n
-/figma-sync
+```
+Tier 1 — Primitives     geeklego brand palette/scales (--color-brand-900, --spacing-4, …)
+         ↓ aliased by
+Tier 2 — Semantics      ShadCN standard vocabulary (--primary, --background, --border, …)
+         ↓ consumed by
+Components              Tailwind utilities (bg-primary, text-foreground, border-input)
 ```
 
-See `.claude/skills/` for the full list.
+| Path | Purpose |
+|---|---|
+| `design-system/v2/` | 2-tier CSS — entrypoint is `index.css` |
+| `components/v2/` | ShadCN-pattern components (`cva` + `cn()` + Radix) |
+| `components/v2/Button/` | Reference implementation — read before building anything new |
+| `app/` | Token Editor cockpit (v2 model) |
+
+**Governing docs:** [`CLAUDE.md`](CLAUDE.md) · [`PROTOTYPE-SHADCN-2TIER.md`](PROTOTYPE-SHADCN-2TIER.md)
+
+> **Note:** `AGENTS.md`, `DESIGN_SYSTEM.md`, and `docs/` still describe the old 3-tier system. Ignore them until refreshed.
+
+### Shipped v2 components
+
+Button · Combobox · Command · CommandPalette · Dialog · Popover
+
+## Using components & styles
+
+Within this repo, import v2 components directly:
+
+```tsx
+import { Button } from "./components/v2/Button/Button";
+import "./design-system/v2/index.css";
+
+<Button variant="default">Click me</Button>
+```
+
+The published `@geeklego/ui` package currently exports shared utilities and CSS:
+
+```tsx
+import { GeeklegoI18nProvider } from "@geeklego/ui";
+import "@geeklego/ui/styles";           // compiled CSS
+// or during development:
+import "@geeklego/ui/styles-source";   // source design-system/v2/index.css
+```
+
+v2 component re-exports through the package barrel are planned; for now use direct path imports or copy from `components/v2/`.
+
+## Custom brand variants
+
+Brand-specific variants use namespaced `--ext-*` tokens (e.g. Button's `gamified` variant), defined in `design-system/v2/semantics.css` and consumed via utilities like `bg-ext-button-gamified-bg`.
+
+## AI-assisted development
+
+This repo ships Claude Code skills under `.claude/skills/`:
+
+| Skill | Purpose |
+|---|---|
+| `component-builder-v2` | Generate new v2 components |
+| `figma-sync` | Sync design tokens from Figma |
+| `security` | XSS / href sanitization audit |
+| `i18n` | Localization patterns |
+| `state-handling` | Visual state handling audit |
+
+> Use **`component-builder-v2`**, not the deleted 3-tier `component-builder` skill.
 
 ## License
 
@@ -64,6 +111,6 @@ MIT
 
 ## Built by GeekyAnts
 
-Geeklego is open-sourced and maintained by [GeekyAnts](https://geekyants.com) — engineering for the AI era, turning ambitious technology strategies into production-grade reality since 2006.
+GeekLego is open-sourced and maintained by [GeekyAnts](https://geekyants.com) — engineering for the AI era, turning ambitious technology strategies into production-grade reality since 2006.
 
 Building AI-native products? Explore [GeekyAnts AI Services](https://geekyants.com/ai).

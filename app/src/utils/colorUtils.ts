@@ -119,20 +119,73 @@ function isInGamut(r: number, g: number, b: number): boolean {
   return r >= -eps && r <= 1 + eps && g >= -eps && g <= 1 + eps && b >= -eps && b <= 1 + eps
 }
 
-function oklchToHex(L: number, C: number, H: number): string {
-  // Gamut-map by reducing chroma via binary search
+/**
+ * Reduce chroma via binary search until (L, C, H) is inside the sRGB gamut.
+ * Returns the in-gamut OKLCH triple (L and H unchanged; C clamped down as needed).
+ */
+function gamutMapOklch(L: number, C: number, H: number): { l: number; c: number; h: number } {
   let lo = 0, hi = C, mapped = C
   for (let i = 0; i < 25; i++) {
     const mid = (lo + hi) / 2
     const [r, g, b] = oklchToLinearRgb(L, mid, H)
     if (isInGamut(r, g, b)) { lo = mid; mapped = mid } else hi = mid
   }
-  const [r, g, b] = oklchToLinearRgb(L, mapped, H)
+  return { l: L, c: mapped, h: H }
+}
+
+function oklchToHex(L: number, C: number, H: number): string {
+  const { l, c, h } = gamutMapOklch(L, C, H)
+  const [r, g, b] = oklchToLinearRgb(l, c, h)
   return rgbToHex(
     Math.round(Math.max(0, Math.min(1, linearToSrgb(r))) * 255),
     Math.round(Math.max(0, Math.min(1, linearToSrgb(g))) * 255),
     Math.round(Math.max(0, Math.min(1, linearToSrgb(b))) * 255),
   )
+}
+
+/**
+ * Format an OKLCH triple as a Tailwind-v4-style `oklch(L% C H)` string.
+ * L is emitted as a percentage (Tailwind's form, e.g. `oklch(62.3% 0.214 259.815)`);
+ * C to 3 decimals; H to 3 decimals (omitted as 0 for achromatic colors). The triple
+ * is gamut-mapped first so the emitted color is always sRGB-displayable.
+ */
+function formatOklch(L: number, C: number, H: number): string {
+  const { l, c, h } = gamutMapOklch(L, C, H)
+  const lPct = +(l * 100).toFixed(3)
+  const cVal = +c.toFixed(3)
+  const hVal = cVal === 0 ? 0 : +h.toFixed(3)
+  return `oklch(${lPct}% ${cVal} ${hVal})`
+}
+
+/**
+ * Convert a hex color to its exact Tailwind-v4-style `oklch(L% C H)` equivalent,
+ * using the same Oklab math as the palette generator. Returns null for non-hex
+ * input (e.g. an already-`oklch(...)` value), so callers can pass through verbatim.
+ * Use this to migrate hex tokens to the OKLCH standard or to normalize a hand-edited
+ * shade on commit.
+ */
+export function hexToOklchString(hex: string): string | null {
+  const lin = hexToLinearRgb(hex)
+  if (!lin) return null
+  const { l, c, h } = linearRgbToOklch(...lin)
+  return formatOklch(l, c, h)
+}
+
+/**
+ * Parse an `oklch(L C H)` string and convert it to a hex color, so the (hex-based)
+ * color picker and any hex-only consumer can display an OKLCH-valued token.
+ * Accepts L as a percentage (`62.3%`) or 0–1 number; C and H as numbers. Returns
+ * null if the string is not a parseable oklch() value.
+ */
+export function oklchStringToHex(value: string): string | null {
+  const m = value.trim().match(/^oklch\(\s*([\d.]+%?)\s+([\d.]+)\s+([\d.]+)\s*\)$/i)
+  if (!m) return null
+  const lRaw = m[1]
+  const L = lRaw.endsWith('%') ? parseFloat(lRaw) / 100 : parseFloat(lRaw)
+  const C = parseFloat(m[2])
+  const H = parseFloat(m[3])
+  if (Number.isNaN(L) || Number.isNaN(C) || Number.isNaN(H)) return null
+  return oklchToHex(L, C, H)
 }
 
 // ─── Scale generation ─────────────────────────────────────────────────────────
@@ -155,7 +208,8 @@ export function generateOklchScale(baseHex: string, includeZero = false): Record
   const { l: baseL, c: baseC, h } = linearRgbToOklch(...lin)
 
   const result: Record<string, string> = {}
-  if (includeZero) result['0'] = '#ffffff'
+  // Pure white as OKLCH (Tailwind-standard form), keeping the scale uniformly oklch().
+  if (includeZero) result['0'] = 'oklch(100% 0 0)'
 
   for (const [shadeStr] of Object.entries(SHADE_L)) {
     const shade = Number(shadeStr)
@@ -172,7 +226,8 @@ export function generateOklchScale(baseHex: string, includeZero = false): Record
     const chromaFactor = Math.exp(-1.7 * distance * distance)
     const c = Math.max(0, baseC * chromaFactor)
 
-    result[String(shade)] = oklchToHex(
+    // Emit a Tailwind-v4-standard oklch() string (gamut-mapped inside formatOklch).
+    result[String(shade)] = formatOklch(
       Math.max(0.05, Math.min(0.99, l)), c, h,
     )
   }

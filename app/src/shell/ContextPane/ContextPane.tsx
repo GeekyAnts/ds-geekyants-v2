@@ -1,18 +1,16 @@
 import { useMemo } from 'react'
 import { useRouter } from '../../routing'
-import { CategoryPage, ComponentPage } from '../../views'
-import type { GeeklegoTokens, ComponentTokenGroup } from '../../types'
+import { CategoryPage } from '../../views'
+import type { GeeklegoTokensV2 } from '../../types'
 import type { RoutePath } from '../../routing'
-import type { KnownComponent } from '../../ia'
 import './ContextPane.css'
 
 interface ContextPaneProps {
-  tokens: GeeklegoTokens
-  componentGroups: ComponentTokenGroup[]
+  tokens: GeeklegoTokensV2
   onSelectToken: (tokenName: string) => void
 }
 
-// Maps a primitives top-level key to the CSS variable prefix used in geeklego.css.
+// Maps a primitives top-level key to the CSS variable prefix used in the v2 design system.
 const PRIMITIVE_PREFIX: Record<string, string> = {
   colors: 'color',
   fontFamily: 'font-family',
@@ -32,26 +30,7 @@ const PRIMITIVE_PREFIX: Record<string, string> = {
   breakpoints: 'breakpoint',
 }
 
-const SEMANTIC_PREFIX: Record<string, string> = {
-  bg: 'color-bg',
-  surface: 'color-surface',
-  text: 'color-text',
-  border: 'color-border',
-  action: 'color-action',
-  status: 'color-status',
-  state: 'color-state',
-  dataSeries: 'color-data-series',
-  shadows: 'shadow',
-  spacingComponent: 'spacing-component',
-  spacingLayout: 'spacing-layout',
-  sizeComponent: 'size-component',
-  radiusComponent: 'radius-component',
-  layer: 'layer',
-  borders: 'border',
-  typographySemantics: 'typography',
-}
-
-function flattenTokens(tokens: GeeklegoTokens): { name: string; value: string }[] {
+function flattenTokens(tokens: GeeklegoTokensV2): { name: string; value: string }[] {
   const entries: { name: string; value: string }[] = []
 
   const prims = tokens.primitives as unknown as Record<string, unknown>
@@ -73,43 +52,11 @@ function flattenTokens(tokens: GeeklegoTokens): { name: string; value: string }[
     }
   }
 
-  const semantics = tokens.semantics?.light as unknown as Record<string, unknown> | undefined
-  if (semantics) {
-    for (const group of Object.keys(semantics)) {
-      const prefix = SEMANTIC_PREFIX[group]
-      if (!prefix) continue
-      const values = semantics[group]
-      if (!values || typeof values !== 'object') continue
-      for (const [k, v] of Object.entries(values as Record<string, unknown>)) {
-        if (typeof v === 'string') {
-          entries.push({ name: `--${prefix}-${k}`, value: v })
-        } else if (v && typeof v === 'object') {
-          // Two-level nesting (e.g. typographySemantics["display-hero"]["size"] → --typography-display-hero-size)
-          for (const [k2, v2] of Object.entries(v as Record<string, unknown>)) {
-            if (typeof v2 === 'string') {
-              entries.push({ name: `--${prefix}-${k}-${k2}`, value: v2 })
-            }
-          }
-        }
-      }
-    }
+  // Flat v2 semantics — CSS var for a key is `--<key>`
+  for (const [k, v] of Object.entries(tokens.semantics.light)) {
+    entries.push({ name: `--${k}`, value: v })
   }
 
-  return entries
-}
-
-function getComponentTokens(
-  componentName: string,
-  componentGroups: ComponentTokenGroup[]
-): { name: string; value: string }[] {
-  const group = componentGroups.find(g => g.componentName === componentName)
-  if (!group) return []
-  const entries: { name: string; value: string }[] = []
-  for (const section of group.sections) {
-    for (const token of section.tokens) {
-      entries.push({ name: token.name, value: token.value })
-    }
-  }
   return entries
 }
 
@@ -137,14 +84,6 @@ function HomePage({ onNavigate }: { onNavigate: (route: RoutePath) => void }) {
           <span className="ed-context-pane__tile-title">Semantic</span>
           <p className="ed-context-pane__tile-desc">Surface, content, interactive, status, layout</p>
         </button>
-        <button
-          type="button"
-          className="ed-context-pane__tile"
-          onClick={() => onNavigate({ type: 'components', componentName: 'button' as KnownComponent })}
-        >
-          <span className="ed-context-pane__tile-title">Components</span>
-          <p className="ed-context-pane__tile-desc">Component-specific token overrides</p>
-        </button>
       </div>
     </div>
   )
@@ -159,7 +98,7 @@ function TokenFocusView({ tokenName }: { tokenName: string }) {
   )
 }
 
-export function ContextPane({ tokens, componentGroups, onSelectToken }: ContextPaneProps) {
+export function ContextPane({ tokens, onSelectToken }: ContextPaneProps) {
   const { route, navigate } = useRouter()
 
   const allTokenEntries = useMemo(() => flattenTokens(tokens), [tokens])
@@ -187,21 +126,6 @@ export function ContextPane({ tokens, componentGroups, onSelectToken }: ContextP
           />
         </main>
       )
-    case 'components': {
-      const componentLevel = componentGroups.find(
-        (g) => g.componentName === route.componentName
-      )?.level ?? 'unknown'
-      return (
-        <main className="ed-context-pane">
-          <ComponentPage
-            componentName={route.componentName}
-            level={componentLevel}
-            tokens={getComponentTokens(route.componentName, componentGroups)}
-            onSelectToken={onSelectToken}
-          />
-        </main>
-      )
-    }
     case 'token':
       return (
         <main className="ed-context-pane">

@@ -1,14 +1,14 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { ChevronUp, ChevronDown, Check, ArrowDown } from 'lucide-react'
 import type { TokenGraph } from '../../graph/build'
-import type { TokenMetadata } from '../../state/metadata.types'
+import type { TokenMetadata, MetadataStagedChanges } from '../../state/metadata.types'
 import { useMetadata } from '../../state/metadata'
 import { EdButton, EdScrollArea, EdEmptyState, EdColorPicker, EdInput } from '../../editor-ds/primitives'
 import { EdChip } from '../../editor-ds/primitives'
 import { isPinned, togglePin } from '../../state/pinning'
 import { subscribeToPendingChanges, subscribeToDraftChanges, getAllStaged, getStagedValue, getDraft, setDraft, unstage, getStagedNewTokens } from '../../state/staging'
 import { withPxAnnotation } from '../../utils/colorUtils'
-import type { GeeklegoTokens, ComponentTokenGroup } from '../../types'
+import type { GeeklegoTokensV2 } from '../../types'
 import { UsedBy } from './UsedBy'
 import './Inspector.css'
 import './UsedBy.css'
@@ -24,8 +24,6 @@ function deriveBreadcrumb(tokenName: string): string {
   if (tokenName.startsWith('--z-')) return 'Foundations / Z-Index'
   if (tokenName.startsWith('--motion-')) return 'Foundations / Motion'
   if (tokenName.startsWith('--shadow-')) return 'Foundations / Shadows'
-  const parts = tokenName.replace(/^--/, '').split('-')
-  if (parts.length >= 2) return `Components / ${parts[0].charAt(0).toUpperCase() + parts[0].slice(1)}`
   return 'Tokens'
 }
 
@@ -45,8 +43,8 @@ function extractColorFamily(tokenName: string): string | null {
   return match ? match[1] : null
 }
 
-// Mirrors PRIMITIVE_PREFIX / SEMANTIC_PREFIX in EditorShell.tsx and ContextPane.tsx —
-// maps the JS token-object key to the CSS variable prefix in geeklego.css.
+// Mirrors PRIMITIVE_PREFIX in EditorShell.tsx and ContextPane.tsx —
+// maps the JS primitive-object key to the CSS variable prefix.
 const PRIMITIVE_PREFIX: Record<string, string> = {
   colors: 'color',
   fontFamily: 'font-family',
@@ -66,42 +64,12 @@ const PRIMITIVE_PREFIX: Record<string, string> = {
   breakpoints: 'breakpoint',
 }
 
-const SEMANTIC_PREFIX: Record<string, string> = {
-  bg: 'color-bg',
-  surface: 'color-surface',
-  text: 'color-text',
-  border: 'color-border',
-  action: 'color-action',
-  status: 'color-status',
-  state: 'color-state',
-  dataSeries: 'color-data-series',
-  shadows: 'shadow',
-  spacingComponent: 'spacing-component',
-  spacingLayout: 'spacing-layout',
-  sizeComponent: 'size-component',
-  radiusComponent: 'radius-component',
-  layer: 'layer',
-  borders: 'border',
-  typographySemantics: 'typography',
-  iconSemantic: 'icon-semantic',
-  contentFlexibility: 'content',
-}
-
 function resolveTokenValue(
   tokenName: string,
-  tokens: GeeklegoTokens,
-  componentGroups: ComponentTokenGroup[]
+  tokens: GeeklegoTokensV2
 ): string | null {
   const staged = getStagedValue(tokenName)
   if (staged !== undefined) return staged
-
-  for (const group of componentGroups) {
-    for (const section of group.sections) {
-      for (const token of section.tokens) {
-        if (token.name === tokenName) return token.value
-      }
-    }
-  }
 
   const prims = tokens.primitives as unknown as Record<string, unknown>
   for (const category of Object.keys(prims)) {
@@ -122,23 +90,10 @@ function resolveTokenValue(
     }
   }
 
-  const semantics = tokens.semantics?.light as unknown as Record<string, unknown> | undefined
-  if (semantics) {
-    for (const group of Object.keys(semantics)) {
-      const prefix = SEMANTIC_PREFIX[group]
-      if (!prefix) continue
-      const vals = semantics[group]
-      if (!vals || typeof vals !== 'object') continue
-      for (const [k, v] of Object.entries(vals as Record<string, unknown>)) {
-        if (typeof v === 'string' && `--${prefix}-${k}` === tokenName) return v
-        if (v && typeof v === 'object') {
-          for (const [k2, v2] of Object.entries(v as Record<string, unknown>)) {
-            if (typeof v2 === 'string' && `--${prefix}-${k}-${k2}` === tokenName) return v2
-          }
-        }
-      }
-    }
-  }
+  // Flat v2 semantics — CSS var for a key is `--<key>`
+  const semanticKey = tokenName.replace(/^--/, '')
+  const semanticVal = tokens.semantics.light[semanticKey]
+  if (typeof semanticVal === 'string') return semanticVal
 
   // Fall back to tokens added via stageNewToken() (stored separately from getStagedValue)
   const stagedNew = getStagedNewTokens().get(tokenName)
@@ -150,18 +105,17 @@ function resolveTokenValue(
 function walkAliasChain(
   tokenName: string,
   graph: TokenGraph | null,
-  tokens: GeeklegoTokens,
-  componentGroups: ComponentTokenGroup[]
+  tokens: GeeklegoTokensV2
 ): { name: string; value: string | null }[] {
-  if (!graph) return [{ name: tokenName, value: resolveTokenValue(tokenName, tokens, componentGroups) }]
-  
+  if (!graph) return [{ name: tokenName, value: resolveTokenValue(tokenName, tokens) }]
+
   const chain: { name: string; value: string | null }[] = []
   let current = tokenName
   const visited = new Set<string>()
 
   while (current && !visited.has(current)) {
     visited.add(current)
-    const value = resolveTokenValue(current, tokens, componentGroups)
+    const value = resolveTokenValue(current, tokens)
     chain.push({ name: current, value })
     
     const node = graph.nodes.get(current)
@@ -210,151 +164,7 @@ function getAliasedColorFamily(currentAlias: string | null): string | null {
   return m ? m[1] : null
 }
 
-/**
- * For a component token, infer which semantic sub-group is appropriate by
- * examining:
- *  1. The CSS family of the *current alias* (most reliable signal)
- *  2. The property segment(s) baked into the host token name as a fallback
- *
- * Returns a prefix string that can be used to filter `allSemantics`, e.g.
- * 'color', 'spacing', 'radius', 'shadow', 'size', 'border', 'duration',
- * 'ease', 'layer', 'content', 'icon', or '' (show all).
- */
-function inferCompTokenSemanticGroup(
-  tokenName: string,
-  currentAlias: string | null,
-): string {
-  // ── 1. Derive from the aliased token name (most accurate) ─────────────────
-  const ref = currentAlias ?? ''
-  if (ref.startsWith('--color-'))                return 'color'
-  if (ref.startsWith('--spacing-'))              return 'spacing'
-  if (ref.startsWith('--radius-component-'))     return 'radius'
-  if (ref.startsWith('--size-component-') ||
-      ref.startsWith('--size-control-') ||
-      ref.startsWith('--size-fixed-') ||
-      ref.startsWith('--size-overlay') ||
-      ref.startsWith('--size-indicator'))         return 'size'
-  if (ref.startsWith('--icon-'))                 return 'icon'
-  if (ref.startsWith('--shadow-'))               return 'shadow'
-  if (ref.startsWith('--border-') &&
-      !ref.startsWith('--border-width-'))         return 'border'
-  if (ref.startsWith('--border-width-'))         return 'border-width'
-  if (ref.startsWith('--duration-'))             return 'duration'
-  if (ref.startsWith('--ease-'))                 return 'ease'
-  if (ref.startsWith('--layer-'))                return 'layer'
-  if (ref.startsWith('--content-'))              return 'content'
-  if (ref.startsWith('--font-size-'))            return 'font-size'
-  if (ref.startsWith('--font-weight-'))          return 'font-weight'
-  if (ref.startsWith('--font-family-'))          return 'font-family'
-  if (ref.startsWith('--line-height-'))          return 'line-height'
-  if (ref.startsWith('--letter-spacing-'))       return 'letter-spacing'
-  if (ref.startsWith('--opacity-'))              return 'opacity'
-
-  // ── 2. Fallback: infer from property segment(s) in the host token name ────
-  // Strip the component prefix (first dash-segment) and look at what remains.
-  // e.g. "--button-primary-bg" → segments after component = ["primary", "bg"]
-  const withoutLeading = tokenName.replace(/^--[a-z0-9]+-/, '') // strip component name
-  const segments = withoutLeading.split('-')
-
-  // Walk segments to find a recognisable property keyword.
-  // Order matters: more specific checks run first to avoid false positives.
-  const COLOR_SEGMENTS    = new Set(['bg', 'color', 'text', 'fill', 'stroke',
-                                      'border', 'outline', 'accent', 'surface',
-                                      'ring', 'caret', 'placeholder'])
-  const SPACING_SEGMENTS  = new Set(['gap', 'px', 'py', 'pt', 'pb', 'pl', 'pr',
-                                      'padding', 'margin', 'indent', 'offset',
-                                      'space', 'inset'])
-  const RADIUS_SEGMENTS   = new Set(['radius', 'rounded', 'corner'])
-  // 'icon' + 'size' → semantic size pool (icon sizes are component sizes)
-  const SIZE_SEGMENTS     = new Set(['size', 'width', 'height', 'min', 'max',
-                                      'w', 'h', 'icon'])
-  const MOTION_SEGMENTS   = new Set(['duration', 'delay', 'transition'])
-  const EASING_SEGMENTS   = new Set(['ease', 'easing', 'timing'])
-  const LAYER_SEGMENTS    = new Set(['z', 'layer', 'zindex'])
-  const CONTENT_SEGMENTS  = new Set(['overflow', 'wrap', 'lines', 'clamp', 'truncate'])
-
-  for (const seg of segments) {
-    if (seg === 'shadow')                       return 'shadow'
-    if (RADIUS_SEGMENTS.has(seg))              return 'radius'
-    if (MOTION_SEGMENTS.has(seg))              return 'duration'
-    if (EASING_SEGMENTS.has(seg))              return 'ease'
-    if (LAYER_SEGMENTS.has(seg))               return 'layer'
-    if (CONTENT_SEGMENTS.has(seg))             return 'content'
-    if (SPACING_SEGMENTS.has(seg))             return 'spacing'
-    if (SIZE_SEGMENTS.has(seg))                return 'size'
-    if (COLOR_SEGMENTS.has(seg))               return 'color'
-  }
-
-  return '' // unknown → show all semantics (safe fallback)
-}
-
-/**
- * Filter a flat list of semantic tokens down to those matching a semantic group.
- * `group` is one of the strings returned by inferCompTokenSemanticGroup().
- */
-function filterSemanticsByGroup(
-  semantics: { name: string; value: string }[],
-  group: string,
-): { name: string; value: string }[] {
-  if (!group) return semantics
-  switch (group) {
-    case 'color':
-      return semantics.filter(t => t.name.startsWith('--color-'))
-    case 'spacing':
-      return semantics.filter(t =>
-        t.name.startsWith('--spacing-component-') || t.name.startsWith('--spacing-layout-')
-      )
-    case 'radius':
-      return semantics.filter(t => t.name.startsWith('--radius-component-'))
-    case 'size':
-      // Component heights/widths — include size-component and icon-semantic since
-      // some component size tokens alias icon-semantic values
-      return semantics.filter(t =>
-        t.name.startsWith('--size-component-') || t.name.startsWith('--icon-semantic-')
-      )
-    case 'icon':
-      // Icon sizes specifically — show the icon-semantic semantic tier tokens
-      return semantics.filter(t => t.name.startsWith('--icon-semantic-'))
-    case 'shadow':
-      return semantics.filter(t => t.name.startsWith('--shadow-'))
-    case 'border':
-      return semantics.filter(t =>
-        t.name.startsWith('--border-') && !t.name.startsWith('--border-width-')
-      )
-    case 'border-width':
-      return semantics.filter(t => t.name.startsWith('--border-'))
-    case 'duration':
-      return semantics.filter(t =>
-        t.name.startsWith('--duration-') || t.name.startsWith('--ease-')
-      )
-    case 'ease':
-      return semantics.filter(t =>
-        t.name.startsWith('--ease-') || t.name.startsWith('--duration-')
-      )
-    case 'layer':
-      return semantics.filter(t => t.name.startsWith('--layer-'))
-    case 'content':
-      return semantics.filter(t => t.name.startsWith('--content-'))
-    case 'font-size':
-      return semantics.filter(t =>
-        t.name.startsWith('--font-size-') || t.name.startsWith('--typography-')
-      )
-    case 'font-weight':
-      return semantics.filter(t => t.name.startsWith('--font-weight-'))
-    case 'font-family':
-      return semantics.filter(t => t.name.startsWith('--font-family-'))
-    case 'line-height':
-      return semantics.filter(t => t.name.startsWith('--line-height-'))
-    case 'letter-spacing':
-      return semantics.filter(t => t.name.startsWith('--letter-spacing-'))
-    case 'opacity':
-      return semantics.filter(t => t.name.startsWith('--opacity-'))
-    default:
-      return semantics
-  }
-}
-
-function flattenPrimitiveTokens(tokens: GeeklegoTokens): { name: string; value: string }[] {
+function flattenPrimitiveTokens(tokens: GeeklegoTokensV2): { name: string; value: string }[] {
   const result: { name: string; value: string }[] = []
   const prims = tokens.primitives as unknown as Record<string, unknown>
   for (const category of Object.keys(prims)) {
@@ -399,42 +209,20 @@ function flattenPrimitiveTokens(tokens: GeeklegoTokens): { name: string; value: 
   return result
 }
 
-function flattenSemanticTokens(tokens: GeeklegoTokens): { name: string; value: string }[] {
+function flattenSemanticTokens(tokens: GeeklegoTokensV2): { name: string; value: string }[] {
   const result: { name: string; value: string }[] = []
-  const semantics = tokens.semantics?.light as unknown as Record<string, unknown> | undefined
-  if (!semantics) return result
-  for (const group of Object.keys(semantics)) {
-    const prefix = SEMANTIC_PREFIX[group]
-    if (!prefix) continue
-    const vals = semantics[group]
-    if (!vals || typeof vals !== 'object') continue
-    for (const [k, v] of Object.entries(vals as Record<string, unknown>)) {
-      if (typeof v === 'string') {
-        const name = `--${prefix}-${k}`
-        result.push({ name, value: getStagedValue(name) ?? v })
-      } else if (v && typeof v === 'object') {
-        for (const [k2, v2] of Object.entries(v as Record<string, unknown>)) {
-          if (typeof v2 === 'string') {
-            const name = `--${prefix}-${k}-${k2}`
-            result.push({ name, value: getStagedValue(name) ?? v2 })
-          }
-        }
-      }
-    }
+  // Flat v2 semantics — CSS var for a key is `--<key>`
+  for (const [k, v] of Object.entries(tokens.semantics.light)) {
+    const name = `--${k}`
+    result.push({ name, value: getStagedValue(name) ?? v })
   }
   // Include newly staged semantic tokens
   for (const [, newToken] of getStagedNewTokens()) {
-    const { kind } = newToken.treePath
-    if (kind === 'semanticColorGroup' || kind === 'semanticFlat') {
+    if (newToken.treePath.kind === 'semanticFlat') {
       result.push({ name: newToken.cssName, value: newToken.value })
     }
   }
   return result
-}
-
-function isComponentToken(tokenName: string): boolean {
-  // Use the same breadcrumb logic — component tokens resolve to "Components / X"
-  return deriveBreadcrumb(tokenName).startsWith('Components')
 }
 
 function resolveDisplayColor(
@@ -461,12 +249,11 @@ function resolveDisplayColor(
 interface TokenAliasPickerProps {
   currentValue: string           // e.g. "var(--color-neutral-0)"
   tokenName: string              // the token being edited
-  tokens: GeeklegoTokens
-  isCompToken?: boolean
+  tokens: GeeklegoTokensV2
   onChange: (newValue: string) => void
 }
 
-function TokenAliasPicker({ currentValue, tokenName, tokens, isCompToken, onChange }: TokenAliasPickerProps) {
+function TokenAliasPicker({ currentValue, tokenName, tokens, onChange }: TokenAliasPickerProps) {
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState('')
   const [stagedVersion, setStagedVersion] = useState(0)
@@ -499,16 +286,11 @@ function TokenAliasPicker({ currentValue, tokenName, tokens, isCompToken, onChan
 
   // ── Candidate pool (before search filter) ───────────────────────────────────
   // Rules:
-  //  • Component token  → scoped semantic sub-group inferred from alias/name
   //  • Semantic token   → primitives in same family; if colour, same palette family
   //  • Unknown token    → all primitives
   // When the user is actively typing a search query we always search the full
   // pool so they can escape the scope and find any token they want.
   const scopedPool = useMemo(() => {
-    if (isCompToken) {
-      const group = inferCompTokenSemanticGroup(tokenName, currentAlias)
-      return filterSemanticsByGroup(allSemantics, group)
-    }
     // Semantic → primitives
     if (family === 'color') {
       // Scope to the same palette family as the current alias.
@@ -524,12 +306,12 @@ function TokenAliasPicker({ currentValue, tokenName, tokens, isCompToken, onChan
       return allPrimitives.filter(t => getTokenFamily(t.name) === family)
     }
     return allPrimitives
-  }, [allPrimitives, allSemantics, family, isCompToken, tokenName, currentAlias])
+  }, [allPrimitives, family, currentAlias])
 
   // Full pool for search escape-hatch
   const fullPool = useMemo(
-    () => isCompToken ? allSemantics : allPrimitives,
-    [isCompToken, allSemantics, allPrimitives]
+    () => allPrimitives,
+    [allPrimitives]
   )
 
   const candidates = useMemo(() => {
@@ -649,7 +431,7 @@ function TokenAliasPicker({ currentValue, tokenName, tokens, isCompToken, onChan
 interface InspectorTokenDescriptionProps {
   tokenName: string
   tokenMetadata?: TokenMetadata
-  stagedChanges: Record<string, any>
+  stagedChanges: MetadataStagedChanges
   onDescriptionChange: (tokenName: string, description: string) => void
   onDescriptionClear: (tokenName: string) => void
 }
@@ -761,7 +543,7 @@ interface TypoPropertyRowProps {
   tokenName: string
   label: string
   prop: string
-  tokens: GeeklegoTokens
+  tokens: GeeklegoTokensV2
   onStageEdit: (name: string, value: string) => void
 }
 
@@ -776,7 +558,7 @@ function TypoPropertyRow({ tokenName, label, prop, tokens, onStageEdit }: TypoPr
   }, [tokenName])
 
   const stagedValue = getStagedValue(tokenName)
-  const resolvedValue = resolveTokenValue(tokenName, tokens, [])
+  const resolvedValue = resolveTokenValue(tokenName, tokens)
   const committed = stagedValue ?? resolvedValue ?? ''
   const display = localDraft ?? committed
   const isDirty = localDraft !== null && localDraft !== committed
@@ -845,15 +627,11 @@ function TypoPropertyRow({ tokenName, label, prop, tokens, onStageEdit }: TypoPr
 
 interface TypographyStyleInspectorProps {
   styleName: string
-  tokens: GeeklegoTokens
+  tokens: GeeklegoTokensV2
   onStageEdit: (name: string, value: string) => void
 }
 
 function TypographyStyleInspector({ styleName, tokens, onStageEdit }: TypographyStyleInspectorProps) {
-  const typoClass = tokens.typographyClasses.find(
-    c => c.name === `.text-${styleName}` || c.name === `text-${styleName}`
-  )
-
   return (
     <EdScrollArea className="ed-inspector">
       <div className="ed-inspector__body">
@@ -882,53 +660,6 @@ function TypographyStyleInspector({ styleName, tokens, onStageEdit }: Typography
             ))}
           </div>
         </div>
-
-        {typoClass && (
-          <div className="ed-inspector__section">
-            <h3 className="ed-inspector__section-title">Utility Class</h3>
-            <div className="ed-typo-class-preview">
-              <div className="ed-typo-class-name">{typoClass.name}</div>
-              <div className="ed-typo-class-props">
-                {typoClass.fontFamily && (
-                  <div className="ed-typo-class-prop">
-                    <span className="ed-typo-class-prop__key">font-family</span>
-                    <span className="ed-typo-class-prop__val">{typoClass.fontFamily}</span>
-                  </div>
-                )}
-                {typoClass.fontSize && (
-                  <div className="ed-typo-class-prop">
-                    <span className="ed-typo-class-prop__key">font-size</span>
-                    <span className="ed-typo-class-prop__val">{withPxAnnotation(typoClass.fontSize)}</span>
-                  </div>
-                )}
-                {typoClass.fontWeight && (
-                  <div className="ed-typo-class-prop">
-                    <span className="ed-typo-class-prop__key">font-weight</span>
-                    <span className="ed-typo-class-prop__val">{typoClass.fontWeight}</span>
-                  </div>
-                )}
-                {typoClass.lineHeight && (
-                  <div className="ed-typo-class-prop">
-                    <span className="ed-typo-class-prop__key">line-height</span>
-                    <span className="ed-typo-class-prop__val">{withPxAnnotation(typoClass.lineHeight)}</span>
-                  </div>
-                )}
-                {typoClass.letterSpacing && (
-                  <div className="ed-typo-class-prop">
-                    <span className="ed-typo-class-prop__key">letter-spacing</span>
-                    <span className="ed-typo-class-prop__val">{withPxAnnotation(typoClass.letterSpacing)}</span>
-                  </div>
-                )}
-                {typoClass.textTransform && (
-                  <div className="ed-typo-class-prop">
-                    <span className="ed-typo-class-prop__key">text-transform</span>
-                    <span className="ed-typo-class-prop__val">{typoClass.textTransform}</span>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </EdScrollArea>
   )
@@ -936,8 +667,7 @@ function TypographyStyleInspector({ styleName, tokens, onStageEdit }: Typography
 
 interface InspectorProps {
   selectedTokenName: string | null
-  tokens: GeeklegoTokens
-  componentGroups: ComponentTokenGroup[]
+  tokens: GeeklegoTokensV2
   graph: TokenGraph | null
   onStageEdit: (tokenName: string, newValue: string) => void
   onClose?: () => void
@@ -946,7 +676,6 @@ interface InspectorProps {
 export function Inspector({
   selectedTokenName,
   tokens,
-  componentGroups,
   graph,
   onStageEdit,
   onClose,
@@ -1012,13 +741,9 @@ export function Inspector({
   const breadcrumb = deriveBreadcrumb(selectedTokenName)
   const staged = getAllStaged()
   const stagedValue = getStagedValue(selectedTokenName)
-  const resolvedValue = resolveTokenValue(selectedTokenName, tokens, componentGroups)
+  const resolvedValue = resolveTokenValue(selectedTokenName, tokens)
 
-  // True when this token lives in a component block — never show the raw color picker for these
-  const isCompToken = componentGroups.some(g =>
-    g.sections.some(s => s.tokens.some(t => t.name === selectedTokenName))
-  )
-  const aliasChain = walkAliasChain(selectedTokenName, graph, tokens, componentGroups)
+  const aliasChain = walkAliasChain(selectedTokenName, graph, tokens)
 
   // What's currently persisted (staged or original)
   const committedValue = stagedValue ?? resolvedValue ?? ''
@@ -1056,7 +781,7 @@ export function Inspector({
         <div className="ed-inspector__section">
           <h3 className="ed-inspector__section-title">Value</h3>
           <div className="ed-inspector__value-editor">
-            {!isCompToken && isFoundationColorToken(selectedTokenName) ? (
+            {isFoundationColorToken(selectedTokenName) ? (
               <EdColorPicker
                 value={displayValue || '#000000'}
                 onChange={(color) => setDraftValue(color)}
@@ -1066,7 +791,6 @@ export function Inspector({
                 currentValue={displayValue}
                 tokenName={selectedTokenName}
                 tokens={tokens}
-                isCompToken={isCompToken}
                 onChange={(v) => setDraftValue(v)}
               />
             ) : (

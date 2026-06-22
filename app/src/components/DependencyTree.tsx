@@ -148,14 +148,16 @@ function DependencyTreeNode({
 }
 
 export function DependencyTree({ visible, onClose, sourceToken, targetToken, graph }: DependencyTreeProps) {
-  if (!visible || !graph) return null
-
+  // Hooks must run unconditionally and in the same order on every render, so
+  // they precede the visibility/graph early-return below (Rules of Hooks).
+  // graph may be null here; the memos guard for it and the early return still
+  // skips rendering when it's absent.
   const treeData = useMemo(() => {
-    return buildDependencyTree(sourceToken, graph)
+    return graph ? buildDependencyTree(sourceToken, graph) : null
   }, [sourceToken, graph])
 
   const path = useMemo(() => {
-    return findPath(sourceToken, targetToken, graph) || []
+    return graph ? findPath(sourceToken, targetToken, graph) || [] : []
   }, [sourceToken, targetToken, graph])
 
   const pathSet = useMemo(() => new Set(path), [path])
@@ -163,6 +165,8 @@ export function DependencyTree({ visible, onClose, sourceToken, targetToken, gra
   const handleTokenClick = (token: string) => {
     console.log('Token clicked:', token)
   }
+
+  if (!visible || !graph || !treeData) return null
 
   return (
     <div

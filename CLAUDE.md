@@ -2,570 +2,348 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-# Geeklego — Project Details & Claude Code Instructions
-
-> Single source of truth for project context. All agents and skills read this before starting any task.
-
----
-
-## What is Geeklego?
-
-Geeklego is an open-source, design-system-first React component library built on Tailwind CSS v4.
-
-It ships three things:
-
-1. **A design system** — `design-system/geeklego.css` — a Tailwind v4 `@theme` file that is the single source of truth for all visual values
-2. **A component library** — `components/` — pre-built React components that use only Tailwind classes generated from those tokens
-3. **An AI generation skill** — `.claude/skills/component-builder/SKILL.md` + `.claude/agents/` — so Claude Code can generate new components that follow the exact same rules
-
-It also includes a **token editor app** (`app/`) that runs locally via `npm run dev` to edit colors, typography, spacing, and export `geeklego.css`.
-
-Geeklego is **not** a Shadcn converter. It is a competitor. It does not reference Shadcn. It does not use `cn()`, `cva`, or Tailwind arbitrary values. It has its own design system architecture, its own component patterns, its own identity.
-
-**Design-system-first means:** the design system is defined completely before a single component is written. Components are an expression of the design system — not the other way around. You never style a component directly. You define the system, and the component inherits from it.
+> **This is the GeekLego v2 system: 2-tier tokens (primitives → semantics) + ShadCN/Radix components.**
+> It replaces the old 3-tier (primitive → semantic → component-token) architecture. The 2-tier cut has landed and the Token Editor `app/` has been rebuilt on v2 — see "Repo state" below. The reference implementation for every v2 rule in this file is the **Button slice** at [components/v2/Button/](components/v2/Button/) — read it before building anything.
+>
+> **Governing brief:** [PROTOTYPE-SHADCN-2TIER.md](PROTOTYPE-SHADCN-2TIER.md) holds the locked decisions and step ordering. [MULTI-TARGET-ARCHITECTURE.md](MULTI-TARGET-ARCHITECTURE.md) holds the "why" (IR-as-contract, fork-per-brand). When this file and the brief disagree, the brief wins and this file should be fixed.
 
 ---
 
-## Project Structure
+## What is GeekLego (v2)?
 
-```
-geeklego/
-├── CLAUDE.md                            ← this file
-├── design-system/
-│   ├── geeklego.css                     ← single source of truth for all tokens
-│   └── geeklego.default.css             ← default/backup copy
-├── components/
-│   ├── atoms/                           ← L1 (no component imports)
-│   ├── molecules/                       ← L2 (imports L1 only)
-│   ├── organisms/                       ← L3 (imports L2 + L1)
-│   └── utils/                           ← keyboard hooks, ARIA helpers, StructuredData, i18n, security
-├── app/                                 ← token editor (runs via npm run dev)
-├── scripts/                             ← token validator, metadata gen, screenshots, dedup helpers
-├── docs/                                ← published docs (token system, best practices, migration guides)
-├── internal/                            ← internal notes, checklists, blog drafts (not published)
-├── stories/                             ← root-level Storybook stories
-├── .storybook/                          ← Storybook config
-├── .agents/skills/                      ← skill copies: component-builder, figma-sync, i18n,
-│                                          screenshot-workflow, security, state-handling
-└── .claude/                             ← project-local agents, skills, references
-```
+GeekLego is an open-source, design-system-first React component library built on **Tailwind CSS v4 + ShadCN/Radix UI**.
 
-> **Note:** `components/templates/` (L4) does **not** exist yet — no templates have been built. `skills-lock.json` is documented further down but is also not present in the repo as checked out.
+It ships:
+
+1. **A 2-tier design system** — `design-system/v2/` — primitives (geeklego's brand palette/scales, unchanged) aliased to a **standard ShadCN/Tailwind semantic vocabulary** (`--primary`, `--background`, `--border`, `--ring`, …). Components consume the semantics directly.
+2. **A component library** — `components/v2/` — ShadCN-pattern React components (`cva` variants + `cn()` + Radix primitives) styled with standard semantic utilities (`bg-primary text-primary-foreground`).
+3. **An AI generation skill** — `component-builder-v2` — generates new v2 components following the rules below.
+4. **A token editor → cockpit** (`app/`) — edit primitives + semantics, manage themes, export to CSS / IR / design.md. (Being adapted from 3-tier; see brief §4.)
+
+**Design-system-first means:** the token system (primitives + semantics) is the source of truth. Components are an expression of it — you never hardcode a value or invent vocabulary. You consume the standard semantics, and only reach for namespaced `--ext-*` tokens for genuine brand-custom variants.
+
+**Why standard ShadCN vocabulary?** Industry-standard, in every LLM's training set, native Tailwind v4 utilities, paste-and-go. The only geeklego-specific layer is the *primitive palette* (the brand seam) — the semantic interface is deliberately standard.
 
 ---
 
-## Development Commands
+## Repo state: the 2-tier cut has landed (read this first)
 
-```bash
-npm run dev              # Token editor app — runs `vite --config vite.config.mts app` (http://localhost:5173)
-npm run storybook        # Storybook (http://localhost:6006)
-npm run build-storybook  # Build Storybook static site
-npx vitest               # Run tests (Storybook stories via Vitest + Playwright browser)
-npx vitest components/atoms/Button/Button.stories.tsx  # Single test
-npx tsc --noEmit         # Type-check (covers app/ only — components checked by Storybook/Vite)
-npm run validate-tokens  # Check geeklego.css for broken var() refs + within-block dupes (runs scripts/validate-tokens.ts)
-npm run lint             # ESLint (flat config)
-npm run lint-css         # Stylelint on design-system/geeklego.css (.stylelintrc.mjs, with tier-guard plugin)
-npm run build            # Library build: tsup (components/index.ts + catalog.ts → esm/cjs + .d.ts) then build:css
-npm run build:css        # Compile design-system/geeklego.css → dist/geeklego.css (minified) via Tailwind CLI
-```
+The **§7 decision gate PASSED, the §7.5 2-tier cut executed (2026-06-21), and the Token Editor `app/` was rebuilt on v2 (2026-06-22).** v2 is the only live system. The old 3-tier **components, component-token block, and old skill are deleted**; the Token Editor now runs against `design-system/v2/`.
 
-`npm run build` bundles the library with `tsup` (no config file — CLI flags only) and then compiles the CSS. There is no separate build for the token editor app; verify component/token changes with Storybook + `npx vitest`. Node >= 20.0.0; package.json also pins `pnpm >= 9.0.0`.
+| Path | System | Status |
+|---|---|---|
+| `design-system/v2/`, `components/v2/` | **v2 — 2-tier ShadCN/Radix** | **Active. All new work goes here.** |
+| `design-system/geeklego.css` | **DELETED** in the cut. | v2 imports `design-system/v2/index.css` only — there is no `geeklego.css` to fall back to. |
+| `design-system/v2-defaults/` | **factory-reset baseline** — pristine copies of `primitives.css`, `semantics.css`, `themes/dark.css` | Source of truth for "reset to defaults" / export diffs. Don't edit by hand as part of normal token work — edit `design-system/v2/`. |
+| `components/utils/` | shared helpers (keyboard/accessibility/security/i18n/StructuredData) | **Kept** per brief §5 — pending a Radix-redundancy audit. Survivors of that audit stay. |
+| `components/index.ts` | package barrel | Repointed to export only `utils/*` (old-component + catalog re-exports removed). |
+| `components/{atoms,molecules,organisms}/`, `components/catalog.ts`, `scripts/catalog.ts` | old 3-tier components + catalog | **DELETED** in the cut. (Backups in the session scratchpad.) |
+| `.claude/skills/component-builder/` | old 3-tier skill | **DELETED.** Use `component-builder-v2`. |
+| `app/` (Token Editor cockpit) | **v2 — rebuilt** | **Active.** Flat `GeeklegoTokensV2` model; reads/writes `design-system/v2/` via a live inline plugin in `vite.config.mts` (not a standalone token-api). Run with `npm run dev`. |
 
-Other `scripts/` helpers (run with `npx tsx scripts/<name>`): `dedup-component-tokens.cjs`, `generate-metadata.ts`, `catalog.ts`, `take-screenshots.mjs`, `fix-replacement-chars.mjs`. `validate-tokens.test.ts` is the test for the token validator.
-
----
-
-## Test Infrastructure
-
-Stories ARE the tests. There are no separate unit test files.
-
-- Each `.stories.tsx` file becomes a test via `@storybook/addon-vitest`
-- Vitest runs stories headless in Chromium via Playwright browser mode
-- Setup file: `.storybook/vitest.setup.ts` applies Storybook annotations
-- A11y addon is configured in `test: "todo"` mode — reports violations in test UI but does not fail CI
-- Custom Storybook viewport presets: mobile (375x812), tablet (768x1024), desktop (1280x800), wide (1536x900)
-
-**TypeScript note:** `npx tsc --noEmit` only covers `app/` (tsconfig.json includes only that directory). Components are type-checked by Storybook/Vite during `npm run storybook` — this is intentional, not a bug.
+**Current rules:**
+- Build all new components under `components/v2/<Name>/`. The old atom/molecule/organism dirs are gone — there is nothing to import from them.
+- v2 imports `design-system/v2/index.css` only — never `design-system/geeklego.css`.
+- **ESLint now enforces v2 import discipline** via `no-restricted-imports` in [eslint.config.mjs](eslint.config.mjs) (bans `**/{atoms,molecules,organisms}/**` and direct `geeklego.css` imports). `npm run lint` is a real gate.
+- `AGENTS.md` / `DESIGN_SYSTEM.md` still describe 3-tier — ignore them until refreshed.
+- Shipped v2 components (verify with `ls components/v2/` — the list moves as work lands): **Button** (the reference leaf), **Input** (a styled leaf), **Dialog** & **Popover** (compound, on Radix primitives), and **Combobox** + **Command** (the `Popover` + `cmdk` recipe), plus shared helpers in `components/v2/lib/` (`cn.ts`). Radix deps in use: `@radix-ui/react-slot` (powers `asChild`), `@radix-ui/react-dialog`, `@radix-ui/react-popover`, and `cmdk`. The cockpit's own UI lives in `app/src/editor-ds/` and is separate from the published `components/v2/` library.
 
 ---
 
-## Token Editor App (`app/`)
+## Commands
 
-The token editor is a full React + Vite app for editing design tokens visually. It uses a **tri-pane shell** (`EditorShell.tsx`) with the following layout:
+Package manager is **npm** in practice (a `pnpm-lock.yaml` exists; `engines` lists both — npm scripts are what's wired). There is **no `test` script** — run Vitest directly.
 
-```
-┌─────────────────────────────────────────────┐
-│ Header                                      │  56px
-├──────────┬──────────────────────┬───────────┤
-│          │                      │           │
-│ NavRail  │  ContextPane         │ Inspector │  flex-1
-│  280px   │  flex-1              │   400px   │
-│          │                      │           │
-├──────────┴──────────────────────┴───────────┤
-│ PendingDrawer (collapsible)                 │
-└─────────────────────────────────────────────┘
-```
-
-- **Header** (`shell/Header/`) — top bar with logo, search trigger (⌘K), pending changes badge, preview theme toggle, and Export button
-- **NavRail** (`shell/NavRail/`) — left sidebar (280px) with search, recently edited, pinned tokens, and the 3-tier IA tree (Foundations / Semantic / Components)
-- **ContextPane** (`shell/ContextPane/`) — center area that reads `useRouter()` and dispatches to `CategoryPage`, `ComponentPage`, or `HomePage`
-- **Inspector** (`shell/Inspector/`) — right panel (400px) showing selected token details, value editor, alias chain, and "Used By" references
-- **PendingDrawer** (`shell/PendingDrawer/`) — collapsible bottom drawer showing staged (uncommitted) edits with impact analysis
-
-Key internals:
-- **Routing** — hash-based routing via `RouterProvider` (`routing/`), supports foundations/semantic/components/token/home route types
-- **Custom Vite plugin** (`vite.config.mts`) — provides API endpoints (`/api/load-tokens`, `/api/save-tokens`, `/api/component-tokens`, etc.) that parse `geeklego.css` into a JS token object and write it back
-- **Live reload** — watches `geeklego.css` for changes and pushes updates to the browser via WebSocket
-- **Backup** — automatically maintains `geeklego.default.css` as a backup copy
-- **Staging** (`state/staging.ts`) — all edits flow through a staging layer (in-memory Map + localStorage) before export; `stage()` / `unstage()` / `commitToExport()` / `discardAll()`
-- **Dependency graph** (`graph/build.ts`) — `buildTokenGraph()` extracts `var(--x)` references to build a directed graph of token dependencies
-- **IA classifier** (`ia/classify.ts`) — `classifyTokens()` maps token names to the 3-tier IA (Foundations / Semantic / Components)
-- **Recently edited** (`state/recentlyEdited.ts`) — tracks last 20 edited tokens with localStorage persistence
-- **Pinning** (`state/pinning.ts`) — pin/unpin tokens to the NavRail sidebar, persisted to localStorage
-- **Metadata** (`state/metadata.ts`) — per-token descriptions, categories, and notes
-- **Validation** (`validators/`) — drift detection, broken `var()` reference checks
-- **Command palette** (`components/CommandPalette.tsx`) — ⌘K searchable omnibox with special queries (`unused`, `broken`, `used by:Name`)
-- **Export modal** (`components/ExportModal.tsx`) — 4-step wizard (Review → Validation → Diff → Export) with snapshot management
-- **CSS generation** (`utils/cssGenerator.ts`) — converts token objects to CSS with cross-browser `color-mix()` fallbacks
-- **History** — undo/redo is handled per-session in the EditorShell via checkpoint snapshots
+| Task | Command |
+|---|---|
+| Token Editor cockpit (dev) | `npm run dev` (Vite, serves `app/`) |
+| Storybook (component dev) | `npm run storybook` (port 6006) |
+| Both at once | `npm run dev:all` |
+| Type-check | `npx tsc --noEmit` |
+| Lint (JS/TS — enforces v2 import rules) | `npm run lint` |
+| Lint CSS | `npm run lint-css` (stylelint over `design-system/v2/**`) |
+| Run all tests | `npx vitest run` (config: [vitest.config.ts](vitest.config.ts) — `app/src/**/*.test.ts` + `scripts/**/*.test.ts`) |
+| Run one test file | `npx vitest run scripts/validate-tokens.test.ts` |
+| Watch a test | `npx vitest scripts/validate-tokens.test.ts` |
+| Validate token chain | `npm run validate-tokens` (must exit 0) |
+| Build library (JS + CSS) | `npm run build` (`tsup` bundle + `build:css`) |
+| Build CSS only | `npm run build:css` (compiles `design-system/v2/index.css` → `dist/geeklego.css`) |
+| Export IR / design.md | `npm run export-ir` · `npm run export-design-md` |
+| Build Storybook | `npm run build-storybook` (⚠️ fails on stale `stories/Configure.mdx` — verify v2 with a scoped config) |
 
 ---
 
-## The Design System File
+## The 2-Tier Token Model
 
-**Location:** `design-system/geeklego.css` — the most important file in the project.
+```
+Tier 1 — PRIMITIVES   geeklego's own brand palette/scales, UNCHANGED (the @theme block + :root mirror)
+                      --color-brand-900   --color-accent-500   --spacing-4   --radius-lg   --font-size-16
+                          ↓ aliased by
+Tier 2 — SEMANTICS    ShadCN / Tailwind STANDARD vocabulary (the interface components consume)
+                      --primary / --primary-foreground   --background / --foreground
+                      --secondary   --muted   --accent   --destructive
+                      --border   --input   --ring   --card   --popover   --radius
 
-It has 5 blocks in order:
+COMPONENTS            standard Tailwind v4 utilities, zero custom vocabulary:
+                      className="bg-primary text-primary-foreground border-input ring-ring"
 
-1. **`@theme` Primitives** — raw values (`--color-brand-500`, `--spacing-4`, etc.). Tailwind auto-generates utility classes from these. Never referenced directly by components.
-2. **`:root` Semantic Tokens** — purpose-driven aliases referencing primitives (`--color-action-primary: var(--color-brand-500)`). These respond to theme switching.
-3. **Theme Overrides** — `[data-theme="dark"]` blocks that override semantic tokens.
-4. **Typography Utility Classes** — composite text styles (`.text-heading-h1`, `.text-body-md`, `.text-button-sm`).
-5. **Semantic Utility Classes + Generated Component Tokens** — shortcuts (`.bg-primary`) and AI-generated component token blocks appended at the end.
+THEMES                a theme = a set of Tier-2 overrides   →  .dark { --primary: …; --background: … }
+BRAND FORKS           re-point Tier-2 semantics at different primitives
+CUSTOM VARIANTS       --ext-<component>-<variant>-*   (namespaced, OUTSIDE the core semantic set)
+```
 
-Read the file directly for exact token names and values.
+### The token chain rule (2-tier)
+
+`primitive → semantic → utility`. **Never skip and never hardcode:**
+- Every Tier-2 semantic aliases a Tier-1 primitive (`--primary: var(--color-brand-900)`). Never a raw value.
+- Every `--ext-*` custom-variant token also aliases a primitive (`--ext-button-gamified-bg: var(--color-accent-500)`). Never a raw value.
+- Components reference **semantics only**, via standard utilities. They never reference a primitive directly and never hardcode.
+- There is **no component-token tier** in v2. Do not write `--button-*`-style component-token blocks. If you find yourself wanting one, you want either a standard utility or an `--ext-*` token.
 
 ---
 
-## Design System Architecture — 2-Tier + AI-Generated Component Tokens
+## Design system file layout (`design-system/v2/`)
 
 ```
-Tier 1 — Primitives   → raw values (@theme block)
-Tier 2 — Semantics    → purpose aliases (:root block)
-                                ↓
-               Component tokens are generated by the AI skill
-               when a component is first created.
+design-system/v2/
+├── index.css            ← entrypoint. @imports the three below, in order (order matters)
+├── primitives.css       ← Tier 1. @import "tailwindcss" + the @theme palette/scales. Copied unchanged from the brand source.
+├── semantics.css        ← Tier 2. :root semantic aliases + @theme inline registration + the --ext-* block
+└── themes/
+    └── dark.css         ← dark theme = Tier-2 overrides under [data-theme="dark"], .dark
 ```
 
-### The Token Chain Rule
+**How the semantic layer wires up** (see [semantics.css](design-system/v2/semantics.css)):
 
-Never skip a level: **primitive → semantic → component**. A component token must always alias a semantic. If no semantic exists for the intent, create one first (aliasing a primitive), then create the component token from it. Never reference a primitive directly from a component token. Never hardcode a value. See `.claude/references/worked-examples.md` for concrete examples.
+1. `:root { --primary: var(--color-brand-900); … }` — raw semantic vars, each aliasing a primitive. This is the themeable layer.
+2. `@theme inline { --color-primary: var(--primary); … }` — registers each semantic as a Tailwind v4 color utility. **The `inline` keyword is required**: it makes Tailwind emit utilities that resolve the `var()` *at runtime*, so theme overrides (`.dark { --primary: … }`) re-theme live without a rebuild. Radius works the same way (`--radius` → `--radius-sm/md/lg/xl` via `calc()`).
+3. `--ext-*` custom-variant tokens get their own `:root` block **and** their own `@theme inline` block, kept structurally separate from the core semantics so brand variants never pollute the themeable set.
 
-### Token Block Verification — Required Before Every Component
+**Themes** ([themes/dark.css](design-system/v2/themes/dark.css)) override only Tier-2 vars and support **both** selectors: `[data-theme="dark"]` (the Token Editor / Storybook switch) **and** `.dark` (ShadCN convention). Always write both.
 
-Before writing any new component TSX, the four-step gate:
+### The standard semantic token set
 
-1. Run `npm run validate-tokens` to establish a baseline (must exit 0).
-2. Write the component token block in `design-system/geeklego.css` first.
-3. Run `npm run validate-tokens` again — must exit 0 before writing TSX.
-4. After writing TSX, run `npm run validate-tokens` one more time — Pass 2 scans `*.tsx` for `var(--)` references and confirms a matching CSS definition exists.
+`--background` `--foreground` · `--primary` `--primary-foreground` · `--secondary` `--secondary-foreground` · `--muted` `--muted-foreground` · `--accent` `--accent-foreground` · `--destructive` `--destructive-foreground` · `--border` · `--input` · `--ring` · `--card` `--card-foreground` · `--popover` `--popover-foreground` · `--radius`.
 
-Missing CSS class rules (e.g. `.slider-input`, `::-webkit-slider-thumb`) are *not* caught by `validate-tokens` — see `.claude/skills/component-builder/references/common-token-mistakes.md` ❌18.
+These map to Tailwind utilities `bg-*`, `text-*`, `border-*`, `ring-*`, `rounded-*`. **Do not invent new core semantics.** If geeklego genuinely needs a semantic ShadCN doesn't define (e.g. status/info, data-series for charts), extend the standard set *deliberately*, document it as "geeklego extends ShadCN," and add it to this list — don't smuggle it in via a component.
 
 ---
 
-## Component Architecture — 5-Level Hierarchy
+## Component architecture (v2)
 
-```
-L1 — Atoms       No component imports. Tokens + Tailwind only.
-L2 — Molecules   Import L1 atoms only.
-L3 — Organisms   Import L2 molecules + L1 atoms.
-L4 — Templates   Import L3 organisms + lower.
-L5 — Pages       Import L4 templates + lower.
-```
+**No atom/molecule/organism tiers. No level folders. No catalog.** Flat: `components/v2/<ComponentName>/`. Atomic design survives as a *composition discipline* (decompose → plan the tree → build leaves first → compose), not as a taxonomy. Import discipline is enforced by ESLint (`eslint.config.mjs`), not folder structure.
 
-A component at level N may only import components at level N-1 or lower. Same-level imports are invalid.
+### The component pattern — ShadCN/Radix
 
-**Exception for stories:** Atom `.stories.tsx` files may import other atom components for documentation/demo purposes. This exception exists because stories are documentation and tests, not component logic — importing another atom for a demo does not create architectural coupling.
+The canonical shape, proven by Button:
 
----
-
-## Component File Structure — 5 Files Per Component
-
-Every component consists of exactly 5 files:
-
-```
-[ComponentName]/
-├── [ComponentName].tsx          ← Component implementation
-├── [ComponentName].types.ts     ← TypeScript interfaces
-├── [ComponentName].stories.tsx  ← Storybook stories (8 required)
-├── README.md                    ← Props table, token list, usage, accessibility
-└── mock-data.json               ← Test/preview data
-```
-
-**Exception — compound organisms:** Slot components (e.g. `Sidebar.Header`) are internal named consts inside the organism's `.tsx` file, attached as static properties and also exported as named exports.
-
----
-
-## How Components Are Styled
-
-**Rule: Tailwind className only. No inline styles. No CSS modules. No hardcoded values.**
+- **`cva` variants** in a separate `<name>-variants.ts` file — base classes + `variants` + `defaultVariants`. Variant classes are standard semantic utilities.
+- **`cn()`** = `clsx` + `tailwind-merge` (from [components/v2/lib/cn.ts](components/v2/lib/cn.ts)) — merges variant output with consumer `className` (last-wins, so overrides compose cleanly).
+- **`forwardRef`** + `displayName`. Plain `forwardRef` — **not** `memo(forwardRef)` (that was a 3-tier rule; dropped).
+- **`asChild`** via Radix `<Slot>` for polymorphic rendering (e.g. a link styled as a button).
+- **Radix primitives** for anything with a11y/keyboard/portal/focus surface — see the Radix-first rule below.
+- `"use client";` at the top when the component uses hooks/refs/interactivity.
 
 ```tsx
-// Correct — component token via var() wrapper (required in Tailwind v4.2)
-<button className="bg-[var(--button-bg)] text-[var(--button-text)] h-[var(--button-height-md)] rounded-[var(--button-radius)] text-button-md transition-default hover:bg-[var(--button-bg-hover)]">
+// components/v2/Button/Button.tsx — the reference
+"use client";
+import { forwardRef } from "react";
+import { Slot } from "@radix-ui/react-slot";
+import { cn } from "../lib/cn";
+import { buttonVariants } from "./button-variants";
+import type { ButtonProps } from "./Button.types";
 
-// Wrong — inline styles, hardcoded values, bare arbitrary values like bg-[#6366f1] or h-[40px]
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ className, variant, size, asChild = false, ...props }, ref) => {
+    const Comp = asChild ? Slot : "button";
+    return <Comp ref={ref} className={cn(buttonVariants({ variant, size }), className)} {...props} />;
+  },
+);
+Button.displayName = "Button";
 ```
 
-### When Inline `style` IS Acceptable
+```ts
+// button-variants.ts — core variants use ONLY standard semantics; `gamified` uses ONLY --ext-* tokens
+export const buttonVariants = cva(
+  ["inline-flex items-center justify-center …",
+   "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+   "disabled:pointer-events-none disabled:opacity-50"].join(" "),
+  {
+    variants: {
+      variant: {
+        default: "bg-primary text-primary-foreground hover:bg-primary/90",
+        outline: "border border-input bg-background text-foreground hover:bg-muted",
+        // custom variant — namespaced --ext-* utilities only:
+        gamified: "bg-ext-button-gamified-bg text-ext-button-gamified-foreground …",
+      },
+      size: { sm: "h-8 px-3 text-xs", md: "h-10 px-4 text-sm", lg: "h-11 px-6 text-base", icon: "size-10 p-0" },
+    },
+    defaultVariants: { variant: "default", size: "md" },
+  },
+);
+```
 
-There are four cases where `style` prop is justified. All others must use `className`.
+```ts
+// Button.types.ts — extend the native element attrs + VariantProps
+export interface ButtonProps
+  extends ButtonHTMLAttributes<HTMLButtonElement>, ButtonVariantProps {
+  asChild?: boolean;
+}
+```
 
-1. **CSS custom property injection** — Bind a runtime-computed value to a `--var` that is consumed by a `className`:
-   ```tsx
-   // CSS custom property injection — dynamic user color drives swatch bg
-   style={{ '--swatch-value': color } as CSSProperties}
-   className="bg-[var(--swatch-value)]"
-   ```
-   The `style` prop must ONLY set `--custom-props` — never `background`, `color`, `width`, etc. directly.
+### Radix-first rule (the one genuinely new decision)
 
-2. **Consumer `style` prop passthrough** — A wrapper component may forward a consumer-supplied `style` for layout overrides. Document with a comment.
+**Before hand-rolling any component with a11y, keyboard nav, focus trapping, portals, or `aria-activedescendant` behavior, check whether `@radix-ui/react-*` already provides the primitive** (Dialog, Popover, Tabs, Tooltip, Select, Dropdown, …) and build on it. Radix delivers the focus trap, escape dismiss, click-outside, roving tabindex, and ARIA wiring natively — do not reimplement them. This replaces the old hand-rolled mechanisms (`cloneElement` injection, `__slot` markers, the `utils/keyboard` hooks).
 
-3. **SVG presentation attributes** — Use camelCase React props (`stopColor`, `fillOpacity`), not the `style` prop:
-   ```tsx
-   // Correct — SVG intrinsic prop
-   <stop stopColor={seriesColor} />
-   // Wrong — using style for an SVG presentation attribute
-   <stop style={{ stopColor: seriesColor }} />
-   ```
+### Compound components
 
-4. **Dynamic data-driven positioning** — Values computed at runtime from geometry or data (tooltip `left`, thumb `top`, `flexGrow` from data values). Always pair with a comment.
-
-**Rule of thumb:** If the value in the `style` prop is `var(--something)`, it should be a className. If it's a genuinely dynamic value (user color, mouse position, data value, `getBoundingClientRect()`), use the CSS var injection pattern.
-
----
-
-## Available Semantic Token Groups
-
-## Available Semantic Token Groups
-
-For the full token list with names and values, read `.claude/skills/component-builder/references/token-quick-reference.md`.
-
-Key groups: `color/background`, `color/text`, `color/border`, `color/action`, `color/status`, `color/state`, `color/data-series`, `spacing/component` (fixed), `spacing/layout` (responsive), `size/component`, `size/icon`, `radius/component`, `motion/duration`, `motion/easing`, `layer`, `border/width`, typography classes (`.text-body-md`, `.text-heading-h1`, etc.), content flexibility utilities (`.truncate-label`, `.clamp-description`, `.content-flex`, `.content-nowrap`, `.empty-placeholder`), responsive card protection (`.card-shell`, `.card-header-row`, `.card-header-title`, `.card-metric-row`), performance utilities (`.perf-contain-content`, `.perf-content-auto`, `.perf-will-change-transform`).
-
-If a semantic token doesn't exist for an intent — create it before using it.
-
----
-
-## Technology Stack
-
-React 19 · TypeScript 5.7+ · Tailwind CSS v4.2 · Vite 6 · Storybook 10 · Vitest 4.1 · Playwright 1.58 · lucide-react 0.577 · npm
-
-**No other styling libraries.** No `styled-components`, no `emotion`, no CSS modules, no `clsx`, no `cva`, no `cn()` utility.
+When a component has slots (Card → Header/Content/Footer; Dialog → Trigger/Content), use the ShadCN sub-component-export pattern — separate sub-components exported as named exports (often each wrapping a Radix primitive part). This is the same shape as the old `Object.assign(Card, {Header})` compound slots, restyled. Prefer the Radix primitive's built-in context over a hand-rolled `createContext`.
 
 ---
 
-## Naming Conventions
+## Files per component (v2)
+
+Button shipped with **4 files** (TSX, types, variants, stories). v2 does **not** mandate the old fixed 5-file set (README + mock-data.json were 3-tier requirements). For a new component, write:
+
+```
+<ComponentName>/
+├── <ComponentName>.tsx          ← implementation (forwardRef + cn + Radix)
+├── <ComponentName>.types.ts     ← Props interface (native attrs + VariantProps + asChild?)
+├── <component-name>-variants.ts ← cva variants (omit only for a component with no variants)
+└── <ComponentName>.stories.tsx  ← Storybook stories
+```
+
+Add a `README.md` when the component's API/a11y genuinely warrants docs (compound components, anything with non-obvious keyboard behavior). Don't generate boilerplate READMEs or `mock-data.json` by reflex.
+
+Shared helpers live in `components/v2/lib/` (e.g. `cn.ts`).
+
+---
+
+## How components are styled
+
+**Standard semantic Tailwind utilities via `className`. No inline styles. No hardcoded values. No arbitrary color/size literals.**
+
+```tsx
+// Correct — standard ShadCN/Tailwind v4 utilities, generated from the semantic @theme inline layer
+<button className="bg-primary text-primary-foreground border-input ring-ring rounded-md" />
+
+// Correct — custom variant via namespaced --ext-* utilities
+<button className="bg-ext-button-gamified-bg text-ext-button-gamified-foreground" />
+
+// Wrong — inline styles, hardcoded hex/px, or bare arbitrary values (bg-[#6366f1], h-[40px])
+```
+
+Note the v2 difference: because semantics are registered as real Tailwind utilities (`@theme inline`), you write **`bg-primary`**, not `bg-[var(--primary)]`. The `var()`-wrapper arbitrary-value pattern was a 3-tier workaround and is no longer needed for semantic tokens. (Bare `shadow-[var(--ext-…)]` arbitrary values are acceptable only where no registered utility exists, as in the gamified shadow.)
+
+**Inline `style` is acceptable only for genuine runtime-dynamic values** that can't be a class — and only via CSS-custom-property injection (`style={{ '--x': value }}` consumed by a `className`), SVG presentation props, or data-driven positioning (tooltip coords, etc.). If the value would be `var(--token)`, it's a className.
+
+---
+
+## Technology stack
+
+React 19 · TypeScript 5.7+ · **Tailwind CSS v4** (`@theme` + `@import "tailwindcss"`) · Vite 6 · Storybook 10 · Vitest 4 · Playwright 1.58 · lucide-react.
+
+**Component layer deps:** `@radix-ui/react-*` (per-component — install when you build the component, not up front), `class-variance-authority`, `clsx`, `tailwind-merge`. `@radix-ui/react-slot` is already installed (powers `asChild`).
+
+**No other styling libraries** beyond this set. The 3-tier ban on `cva`/`cn()`/`clsx` is **reversed** in v2 — those are now the required pattern. Still no `styled-components`, `emotion`, or CSS modules.
+
+**ShadCN is not a dependency.** Its CLI copies source into your repo; we hand-write off the ShadCN pattern instead (the CLI fights geeklego's token setup). Use relative imports between v2 files — never package paths.
+
+---
+
+## Naming conventions
 
 | Thing | Convention | Example |
 |---|---|---|
-| Component folders/files | PascalCase | `Button/`, `Button.tsx` |
-| Component exports | Named export matching folder | `export const Button` |
-| Token names | kebab-case with prefix | `--button-bg`, `--input-border-focus` |
-| Component CSS tokens | `--{component}-{property}-{scale}` | `--avatar-size-md`, `--checkbox-icon-size-sm` |
-| Story titles | `Atoms/Button`, `Molecules/Card` | Matches level hierarchy |
-| TypeScript interfaces | PascalCase + Props | `ButtonProps` |
+| Component folder/file | PascalCase | `Button/`, `Button.tsx` |
+| Variants file | kebab-case | `button-variants.ts` |
+| Component export | named, matching folder | `export const Button` |
+| Core semantic tokens | ShadCN standard kebab-case | `--primary`, `--primary-foreground`, `--ring` |
+| Custom-variant tokens | `--ext-<component>-<variant>-<property>` | `--ext-button-gamified-bg` |
+| TS interfaces | PascalCase + `Props` | `ButtonProps` |
+| Story titles | `v2/<Name>` | `v2/Button` |
 
 ---
 
-## What Claude Code Should Never Do
+## Storybook stories (v2)
 
-1. **Never hardcode a value** — every value comes from a token.
-2. **Never use inline `style` prop** for CSS property values (color, background, width, height, border, shadow, etc.). CSS custom property injection (`--var`) is the only acceptable `style` prop pattern for dynamic values that cannot be expressed as a class. See "When Inline style IS Acceptable" above.
-3. **Never use arbitrary Tailwind values** like `bg-[#6366f1]` or `h-[40px]`. Only `bg-[var(--token)]` (must include `var()` wrapper).
-4. **Never create a component token that references a primitive directly.** Chain: primitive → semantic → component.
-4.5. **Never create a separate `[data-theme="dark"]` component token block.** All component tokens must use unified `:root, [data-theme="dark"]` selector. Fix semantic tokens instead.
-5. **Never import a component from the same or higher level.**
-6. **Never create more or fewer than 5 files per component.**
-7. **Never skip writing component tokens** into `geeklego.css` before writing the component.
-8. **Never use `clsx`, `cva`, `cn()` or any class-merging utility.**
-9. **Never reference Shadcn** in any way.
-10. **Never use package import paths** — use relative imports only.
-11. **Never create a separate 5-file folder for a non-reusable slot component.** Define as internal const + static property.
-12. **Never classify a self-contained interactive unit as a molecule.** No component deps = L1 atom.
-13. **Never apply box-shadow to a resting component in light/dark mode.** Shadows only on overlays (dropdowns, modals, tooltips, popovers).
-14. **Never create an interactive element smaller than 24x24px CSS** (WCAG 2.5.8). Use `.touch-target` for visually smaller controls.
-15. **Never create an interactive element without an accessible name.** Icon-only buttons need `aria-label`. Form controls need `<label>`. Multiple landmarks of same type need `aria-label`.
-16. **Never place a decorative icon without `aria-hidden="true"` on its wrapper.**
-17. **Never rely on color alone to convey state.** Use a secondary cue (icon, border, text label).
-18. **Never write `animation:` or `transition:` directly.** Use `.transition-default`, `.transition-enter`, etc.
-19. **Never add Schema.org markup to components with no semantic entity mapping.**
-20. **Never render Microdata when `schema` prop is `false`/undefined.** Use conditional spread.
-21. **Never use React context for schema state.** Pass via props.
-22. **Never use `role="treeitem"` outside a `role="tree"` container.** Flat nav = plain `<li>` in `<ul>`.
-23. **Never default Avatar `alt` to empty string** for user-facing avatars. Default to `'User avatar'`.
-24. **Never write `@media`/`@container` queries in component TSX.** Use Tailwind responsive prefixes or token overrides in `geeklego.css`.
-25. **Never make `--spacing-component-*` tokens responsive.** Only `--spacing-layout-*` scales with viewport.
-26. **Never write vendor-prefixed CSS manually.** Autoprefixer handles this.
-27. **Never use `color-mix()` in component token blocks.** Isolated to shadow tokens in `geeklego.css` with `@supports` fallbacks via `cssGenerator.ts`.
-28. **Never add `@supports` blocks in component TSX.** Feature-gated CSS lives only in `geeklego.css`.
-29. **Never use unsafe CSS features without `cssGenerator.ts` fallback first.** Unsafe: `@property`, `anchor-positioning`, `round()`/`mod()`/`rem()`. See `.claude/references/cross-browser-compat.md`.
-30. **Never implement arrow-key nav, focus trapping, escape dismiss, or click-outside inline.** Use hooks from `components/utils/keyboard/`.
-31. **Never use `tabIndex` greater than 0.**
-32. **Never use raw Tailwind overflow utilities** (`truncate`, `whitespace-nowrap`, `line-clamp-*`). Use `.truncate-label`, `.clamp-description`, `.content-nowrap`, `.content-flex`.
-33. **Never hardcode `-webkit-line-clamp`.** Use `.clamp-description`/`.clamp-body` or `.clamp-lines` with a component token.
-34. **Never apply `will-change` permanently.** Use `.perf-will-change-transform` (hover/focus only).
-35. **Never use index as sole React key in `.map()`.** Use a stable unique identifier.
-36. **Never skip `React.memo` on L1/L2 components.** Wrap with `memo(forwardRef(...))`. For L3+ organisms, use `memo(forwardRef(...))` for consistency; bare `memo()` allowed only when the component genuinely cannot accept a ref.
-37. **Never create a card-shell component without responsive layout protection.** Use `.card-shell`, `.card-header-row`, `.card-header-title`, `.card-metric-row`.
-38. **Never write a DarkMode story without `max-w-2xl`.**
-39. **Never hand-roll ARIA attribute objects.** Use helpers from `components/utils/accessibility/aria-helpers.ts`.
-40. **Never hardcode a system string directly into JSX.** Any string a screen reader announces or a user reads that is not consumer-supplied content (not `children`, `title`, `label` prop) must be resolvable via `useComponentI18n()` and the `i18nStrings` prop.
-41. **Never use `pl-*`/`pr-*`/`ml-*`/`mr-*`/`left-*`/`right-*` for component-internal padding, margin, or icon offsets.** Use logical equivalents: `ps-*`/`pe-*`/`ms-*`/`me-*`/`start-*`/`end-*`.
-42. **Never render `href` verbatim on an `<a>` element.** Always pass it through `sanitizeHref()` from `components/utils/security/sanitize.ts`. This strips `javascript:`, `data:text/html`, and `vbscript:` protocols that bypass React's automatic text-escaping.
-43. **Never render `<a target="_blank">` without `rel="noopener noreferrer"`.** Use `getSafeExternalLinkProps()` from `components/utils/security/sanitize.ts` for any component that accepts a `target` prop or has an `external` concept.
-44. **Never accept a `href` prop on any component that renders `<a>` without importing `sanitizeHref`.** Even when the href is expected to be a fragment or relative path — sanitize unconditionally. The utility is a no-op on safe values.
-45. **Never name a component token with the property before the component name.** Always use `--{component}-{property}-{scale}` (e.g. `--avatar-size-md`), never `--{property}-{component}-{scale}` (e.g. `--size-avatar-md`).
-46. **Never define child-component tokens in a parent component's token block.** If Navbar renders NavItem and needs to override `--navitem-height` per size, add a CSS class rule (`.navbar-size-sm { --navitem-height: var(--size-component-sm); }`) — do NOT create intermediate tokens like `--navbar-item-height-sm` in the Navbar block. These pollute the child's namespace, become dead code when the child block is regenerated, and the CSS class rules that consume them may be silently missing.
-47. **Never create a component token whose value references another component's token.** Component tokens must only alias `:root`-level semantic tokens. Cross-component token references (e.g., `--textarea-text-placeholder: var(--input-text-placeholder)`) create horizontal coupling that silently breaks when the referenced component is regenerated. Every `var()` in a component token's value must resolve to a `:root` semantic. Detection: `rg '--[a-z]+-[a-z]+-.*var\(--[a-z]+-[a-z]+-' design-system/geeklego.css` — review matches where the LHS component prefix differs from the RHS component prefix.
+Each story file imports the v2 stylesheet directly so the slice is self-contained:
+`import "../../../design-system/v2/index.css";` (the only stylesheet — the old 3-tier `geeklego.css` is gone).
+
+Cover: Default, Variants (core/standard only), Sizes, each custom `--ext-*` variant, Disabled, `asChild`, and **DarkMode** (wrap in `<div data-theme="dark" className="dark max-w-2xl …">` — set *both* selectors, and keep `max-w-2xl` so the dark surface is bounded). See [Button.stories.tsx](components/v2/Button/Button.stories.tsx).
 
 ---
 
-## What Claude Code Should Always Do
+## Custom variants — the `--ext-*` containment rule
 
-1. **Read `design-system/geeklego.css` before generating any component.**
-2. **Check if a component token block already exists** before creating a new one. Never create a second block for the same component — replace the existing one in-place. After writing tokens, `npm run validate-tokens` must exit 0 (it now also checks for within-block duplicates).
-3. **Write component tokens into `geeklego.css` first**, then write the component.
-4. **Follow the 5-file structure exactly.**
-5. **Place components in the correct level folder.**
-6. **Use typography utility classes** (`.text-button-md`, `.text-body-sm`) — never set font properties manually.
-7. **Use `.transition-default`** for all hover/focus transitions.
-8. **Use `.focus-ring`** for all focus-visible states.
-9. **Use `.skeleton`** for all loading states.
-10. **Use relative imports** between components.
-11. **Attach compound organism slots as static properties** and export as named exports.
-12. **Apply shadows contextually by theme.** Light/dark resting = `none`, overlays = `--shadow-lg`/`--shadow-xl`. Active = `--shadow-inset-sm`, overlays = `-lg`.
-13. **Use semantic HTML first, ARIA second.** See `.claude/references/semantic-html-guide.md`. `<button>` for actions, `<a>` for navigation, landmarks for sections. Never `onClick` on `<div>`.
-14. **Add `aria-expanded`** to every disclosure trigger.
-15. **Add `aria-controls` + matching `id`** to every disclosure trigger/panel pair. Use `useId()`.
-16. **Include an `Accessibility` story** as the 8th story, tagged `['a11y']`.
-17. **Minimum 24x24px touch target** on every interactive element. Use `.touch-target` for visually smaller controls.
-18. **Write the Accessibility section** in every README.md with keyboard interaction table.
-19. **Check Schema.org mapping table** when generating. Add `schema?: boolean` if applicable.
-20. **Document Schema.org** in README.md when supported.
-21. **Use `--spacing-layout-*`** for between-component gaps (responsive). Use `--spacing-component-*`** for internal padding (fixed).
-22. **Use Tailwind responsive prefixes** (`md:hidden`, `lg:flex`) for conditional layout.
-23. **Use `-responsive` typography classes** for viewport-scaling text.
-24. **Add new `color-mix()` shadow tokens to `cssGenerator.ts`**, not hand-edited in `geeklego.css`.
-25. **Default `@container` layouts to small/mobile variant.** Container queries progressively enhance.
-26. **Use keyboard hooks** from `components/utils/keyboard/`: `useRovingTabindex`, `useFocusTrap`, `useEscapeDismiss`, `useClickOutside`.
-27. **Include keyboard interaction table** in every interactive component's README.md.
-28. **Use roving tabindex** (not regular Tab) for arrow-navigated groups via `useRovingTabindex`.
-29. **Include content flexibility tokens** in every component token block for all text/container slots.
-30. **Use `.truncate-label`** for single-line truncation (not Tailwind's `truncate`).
-31. **Use `.content-flex`** on flex children with text (replaces `flex-1 min-w-0`).
-32. **Use `.content-nowrap`** for non-wrapping text in buttons/chips/badges.
-33. **Use `.empty-placeholder`** for empty/zero-data states with `emptyMessage?: string` prop.
-34. **Wrap L1/L2 with `memo(forwardRef(...))`** (mandatory). L3+ with `memo(forwardRef(...))` (recommended for consistency; bare `memo` allowed only when ref is impossible). Set `displayName`.
-35. **Use `useMemo`** for computed className strings. Hoist static strings to module scope.
-36. **Use `useCallback`** only for internally-created handlers, not pass-through props.
-37. **Use stable unique identifiers as React keys** — id, href, or unique data field, never index alone.
-38. **Use `.perf-contain-content`** on repeated list items and card-like components.
-39. **Use `.perf-content-auto`** for off-screen collapsible content.
-40. **No permanent `will-change`** — use `.perf-will-change-transform` (hover/focus only).
-41. **Use `.card-shell`** on every L2/L3 with header + body layout.
-42. **Use `.card-header-row`** for header rows with title + action.
-43. **Use `.card-header-title`** for the title area inside header rows.
-44. **Use `.card-metric-row`** for metric + delta/label rows.
-45. **Use ARIA helper functions** from `components/utils/accessibility/aria-helpers.ts`: `getDisclosureProps`, `getNavigationItemProps`, `getLiveRegionProps`, `getLoadingProps`, `getDisabledProps`, `getErrorFieldProps`, `getIconProps`.
-46. **Check `.claude/skills/i18n/references/string-inventory.md`** when building a component to see whether it has known system strings. If so, add `i18nStrings?` to its types and resolve via `useComponentI18n()`.
-47. **Use `ps-*`/`pe-*` for content padding and `start-*`/`end-*` for icon inset positioning** (RTL-safe logical properties).
-48. **Apply `sanitizeHref()` to every `href` prop** before passing it to an `<a>` element. Import from `../../utils/security/sanitize` (relative path). Wrap in `useMemo` per the performance pattern.
-49. **Read `.claude/skills/state-handling/SKILL.md`** when adding or auditing visual states (loading, disabled, error, selected). Use `getLoadingProps()`, `getDisabledProps()`, `getErrorFieldProps()` from `components/utils/accessibility/aria-helpers.ts`. Minimum requirement: L3 organisms must have a `loading` prop.
+Brand-specific variants (e.g. Button's `gamified`) are the one place v2 departs from pure ShadCN vocabulary. Keep them contained:
+
+1. Token name: `--ext-<component>-<variant>-<property>`, defined in the `--ext-*` block of `semantics.css` (its own `:root` + `@theme inline`), **separate** from the core semantic set.
+2. The token still chains to a primitive — never a raw value.
+3. In the `cva` variants, a custom variant uses **only** its `--ext-*` utilities and **none** of the core semantics — this structural separation is what keeps the themeable layer clean. (Button's `gamified` is the canary: watch whether this stays disciplined at variant #5, not just #1.)
 
 ---
 
-## Wrapper Components Own ARIA Wiring
+## Verification
 
-When a component wraps a form control (FormField, Fieldset, InputGroup) or composes parts that need to be linked (disclosure + panel, label + control + error), the **wrapper** generates IDs via `useId()` and injects `aria-describedby` / `aria-invalid` / `aria-controls` / `aria-labelledby` onto its child using `React.cloneElement`. Never push this wiring to the consumer. Use `joinDescribedBy()` / `mergeDescribedBy()` patterns to preserve any consumer-supplied `aria-describedby` tokens when cloning.
+Build/check the v2 slice through the real pipeline before declaring done:
+- `npx tsc --noEmit` — type-check.
+- Build the v2 story via Storybook/Vite to confirm the full Tailwind pipeline resolves the chain (`--color-brand-900 → --primary → bg-primary`), the `--ext-*` utilities emit, and the dark override fires for both `[data-theme="dark"]` and `.dark`.
+- `npm run lint` (ESLint flat config) — also enforces v2 import discipline.
 
-## Dark Mode — Reading Token Values
+> Known unrelated issue: full-repo `storybook build` fails on pre-existing boilerplate `stories/Configure.mdx` (missing asset) — not a v2 problem; verify v2 with a scoped config.
 
-Never use `getComputedStyle()` to read color token values. It returns the computed light-mode value regardless of `data-theme`. Read token values directly from the CSS source (e.g. parse `design-system/geeklego.css`) when you need a JS-side hex for an SVG numeric prop, an SSR fallback, or a swatch preview.
-
----
-
-## The Component Generation Flow
-
-Component generation follows a 5-step flow: (1) read `geeklego.css`, (2) classify level + dependencies, (3) write component tokens, (4) write 5 files, (4.5) accessibility audit, (4.6) performance audit, (4.7) SEO audit, (4.8) security audit, (5) verify imports.
-
-**Full flow with checklists:** `.claude/references/component-generation-flow.md`
-**Storybook story template:** `.claude/references/storybook-stories.md`
+`npm run validate-tokens` runs [scripts/validate-tokens.ts](scripts/validate-tokens.ts), now adapted to 2-tier (primitive→semantic chain checks; no component-tier passes). It must exit 0.
 
 ---
 
-## Reference Documents
+## Hard rules — never do this in v2
 
-These files in `.claude/references/` contain detailed implementation guidance. Read them when the topic is relevant to your task:
-
-| File | When to read |
-|---|---|
-| `component-generation-flow.md` | Before generating any component — full 5-step flow with accessibility + performance checklists |
-| `storybook-stories.md` | Before writing stories — 8-story template with JSX examples |
-| `worked-examples.md` | When unsure how the token chain works — concrete primitive → semantic → component examples |
-| `cross-browser-compat.md` | When using `color-mix()`, `@property`, `anchor-positioning`, or other unsafe CSS features |
-| `semantic-html-guide.md` | When choosing HTML elements — decision table for `<button>` vs `<a>` vs `<div>`, landmarks, etc. |
-| `component-variants.md` | When implementing size/variant props — patterns for variant-based styling |
-
-Additional skill-specific references live in `.claude/skills/component-builder/references/` (token-quick-reference, schema-org, aria-patterns).
-
-**State handling** — Read `.claude/skills/state-handling/SKILL.md` when adding or auditing any visual state (loading, disabled, error, selected). Full code patterns and token chains in `.claude/skills/state-handling/references/patterns.md`.
-
----
-
-## Skills — `.claude/skills/` and `.agents/skills/`
-
-Project skills live in two parallel locations, both holding the same set: **component-builder, figma-sync, i18n, screenshot-workflow, security, state-handling**.
-
-- `.claude/skills/` — the project-local source of truth, read by Claude Code.
-- `.agents/skills/` — a mirror of the same skills for the agent runtime.
-
-> **Note:** There is currently no `skills-lock.json` and no externally sourced skill (the previously documented `web-accessibility` skill is not present). All skills above are authored in-repo. If a lockfile-managed external-skill workflow is reintroduced, document its format here.
+1. **Never hardcode a value.** Every value chains primitive → semantic (→ `--ext-*`).
+2. **Never write a component-token tier** (no `--button-*`-style blocks). v2 is 2-tier.
+3. **Never reference a primitive directly from a component.** Components consume semantics only.
+4. **Never invent core semantic vocabulary** ad hoc. Extend the standard set deliberately and document it.
+5. **Never edit, import from, or extend the old 3-tier code** (`components/{atoms,molecules,organisms}/`, `design-system/geeklego.css`).
+6. **Never use the old `component-builder` skill.** Use `component-builder-v2`.
+7. **Never reimplement focus trap / escape / click-outside / roving tabindex / portals by hand** when a Radix primitive provides it. Radix-first.
+8. **Never use inline `style`** for a value that could be a className (`var(--token)` → use the utility).
+9. **Never use bare arbitrary literals** (`bg-[#6366f1]`, `h-[40px]`). Use registered utilities; `var()` arbitraries only where no utility exists.
+10. **Never put `--ext-*` custom variants inside the core semantic block** — they get their own separate block.
+11. **Never write a DarkMode story without both `data-theme="dark"` and `.dark`** (and `max-w-2xl`).
+12. **Never reference Shadcn by name in shipped code/docs**, and never wire in its CLI/`components.json` — we hand-write off the pattern.
+13. **Never use package import paths** between v2 files — relative imports only.
 
 ---
 
-## Schema.org Structured Data
+## Always do this in v2
 
-Opt-in via `schema?: boolean` prop (default `false`). Two levels: Microdata on L1-L3 components, JSON-LD via `<StructuredData>` at L4+.
-
-**Full mapping table, implementation patterns, and rules:** `.claude/skills/component-builder/references/schema-org.md`
-
-**Key rules:** `schema` defaults to `false`. All Microdata uses conditional spread `{...(schema && {...})}`. Pass via props, not context. No new DOM when off.
-
----
-
-## Existing Components
-
-Location is always `components/{level}/{ComponentName}/`. Run `ls components/atoms` etc. for the live list — the lists below were accurate as of June 2026.
-
-**L1 Atoms** (`components/atoms/`): Avatar, Badge, BreadcrumbItem, Button, ChatBubble, Checkbox, Chip, ColorSwatch, Divider, EmptyState, FileInput, Heading, Image, Input, Item, Label, Link, List, NavItem, ProgressBar, ProgressIndicator, Quote, Radio, Rating, SegmentedControl, Select, Skeleton, Slider, Spinner, Stack, Switch, Tag, Textarea, ThemeSwitcher, Toggle, TreeItem, TypingIndicator, Video
-
-**L2 Molecules** (`components/molecules/`): AlertBanner, Breadcrumb, ButtonGroup, Calendar, Card, ChatHeader, ChatInputBar, ChatMessage, Combobox, DateInput, DropdownMenu, Fieldset, FileUpload, FormField, InputGroup, Navbar, NumberInput, Pagination, Popover, ProductCard, RadioGroup, SearchBar, StatCard, Stepper, Toast, Tooltip, TreeView
-
-**L3 Organisms** (`components/organisms/`): Accordion, AreaChart, BarChart, Carousel, Chat, ColorPicker, DataTable, Datepicker, Drawer, Footer, Form, Header, Modal, PieChart, Sidebar, Tabs
-
-**L4 Templates:** none built yet (`components/templates/` does not exist).
-
-**Utility modules (not components):** `useRovingTabindex`, `useFocusTrap`, `useEscapeDismiss`, `useClickOutside` (in `components/utils/keyboard/`), ARIA helpers (`components/utils/accessibility/aria-helpers.ts`), StructuredData (`components/utils/StructuredData/`), i18n helpers (`components/utils/i18n/`), security utilities (`components/utils/security/`).
+1. **Read [components/v2/Button/](components/v2/Button/) first** — it's the reference for every rule here.
+2. **Build under `components/v2/<Name>/`** with the file set above.
+3. **Check whether a Radix primitive exists** before building anything with an a11y/keyboard/portal surface.
+4. **Style with standard semantic utilities** (`bg-primary`, `border-input`, `ring-ring`).
+5. **Use `cva` for variants, `cn()` to merge, `forwardRef` + `displayName`.**
+6. **Use `asChild` + Radix `Slot`** for polymorphic rendering.
+7. **Add semantics to `semantics.css` (both `:root` and `@theme inline`)** if a genuinely new core semantic is justified.
+8. **Add `--ext-*` tokens (own block) for brand variants**, chained to a primitive.
+9. **Write a DarkMode story** and confirm theming re-themes live.
+10. **Verify through `tsc --noEmit` + a scoped Storybook/Vite build + `npm run lint`.**
+11. **Author new v2 components via the `component-builder-v2` skill** once it's validated.
 
 ---
 
-## Priority Component Build Order
+## Key principles — in order of priority
 
-The full atom, molecule, and organism layers are built (see "Existing Components"). Remaining work:
-
-**L3 Organisms:** HeroSection
-**L4 Templates (none built yet):** DashboardLayout · AuthLayout · LandingLayout
-
----
-
-## On-Demand Audit Commands
-
-These commands can be typed at any time to trigger a targeted audit across all existing components.
-
-### "do a refactor check" / "run a quality audit"
-
-Scans all components in `components/atoms/`, `components/molecules/`, `components/organisms/`, and `components/templates/`.
-
-For each component, check:
-
-**Hooks compliance**
-- Wrapped with `memo(forwardRef(...))` for L1/L2, `memo()` for L3+
-- `displayName` set on every component
-- `useMemo` on all computed className strings
-- Static class strings hoisted to module scope
-- `useCallback` on all internally-created event handlers
-- No index-based keys in `.map()`
-
-**Utility class compliance**
-- No raw `flex-1 min-w-0` — use `.content-flex`
-- No raw `truncate` or `whitespace-nowrap` — use `.truncate-label` or `.content-nowrap`
-- No inline click-outside `useEffect` — use `useClickOutside` hook
-- No inline escape key `useEffect` — use `useEscapeDismiss` hook
-- No inline focus trap logic — use `useFocusTrap` hook
-- No raw `-webkit-line-clamp` — use `.clamp-description` or `.clamp-body`
-
-**Token compliance**
-- No hardcoded hex, px, or rem values
-- No arbitrary Tailwind values except `var(--token)` syntax
-- No primitive tokens referenced directly in component tokens
-
-Output format:
-- List each component that needs fixes with specific line-level changes
-- List components that are clean as a single `✓` line
-- End with a "Skip / Not worth fixing" section for over-engineering calls
-- Do not make any file changes — output the plan only and wait for approval
-
-### "do a reuse audit"
-
-Scans all existing components for inlined markup, styling, or logic that an already-built atom now owns.
-
-Check every existing component against the current component inventory in CLAUDE.md. Flag any case where a component is hand-rolling something an existing atom provides.
-
-Output format:
-- List each violation as: `[File] — [what is inlined] → replace with <[Atom]>`
-- If no violations found, print: `✓ Reuse audit — no violations found`
-- Do not make any file changes — output the plan only and wait for approval
-
-### "do an SEO audit"
-
-Scans all components in `components/atoms/`, `components/molecules/`, `components/organisms/`, and `components/templates/`.
-
-For each component, check:
-
-**Schema.org coverage**
-- Does a mapping exist in `.claude/skills/component-builder/references/schema-org.md`?
-- If yes: Is `schema?: boolean` declared in `[ComponentName].types.ts`?
-- If yes: Is the conditional-spread Microdata implemented in `[ComponentName].tsx`? (Check that `itemScope`/`itemType` is driven by the prop — not just declared in types)
-- If yes: Does it cascade `schema` to child components that also have schema props (including through intermediary renderers)?
-- If yes: Is the Schema.org section documented in `README.md` with type, itemProps table, and usage example?
-
-**Semantic HTML**
-- Does the component use the most semantically specific HTML element available?
-- Are all image `alt` texts non-empty for user-facing images?
-- Is link text descriptive (no "click here", "read more", "here")?
-- Are lists using `<ul>` or `<ol>`, not bare `<div>` stacks?
-- Multiple same-type landmark elements each have `aria-label` to distinguish them?
-
-Output format:
-- List each violation as: `[File:line] — [what is wrong]`
-- Clean components as: `✓ ComponentName`
-- End with a "Summary" section: total components scanned, count with violations, count clean
-- Do not make any file changes — output the plan only and wait for approval
-
-### "apply the refactor" / "apply the audit"
-
-Only run this after a refactor check, reuse audit, or SEO audit has been output and reviewed.
-Apply all fixes from the most recent audit output.
-After applying, print a summary of what was changed.
+1. **2-tier integrity** — primitive → semantic, never skip, never hardcode. No component-token tier.
+2. **Standard semantic vocabulary** — consume ShadCN/Tailwind names; only `--ext-*` for brand variants.
+3. **Radix-first** — use the primitive if it exists; don't re-roll a11y.
+4. **ShadCN component pattern** — `cva` + `cn` + `forwardRef` + `Slot`.
+5. **Theme-awareness** — every semantic works in light and dark (`@theme inline` makes overrides live).
+6. **v2 isolation** — never entangle with the frozen 3-tier code at root.
 
 ---
 
-## Key Principles — In Order of Priority
-
-1. **Design-system-first integrity** — primitive → semantic → component. Never skip. Never break.
-2. **geeklego.css is always updated first** — component tokens before component code.
-3. **5 files always** — no more, no less.
-4. **Tailwind className only** — no inline styles, no arbitrary values except `[var(--token)]` syntax.
-5. **Level hierarchy respected** — atoms import nothing, molecules import atoms only.
-6. **Typography via utility classes** — `.text-body-md` not `fontSize: '16px'`.
-7. **Theme-awareness** — every colour token must work in light and dark modes.
-
----
-
-*Project: Geeklego*
-*Type: Open-source design-system-first component library*
-*Stack: React 19 + TypeScript 5.7 + Tailwind CSS v4.2 + Storybook 10 + Vite 6*
-*Last updated: March 2026*
+*Project: GeekLego v2 — open-source, design-system-first component library*
+*Architecture: 2-tier tokens (primitives → standard ShadCN semantics) + ShadCN/Radix components*
+*Stack: React 19 + TypeScript 5.7 + Tailwind CSS v4 + Radix UI + Storybook 10 + Vite 6*
+*Reference component: `components/v2/Button/` · Governing brief: `PROTOTYPE-SHADCN-2TIER.md`*
+*Last updated: 2026-06-22*

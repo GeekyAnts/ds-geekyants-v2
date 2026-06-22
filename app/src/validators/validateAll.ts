@@ -1,5 +1,5 @@
 import type { TokenGraph } from '../graph/build'
-import type { GeeklegoTokens } from '../types'
+import type { GeeklegoTokensV2 } from '../types'
 import type { ValidatorResult } from './types'
 import { checkBrokenReferences } from './brokenRefValidator'
 import { checkCircularAliases } from './circularAliasValidator'
@@ -15,7 +15,7 @@ export interface ValidationSummary {
 }
 
 export function validateAll(
-  tokens: GeeklegoTokens,
+  tokens: GeeklegoTokensV2,
   graph: TokenGraph,
   stagedEdits: Map<string, string>
 ): ValidationSummary {

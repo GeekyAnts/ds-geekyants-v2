@@ -1,32 +1,25 @@
 // ─── IA Classification Layer ──────────────────────────────────────────────────
 // Pure functions to classify tokens from cssParser output into IA sections
 
-import { componentCatalog } from '../../../components/catalog'
-import type { 
-  ClassifiedTokens, 
-  ClassifiedCategory, 
-  NavigationNode, 
+import type {
+  ClassifiedTokens,
+  ClassifiedCategory,
+  NavigationNode,
   NavigationStructure,
   KnownComponent,
   IATopLevel,
   FoundationsSubCategory,
-  SemanticSubCategory 
+  SemanticSubCategory
 } from './classify.types.ts'
 import type { TokenMetadata } from '../state/metadata.types'
 
-// ─── Known Component List (camelCase for token matching) ────────────────────
-// Derived from the canonical catalog.ts — adding a component there
-// automatically makes the Token Editor recognize its tokens.
-
-function toCamel(pascal: string): string {
-  return pascal.charAt(0).toLowerCase() + pascal.slice(1)
-}
-
-const KNOWN_COMPONENTS: KnownComponent[] = [
-  ...componentCatalog.atoms.map(toCamel),
-  ...componentCatalog.molecules.map(toCamel),
-  ...componentCatalog.organisms.map(toCamel),
-]
+// ─── Known Component List ───────────────────────────────────────────────────
+// v2 (2-tier) has no component-token tier, so there are no component tokens to
+// classify. The old `components/catalog` source was deleted in the §7.5 cut;
+// this list is intentionally empty. The component-discovery functions below are
+// retained (as no-ops) only so their Phase-4/5 consumers keep compiling — they
+// will be removed when the component UI is stripped (rebuild-plan Phase 5).
+const KNOWN_COMPONENTS: KnownComponent[] = []
 
 // ─── Foundations Category Definitions ─────────────────────────────────────────
 
@@ -56,13 +49,33 @@ function getSemanticCategories(): {
   label: string; 
   icon?: string 
 }[] {
+  // v2 (2-tier) semantics are the flat, standard ShadCN/Tailwind vocabulary
+  // (background, primary, ring, radius, …) — NOT the old 3-tier prefixed names
+  // (surface-*, content-*, …). The classifier receives these bare keys (sans
+  // leading `--`), so each pattern anchors the exact name plus its optional
+  // `-foreground` pair. Grouping maps the core set onto the existing semantic
+  // sub-categories so routing / isRouteActive stay unchanged:
+  //   surface      → page/elevated surfaces + their foreground content
+  //   interactive  → brand/interactive fills (+ focus ring)
+  //   status       → feedback colors (destructive)
+  //   layout       → structural tokens (border, input, radius)
   return [
-    { pattern: /^surface-/, categoryId: 'surface', label: 'Surfaces', icon: 'Layout' },
-    { pattern: /^content-/, categoryId: 'content', label: 'Content', icon: 'AlignLeft' },
-    { pattern: /^interactive-/, categoryId: 'interactive', label: 'Interactive', icon: 'Zap' },
-    { pattern: /^status-/, categoryId: 'status', label: 'Status', icon: 'CircleAlert' },
-    { pattern: /^layout-/, categoryId: 'layout', label: 'Layout', icon: 'Maximize2' },
-    { pattern: /^typography-/, categoryId: 'typography-semantic', label: 'Typography', icon: 'Type' },
+    {
+      pattern: /^(background|foreground|card|card-foreground|popover|popover-foreground)$/,
+      categoryId: 'surface', label: 'Surfaces', icon: 'Layout',
+    },
+    {
+      pattern: /^(primary|primary-foreground|secondary|secondary-foreground|accent|accent-foreground|muted|muted-foreground|ring)$/,
+      categoryId: 'interactive', label: 'Interactive', icon: 'Zap',
+    },
+    {
+      pattern: /^(destructive|destructive-foreground)$/,
+      categoryId: 'status', label: 'Status', icon: 'CircleAlert',
+    },
+    {
+      pattern: /^(border|input|radius)$/,
+      categoryId: 'layout', label: 'Layout', icon: 'Maximize2',
+    },
   ]
 }
 
@@ -70,7 +83,7 @@ function getSemanticCategories(): {
 
 function getMetadataCategory(tokenName: string, metadata?: TokenMetadata): { categoryId: string; label: string; icon?: string; topLevel: string } | null {
   if (metadata?.category) {
-    const level = metadata.category === 'foundations' ? 'foundations' : metadata.category === 'semantic' ? 'semantic' : metadata.category === 'components' ? 'components' : null
+    const level = metadata.category === 'foundations' ? 'foundations' : metadata.category === 'semantic' ? 'semantic' : null
     if (level) {
       return {
         categoryId: metadata.category,
@@ -134,21 +147,6 @@ function classifyToken(tokenName: string, tokenMetadata?: TokenMetadata): Classi
     }
   }
 
-  for (const componentName of KNOWN_COMPONENTS) {
-    const componentPattern = new RegExp(`^${componentName}-`)
-    if (componentPattern.test(tokenName)) {
-      return {
-        key: `components/${componentName}`,
-        label: componentName,
-        categoryName: componentName,
-        topLevel: 'components',
-        subCategory: 'component',
-        tokens: [tokenName],
-        componentName: componentName,
-      }
-    }
-  }
-
   return null
 }
 
@@ -179,19 +177,13 @@ export function classifyTokens(
       })
     }
     categoryMap.get(classification.key)!.tokens.push(tokenName)
-
-    if (
-      classification.topLevel === 'components' &&
-      classification.componentName
-    ) {
-      discoveredComponents.add(classification.componentName)
-    }
   }
 
   return {
     foundations: Array.from(categoryMap.values()).filter(c => c.topLevel === 'foundations'),
     semantic: Array.from(categoryMap.values()).filter(c => c.topLevel === 'semantic'),
-    components: Array.from(categoryMap.values()).filter(c => c.topLevel === 'components'),
+    // v2 (2-tier) has no component-token tier — there are no 'components' tokens to classify.
+    components: [],
     uncategorized,
     componentNames: Array.from(discoveredComponents) as KnownComponent[],
   }

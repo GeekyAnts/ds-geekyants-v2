@@ -1,3 +1,5 @@
+> ⚠️ This describes the OLD 3-tier system. v2 is being rebuilt — see `PROTOTYPE-SHADCN-2TIER.md`. Ignore this file until refreshed.
+
 # AGENTS.md — Geeklego
 
 ## First Things

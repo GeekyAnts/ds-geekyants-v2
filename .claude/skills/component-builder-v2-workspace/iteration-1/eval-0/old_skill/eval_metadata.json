@@ -1,0 +1,14 @@
+{
+  "eval_id": 0,
+  "eval_name": "simple-badge-no-radix",
+  "prompt": "Add a Badge component to the library. It should support a few color variants (default, secondary, destructive, outline) and render as a small pill-shaped label. We use it to tag statuses on cards.",
+  "assertions": [
+    "Uses cva for variants in a *-variants.ts file",
+    "Uses forwardRef + displayName, NOT memo(forwardRef)",
+    "Does NOT pull in a Radix behavioral primitive (only Slot allowed)",
+    "Uses standard semantic utilities (bg-primary / bg-secondary / bg-destructive / border-input)",
+    "No hardcoded hex/px or bare arbitrary color literals",
+    "DarkMode story sets BOTH data-theme=dark and .dark",
+    "No component-token tier block (--badge-* style)"
+  ]
+}

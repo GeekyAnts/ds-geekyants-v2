@@ -9,9 +9,9 @@ interface TourStep {
 
 const TOUR_STEPS: TourStep[] = [
   {
-    title: 'Three Layers of Tokens',
+    title: 'Two Layers of Tokens',
     description:
-      'Tokens are organized into three layers in the nav rail. Foundations hold raw values. Semantics map purpose to those values. Component tokens wire semantics to specific UI components.',
+      'Tokens are organized into two layers in the nav rail. Foundations (primitives) hold raw values. Semantics map purpose to those values using the standard ShadCN/Tailwind vocabulary that components consume directly.',
     visualSlot: 'layers',
   },
   {
@@ -35,19 +35,13 @@ function LayersArt() {
         <div className="ed-tour__tier ed-tour__tier--foundations">
           <span className="ed-tour__tier-dot" />
           <span className="ed-tour__tier-label">Foundations</span>
-          <span className="ed-tour__tier-value">--color-brand-500</span>
+          <span className="ed-tour__tier-value">--color-brand-900</span>
         </div>
         <div className="ed-tour__tier-arrow">↓</div>
         <div className="ed-tour__tier ed-tour__tier--semantics">
           <span className="ed-tour__tier-dot" />
           <span className="ed-tour__tier-label">Semantics</span>
-          <span className="ed-tour__tier-value">--color-action-primary</span>
-        </div>
-        <div className="ed-tour__tier-arrow">↓</div>
-        <div className="ed-tour__tier ed-tour__tier--components">
-          <span className="ed-tour__tier-dot" />
-          <span className="ed-tour__tier-label">Components</span>
-          <span className="ed-tour__tier-value">--button-bg</span>
+          <span className="ed-tour__tier-value">--primary</span>
         </div>
       </div>
     </div>
@@ -61,22 +55,22 @@ function InspectorArt() {
         <div className="ed-tour__inspector-header">Inspector</div>
         <div className="ed-tour__inspector-row">
           <div className="ed-tour__inspector-swatch" style={{ background: '#c96442' }} />
-          <span className="ed-tour__inspector-key">--color-brand-500</span>
-          <span className="ed-tour__inspector-val">#c96442</span>
+          <span className="ed-tour__inspector-key">--color-brand-900</span>
+          <span className="ed-tour__inspector-val">#331936</span>
         </div>
         <div className="ed-tour__inspector-row ed-tour__inspector-row--selected">
-          <div className="ed-tour__inspector-swatch" style={{ background: '#2563eb' }} />
-          <span className="ed-tour__inspector-key">--color-action-primary</span>
+          <div className="ed-tour__inspector-swatch" style={{ background: '#331936' }} />
+          <span className="ed-tour__inspector-key">--primary</span>
           <span className="ed-tour__inspector-val">var(…)</span>
         </div>
         <div className="ed-tour__inspector-row">
-          <div className="ed-tour__inspector-swatch" style={{ background: '#eef1f5' }} />
-          <span className="ed-tour__inspector-key">--color-surface-default</span>
+          <div className="ed-tour__inspector-swatch" style={{ background: '#ffffff' }} />
+          <span className="ed-tour__inspector-key">--background</span>
           <span className="ed-tour__inspector-val">var(…)</span>
         </div>
         <div className="ed-tour__inspector-row">
-          <div className="ed-tour__inspector-swatch" style={{ background: '#1a1916' }} />
-          <span className="ed-tour__inspector-key">--color-content-default</span>
+          <div className="ed-tour__inspector-swatch" style={{ background: '#331936' }} />
+          <span className="ed-tour__inspector-key">--foreground</span>
           <span className="ed-tour__inspector-val">var(…)</span>
         </div>
       </div>

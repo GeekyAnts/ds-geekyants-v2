@@ -1,17 +1,8 @@
-import type { GeeklegoTokens, TypographyClass } from '../types.ts'
-
-// ─── Parser state ─────────────────────────────────────────────────────────────
-
-type ParseState =
-  | 'OUTSIDE'
-  | 'IN_THEME'
-  | 'IN_ROOT'
-  | 'IN_DARK'
-  | 'IN_SUPPORTS'
-  | 'IN_TYPO_CLASS'
-  | 'IN_MEDIA'
-  | 'IN_MEDIA_RESPONSIVE'
-  | 'DONE'
+import type {
+  GeeklegoTokensV2,
+  V2Semantics,
+} from '../types.ts'
+import { V2_SEMANTIC_KEYS } from '../types.ts'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -93,7 +84,11 @@ function collectTokens(lines: string[]): TokenEntry[] {
 
 // ─── @theme → Primitives ──────────────────────────────────────────────────────
 
-function applyThemeToken(name: string, value: string, primitives: any): void {
+function applyThemeToken(
+  name: string,
+  value: string,
+  primitives: GeeklegoTokensV2['primitives'],
+): void {
   // Colors: --color-{family}-{shade}
   const colorMatch = name.match(/^color-([\w-]+)-(\w+)$/)
   if (colorMatch) {
@@ -243,210 +238,35 @@ function applyThemeToken(name: string, value: string, primitives: any): void {
   }
 }
 
-// ─── :root/:dark → Semantics ──────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════════
+//  v2 — the flat ShadCN/2-tier cockpit parser (TOKEN-EDITOR-V2-REBUILD-PLAN Phase 2)
+//
+//  Parses the three design-system/v2 files into GeeklegoTokensV2:
+//    primitives.css → primitives (reuse the @theme machine + applyThemeToken)
+//    semantics.css  → semantics.light (canonical :root) + ext.rawBlock (opaque)
+//    themes/dark.css → semantics.dark + ext.darkOverride (opaque)
+//
+//  ⚠ Two OPPOSITE canonical polarities (the central trap):
+//    - primitives.css: @theme is canonical, the :root mirror is IGNORED here.
+//    - semantics.css:  :root is canonical, @theme inline is IGNORED (it's regenerated).
+//  applyV2SemanticToken is allowlisted to V2_SEMANTIC_KEYS so it can NEVER pick up a
+//  primitive mirror name even if the wrong block is fed to it.
+// ═══════════════════════════════════════════════════════════════════════════════
 
-function applySemanticToken(name: string, value: string, sem: any): void {
-  // Background colors: --color-bg-{suffix}
-  if (name.startsWith('color-bg-')) {
-    sem.bg[name.slice('color-bg-'.length)] = value
-    return
-  }
+const V2_KEY_SET: ReadonlySet<string> = new Set(V2_SEMANTIC_KEYS)
 
-  // Surface colors: --color-surface-{suffix}
-  if (name.startsWith('color-surface-')) {
-    sem.surface[name.slice('color-surface-'.length)] = value
-    return
-  }
+/** Marker text on the section-3 header comment that begins the --ext-* block in semantics.css. */
+const V2_EXT_HEADER_MARKER = 'CUSTOM VARIANTS'
 
-  // Text colors: --color-text-{suffix}
-  if (name.startsWith('color-text-')) {
-    sem.text[name.slice('color-text-'.length)] = value
-    return
-  }
-
-  // Border colors: --color-border-{suffix}
-  if (name.startsWith('color-border-')) {
-    sem.border[name.slice('color-border-'.length)] = value
-    return
-  }
-
-  // Action colors: --color-action-{suffix}
-  if (name.startsWith('color-action-')) {
-    sem.action[name.slice('color-action-'.length)] = value
-    return
-  }
-
-  // Status colors: --color-status-{suffix}
-  if (name.startsWith('color-status-')) {
-    sem.status[name.slice('color-status-'.length)] = value
-    return
-  }
-
-  // State colors: --color-state-{suffix}
-  if (name.startsWith('color-state-')) {
-    sem.state[name.slice('color-state-'.length)] = value
-    return
-  }
-
-  // Control thumb: --color-control-thumb (not prefixed with color-state-)
-  if (name === 'color-control-thumb') {
-    sem.colorControlThumb = value
-    return
-  }
-
-  // Ring color: --color-ring (not prefixed with color-state-)
-  if (name === 'color-ring') {
-    sem.colorRing = value
-    return
-  }
-
-  // Overlay backdrop: --color-overlay-backdrop
-  if (name === 'color-overlay-backdrop') {
-    sem.colorOverlayBackdrop = value
-    return
-  }
-
-  // Data series: --color-data-series-{n}
-  const dataSeriesMatch = name.match(/^color-data-series-(.+)$/)
-  if (dataSeriesMatch) {
-    sem.dataSeries[dataSeriesMatch[1]] = value
-    return
-  }
-
-  // Shadows: --shadow-{name}
-  if (name.startsWith('shadow-')) {
-    sem.shadows[name.slice('shadow-'.length)] = value
-    return
-  }
-
-  // Elevation opacity: --elevation-{name}-opacity → store just the name (e.g. "sm")
-  const elevationMatch = name.match(/^elevation-(.+)-opacity$/)
-  if (elevationMatch) {
-    sem.elevationOpacity[elevationMatch[1]] = parseNumeric(value)
-    return
-  }
-
-  // Spacing component: --spacing-component-{suffix}
-  if (name.startsWith('spacing-component-')) {
-    sem.spacingComponent[name.slice('spacing-component-'.length)] = value
-    return
-  }
-
-  // Spacing layout: --spacing-layout-{suffix}
-  if (name.startsWith('spacing-layout-')) {
-    sem.spacingLayout[name.slice('spacing-layout-'.length)] = value
-    return
-  }
-
-  // Size component: --size-component-{suffix}
-  if (name.startsWith('size-component-')) {
-    sem.sizeComponent[name.slice('size-component-'.length)] = value
-    return
-  }
-
-  // Icon semantic: --icon-semantic-{name}
-  if (name.startsWith('icon-semantic-')) {
-    sem.iconSemantic[name.slice('icon-semantic-'.length)] = value
-    return
-  }
-
-  // Size fixed: --size-fixed-{n}
-  if (name.startsWith('size-fixed-')) {
-    sem.sizeFixed[name.slice('size-fixed-'.length)] = value
-    return
-  }
-
-  // Radius component: --radius-component-{suffix}
-  if (name.startsWith('radius-component-')) {
-    sem.radiusComponent[name.slice('radius-component-'.length)] = value
-    return
-  }
-
-  // Duration (semantic — in :root): --duration-{suffix}
-  if (name.startsWith('duration-')) {
-    if (!sem.motion.duration) sem.motion.duration = {}
-    sem.motion.duration[name.slice('duration-'.length)] = value
-    return
-  }
-
-  // Ease (semantic — in :root): --ease-{suffix}
-  if (name.startsWith('ease-')) {
-    if (!sem.motion.easing) sem.motion.easing = {}
-    sem.motion.easing[name.slice('ease-'.length)] = value
-    return
-  }
-
-  // Layer: --layer-{name}
-  if (name.startsWith('layer-')) {
-    sem.layer[name.slice('layer-'.length)] = value
-    return
-  }
-
-  // Borders: --border-{name} (semantic border shorthands)
-  if (name.startsWith('border-')) {
-    sem.borders[name.slice('border-'.length)] = value
-    return
-  }
-
-  // Content flexibility: --content-{suffix}
-  if (name.startsWith('content-')) {
-    sem.contentFlexibility[name.slice('content-'.length)] = value
-    return
-  }
-
-  // Typography semantics: --typography-{style}-{property}
-  // style may contain hyphens (e.g. "display-hero", "heading-h1", "body-lg")
-  // property is always the last segment: "size", "weight", "leading", "tracking"
-  if (name.startsWith('typography-')) {
-    const rest = name.slice('typography-'.length)
-    // The property is the last hyphen-delimited segment
-    const lastDash = rest.lastIndexOf('-')
-    if (lastDash > 0) {
-      const style = rest.slice(0, lastDash)
-      const prop = rest.slice(lastDash + 1)
-      if (!sem.typographySemantics[style]) sem.typographySemantics[style] = {}
-      sem.typographySemantics[style][prop] = value
-    }
-    return
-  }
-}
-
-// ─── Typography class parser ──────────────────────────────────────────────────
-
-interface TypoClassAccumulator {
-  name: string
-  lines: string[]
-}
-
-function parseTypoClass(acc: TypoClassAccumulator): TypographyClass | null {
-  const props: Record<string, string> = {}
-  for (const line of acc.lines) {
-    const trimmed = line.trim()
-    const m = trimmed.match(/^([\w-]+):\s*(.+?);?\s*$/)
-    if (!m) continue
-    const [, prop, val] = m
-    props[prop] = val.trim().replace(/;$/, '')
-  }
-  if (!props['font-size'] || !props['font-weight'] || !props['line-height'] || !props['letter-spacing']) {
-    return null
-  }
+/**
+ * Build a fresh, empty primitives accumulator — same shape applyThemeToken expects.
+ */
+function emptyV2Primitives(): GeeklegoTokensV2['primitives'] {
   return {
-    name: acc.name,
-    fontFamily: props['font-family'] ?? '',
-    fontSize: props['font-size'],
-    fontWeight: props['font-weight'],
-    lineHeight: props['line-height'],
-    letterSpacing: props['letter-spacing'],
-    ...(props['text-transform'] ? { textTransform: props['text-transform'] } : {}),
-  }
-}
-
-// ─── Main parser ──────────────────────────────────────────────────────────────
-
-export function parseGeeklegoCss(cssText: string): GeeklegoTokens {
-  // ── Initialize output structure ──────────────────────────────────────────────
-  const primitives: any = {
-    colors: {},
+    // Color families are added during parse (applyThemeToken seeds each
+    // family on first sight via the PrimitiveColors index signature), so the
+    // accumulator legitimately starts with none of the required families.
+    colors: {} as GeeklegoTokensV2['primitives']['colors'],
     fontFamily: {},
     fontSize: {},
     fontWeight: {},
@@ -465,319 +285,167 @@ export function parseGeeklegoCss(cssText: string): GeeklegoTokens {
     breakpoints: {},
     contentFlexibility: { lineClamp: {}, maxWidth: {}, minWidth: {} },
   }
+}
 
-  const semLight: any = {
-    bg: {},
-    surface: {},
-    text: {},
-    border: {},
-    action: {},
-    status: {},
-    state: {},
-    dataSeries: {},
-    shadows: {},
-    elevationOpacity: {},
-    spacingComponent: {},
-    spacingLayout: {},
-    sizeComponent: {},
-    iconSemantic: {},
-    sizeFixed: {},
-    radiusComponent: {},
-    motion: { duration: {}, easing: {} },
-    layer: {},
-    borders: {},
-    colorControlThumb: '',
-    colorRing: '',
-    contentFlexibility: {},
-    colorOverlayBackdrop: '',
-    typographySemantics: {},
+/**
+ * Apply a single semantic alias into a flat V2Semantics map — STRICTLY allowlisted.
+ * Anything not in V2_SEMANTIC_KEYS is a no-op (so primitive mirror names, --color-*
+ * registrations, and --ext-* tokens are all silently ignored). This is the guard that
+ * makes feeding any :root block safe.
+ */
+function applyV2SemanticToken(name: string, value: string, sem: V2Semantics): void {
+  if (V2_KEY_SET.has(name)) {
+    sem[name] = value
   }
+}
 
-  const semDark: any = {
-    bg: {},
-    surface: {},
-    text: {},
-    border: {},
-    action: {},
-    status: {},
-    state: {},
-    dataSeries: {},
-    shadows: {},
-    elevationOpacity: {},
-    spacingComponent: {},
-    spacingLayout: {},
-    sizeComponent: {},
-    iconSemantic: {},
-    sizeFixed: {},
-    radiusComponent: {},
-    motion: { duration: {}, easing: {} },
-    layer: {},
-    borders: {},
-    colorControlThumb: '',
-    colorRing: '',
-    contentFlexibility: {},
-    colorOverlayBackdrop: '',
-    typographySemantics: {},
-  }
-
-  const typographyClasses: TypographyClass[] = []
-
-  // ── State machine ────────────────────────────────────────────────────────────
-  let state: ParseState = 'OUTSIDE'
-
-  // Lines accumulated for current block
-  let blockLines: string[] = []
-
-  // Brace depth tracking (relative to block entry)
-  let braceDepth = 0
-
-  // For IN_TYPO_CLASS — name of current class
-  let currentTypoName = ''
-  let typoClassLines: string[] = []
-
-  // For IN_MEDIA_RESPONSIVE — responsive spacing override accumulation
-  let currentMediaMaxWidth = ''
-  let mediaTokenLines: string[] = []
-  const responsiveOverrides: Array<{ maxWidth: string; spacingLayout: Record<string, string> }> = []
-
-  // For detecting :root block that spans two lines (`:root,` then `[data-theme="light"] {`)
-  let sawRootComma = false
-
+/**
+ * Extract the body lines of the FIRST top-level block whose selector matches `predicate`.
+ * The selector may span multiple lines before its `{` (e.g. `[data-theme="dark"],\n.dark {`):
+ * once `predicate` matches an opening line we wait for the `{` (consuming any intervening
+ * selector lines), then collect brace-depth-aware body lines strictly between `{` and its
+ * matching `}` (not including either). Returns null if no matching block is found.
+ */
+function extractBlockBody(
+  cssText: string,
+  predicate: (openingLine: string) => boolean,
+): string[] | null {
   const lines = cssText.split('\n')
+  let matchedSelector = false
+  let inBody = false
+  let depth = 0
+  const body: string[] = []
 
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i]
+  for (const line of lines) {
     const trimmed = line.trim()
-
-    // ── Stop at generated component tokens marker ──────────────────────────────
-    if (trimmed.includes('GENERATED COMPONENT TOKENS')) {
-      state = 'DONE'
-      break
+    if (!matchedSelector) {
+      if (predicate(trimmed)) matchedSelector = true
+      else continue
     }
-
-    if ((state as string) === 'DONE') break
-
-    // ── Count braces in this line ──────────────────────────────────────────────
-    const openCount = (line.match(/\{/g) ?? []).length
-    const closeCount = (line.match(/\}/g) ?? []).length
-
-    // ── OUTSIDE: look for block starters ──────────────────────────────────────
-    if (state === 'OUTSIDE') {
-      // Check for :root (possible two-line form)
-      if (trimmed === ':root,' || trimmed === ':root, [data-theme="light"] {' || trimmed.startsWith(':root,')) {
-        sawRootComma = true
-        if (trimmed.includes('{')) {
-          // Single-line form
-          state = 'IN_ROOT'
-          braceDepth = 1
-          sawRootComma = false
-          blockLines = []
-        }
-        continue
-      }
-
-      if (sawRootComma) {
-        if (trimmed.startsWith('[data-theme="light"]') && trimmed.includes('{')) {
-          state = 'IN_ROOT'
-          braceDepth = 1
-          sawRootComma = false
-          blockLines = []
-          continue
-        }
-        // Some other line — reset
-        sawRootComma = false
-      }
-
-      // @theme {
-      if (trimmed === '@theme {' || trimmed.startsWith('@theme {')) {
-        state = 'IN_THEME'
-        braceDepth = openCount - closeCount
-        blockLines = []
-        continue
-      }
-
-      // [data-theme="dark"] {
-      if (trimmed.startsWith('[data-theme="dark"]') && trimmed.includes('{')) {
-        state = 'IN_DARK'
-        braceDepth = 1
-        blockLines = []
-        continue
-      }
-
-      // @supports { } — skip
-      if (trimmed.startsWith('@supports')) {
-        state = 'IN_SUPPORTS'
-        braceDepth = openCount - closeCount
-        if (braceDepth <= 0) state = 'OUTSIDE'
-        continue
-      }
-
-      // @media — capture max-width blocks for responsive overrides; skip everything else
-      if (trimmed.startsWith('@media')) {
-        const mwMatch = trimmed.match(/@media\s*\(\s*max-width:\s*([^)]+)\s*\)/)
-        if (mwMatch) {
-          state = 'IN_MEDIA_RESPONSIVE'
-          currentMediaMaxWidth = mwMatch[1].trim()
-          mediaTokenLines = []
-        } else {
-          state = 'IN_MEDIA'
-        }
-        braceDepth = openCount - closeCount
-        if (braceDepth <= 0) state = 'OUTSIDE'
-        continue
-      }
-
-      // Typography class: .text-{name} { — but NOT -responsive
-      const typoMatch = trimmed.match(/^\.(text-[\w-]+)\s*\{/)
-      if (typoMatch) {
-        const className = typoMatch[1]
-        if (!className.endsWith('-responsive')) {
-          state = 'IN_TYPO_CLASS'
-          currentTypoName = className  // keep full name e.g. "text-display-hero"
-          typoClassLines = []
-          braceDepth = 1
-          // Capture any inline content on the same line after `{`
-          const afterBrace = trimmed.slice(trimmed.indexOf('{') + 1).trim()
-          if (afterBrace && afterBrace !== '}') typoClassLines.push(afterBrace)
-          if (afterBrace === '}' || trimmed.endsWith('}')) {
-            // Single-line class — parse immediately
-            const cls = parseTypoClass({ name: currentTypoName, lines: typoClassLines })
-            if (cls) typographyClasses.push(cls)
-            state = 'OUTSIDE'
-          }
-        }
-        continue
-      }
-
+    if (!inBody) {
+      // Selector matched; wait for the `{` (it may be on this or a later selector line).
+      if (!line.includes('{')) continue
+      inBody = true
+      depth = (line.match(/\{/g) ?? []).length - (line.match(/\}/g) ?? []).length
+      if (depth <= 0) return body // single-line empty block
       continue
     }
+    const open = (line.match(/\{/g) ?? []).length
+    const close = (line.match(/\}/g) ?? []).length
+    depth += open - close
+    if (depth <= 0) return body // matching close reached
+    body.push(line)
+  }
+  return inBody ? body : null
+}
 
-    // ── IN_THEME ──────────────────────────────────────────────────────────────
-    if (state === 'IN_THEME') {
-      braceDepth += openCount - closeCount
-      if (braceDepth <= 0) {
-        // End of @theme block — process accumulated lines
-        const tokens = collectTokens(blockLines)
-        for (const { name, value } of tokens) {
-          applyThemeToken(name, value, primitives)
-        }
-        state = 'OUTSIDE'
-        blockLines = []
-        continue
-      }
-      blockLines.push(line)
-      continue
-    }
-
-    // ── IN_ROOT ───────────────────────────────────────────────────────────────
-    if (state === 'IN_ROOT') {
-      braceDepth += openCount - closeCount
-      if (braceDepth <= 0) {
-        const tokens = collectTokens(blockLines)
-        for (const { name, value } of tokens) {
-          applySemanticToken(name, value, semLight)
-        }
-        state = 'OUTSIDE'
-        blockLines = []
-        continue
-      }
-      blockLines.push(line)
-      continue
-    }
-
-    // ── IN_DARK ───────────────────────────────────────────────────────────────
-    if (state === 'IN_DARK') {
-      braceDepth += openCount - closeCount
-      if (braceDepth <= 0) {
-        const tokens = collectTokens(blockLines)
-        for (const { name, value } of tokens) {
-          applySemanticToken(name, value, semDark)
-        }
-        state = 'OUTSIDE'
-        blockLines = []
-        continue
-      }
-      blockLines.push(line)
-      continue
-    }
-
-    // ── IN_SUPPORTS ───────────────────────────────────────────────────────────
-    if (state === 'IN_SUPPORTS') {
-      braceDepth += openCount - closeCount
-      if (braceDepth <= 0) state = 'OUTSIDE'
-      continue
-    }
-
-    // ── IN_MEDIA ──────────────────────────────────────────────────────────────
-    if (state === 'IN_MEDIA') {
-      braceDepth += openCount - closeCount
-      if (braceDepth <= 0) state = 'OUTSIDE'
-      continue
-    }
-
-    // ── IN_MEDIA_RESPONSIVE ───────────────────────────────────────────────────
-    if (state === 'IN_MEDIA_RESPONSIVE') {
-      braceDepth += openCount - closeCount
-      if (braceDepth <= 0) {
-        // Extract --spacing-layout-* tokens from the accumulated lines
-        const entries = collectTokens(mediaTokenLines)
-        const spacingLayout: Record<string, string> = {}
-        for (const { name, value } of entries) {
-          if (name.startsWith('spacing-layout-')) {
-            spacingLayout[name.slice('spacing-layout-'.length)] = value
-          }
-        }
-        if (Object.keys(spacingLayout).length > 0) {
-          responsiveOverrides.push({ maxWidth: currentMediaMaxWidth, spacingLayout })
-        }
-        state = 'OUTSIDE'
-        mediaTokenLines = []
-        currentMediaMaxWidth = ''
-      } else {
-        mediaTokenLines.push(line)
-      }
-      continue
-    }
-
-    // ── IN_TYPO_CLASS ─────────────────────────────────────────────────────────
-    if (state === 'IN_TYPO_CLASS') {
-      braceDepth += openCount - closeCount
-      if (braceDepth <= 0) {
-        // End of class body
-        const cls = parseTypoClass({ name: currentTypoName, lines: typoClassLines })
-        if (cls) typographyClasses.push(cls)
-        state = 'OUTSIDE'
-        typoClassLines = []
-        currentTypoName = ''
-        continue
-      }
-      typoClassLines.push(line)
-      continue
+/**
+ * Parse primitives.css → primitives. Runs the existing @theme machine via the main
+ * parser shape, keeping ONLY the @theme result (the :root mirror is intentionally
+ * ignored — @theme is canonical for primitives).
+ */
+export function parseV2Primitives(css: string): GeeklegoTokensV2['primitives'] {
+  const primitives = emptyV2Primitives()
+  const themeBody = extractBlockBody(css, (l) => l === '@theme {' || l.startsWith('@theme {'))
+  if (themeBody) {
+    for (const { name, value } of collectTokens(themeBody)) {
+      applyThemeToken(name, value, primitives)
     }
   }
+  return primitives
+}
 
-  // ── Trim empty dark semantics groups ─────────────────────────────────────────
-  // Only keep groups that actually have values
-  const darkCleaned: any = {}
-  for (const [key, val] of Object.entries(semDark)) {
-    if (typeof val === 'object' && val !== null && !Array.isArray(val)) {
-      if (Object.keys(val as object).length > 0) {
-        darkCleaned[key] = val
-      }
-    } else if (typeof val === 'string' && (val as string).length > 0) {
-      darkCleaned[key] = val
-    } else if (typeof val === 'number') {
-      darkCleaned[key] = val
-    }
+/**
+ * Split semantics.css into [coreCss, extBlock]. The --ext-* block starts at the
+ * section-3 header comment (the `CUSTOM VARIANTS` marker line); everything from that
+ * line to EOF is captured verbatim as the opaque ext.rawBlock. If no marker is present,
+ * extBlock is '' and the whole file is treated as core.
+ */
+function splitV2SemanticsExt(css: string): { coreCss: string; extBlock: string } {
+  const lines = css.split('\n')
+  // Prefer the header comment marker; fall back to the first `--ext-` declaration.
+  let extStart = lines.findIndex((l) => l.includes(V2_EXT_HEADER_MARKER))
+  if (extStart === -1) {
+    extStart = lines.findIndex((l) => l.trim().startsWith('--ext-'))
   }
-
+  if (extStart === -1) return { coreCss: css, extBlock: '' }
+  // The marker often sits on the MIDDLE line of a multi-line comment whose `/*` opener is
+  // on a preceding line (and is not itself closed before the marker). Rewind to that
+  // opener so the captured block carries a well-formed comment — otherwise the generated
+  // file would emit a dangling comment body with no `/*`.
+  let blockStart = extStart
+  for (let i = extStart - 1; i >= 0; i--) {
+    const t = lines[i].trim()
+    if (t === '') continue // skip blank separator lines, keep looking
+    if (t.startsWith('/*') && !t.includes('*/')) {
+      blockStart = i // an OPEN (unterminated-on-this-line) comment — the header opener
+    }
+    break // first non-blank line above: either we found the opener, or it's unrelated
+  }
   return {
-    primitives: primitives as any,
-    semantics: {
-      light: semLight as any,
-      dark: darkCleaned as any,
-    },
-    typographyClasses,
-    responsiveOverrides,
-  } as GeeklegoTokens
+    coreCss: lines.slice(0, blockStart).join('\n'),
+    extBlock: lines.slice(blockStart).join('\n').replace(/\s+$/, '') + '\n',
+  }
+}
+
+/**
+ * Parse semantics.css → { light, extBlock }.
+ *  - light: the FIRST `:root {}` (canonical light semantics), allowlisted.
+ *  - extBlock: the opaque --ext-* section, captured verbatim.
+ * The `@theme inline {}` registration is ignored (it's a derived mirror, regenerated).
+ */
+export function parseV2Semantics(css: string): { light: V2Semantics; extBlock: string } {
+  const { coreCss, extBlock } = splitV2SemanticsExt(css)
+  const light: V2Semantics = {}
+  // Only the core region's first :root is canonical. (extBlock also has a :root, but it
+  // lives past the split boundary, so it's never seen here — and would no-op anyway.)
+  const rootBody = extractBlockBody(coreCss, (l) => l === ':root {' || l.startsWith(':root {'))
+  if (rootBody) {
+    for (const { name, value } of collectTokens(rootBody)) {
+      applyV2SemanticToken(name, value, light)
+    }
+  }
+  return { light, extBlock }
+}
+
+/**
+ * Parse themes/dark.css → { dark, darkOverride }.
+ *  - dark: core semantic overrides from the `[data-theme="dark"], .dark {}` block.
+ *  - darkOverride: any --ext-* override lines interleaved in that same block, captured
+ *    verbatim (each on its own line) for opaque passthrough.
+ */
+export function parseV2Dark(css: string): { dark: V2Semantics; darkOverride: string } {
+  const dark: V2Semantics = {}
+  const extLines: string[] = []
+  // The dark block opens with `[data-theme="dark"],` then `.dark {` — match either the
+  // combined single-line form or the first selector line; brace-tracking handles the rest.
+  const body = extractBlockBody(css, (l) => l.startsWith('[data-theme="dark"]'))
+  if (body) {
+    for (const { name, value } of collectTokens(body)) {
+      if (name.startsWith('ext-')) {
+        extLines.push(`  --${name}: ${value};`)
+      } else {
+        applyV2SemanticToken(name, value, dark)
+      }
+    }
+  }
+  return { dark, darkOverride: extLines.join('\n') }
+}
+
+/**
+ * Orchestrator — parse the three v2 files into one GeeklegoTokensV2.
+ */
+export function parseGeeklegoV2(
+  primCss: string,
+  semCss: string,
+  darkCss: string,
+): GeeklegoTokensV2 {
+  const primitives = parseV2Primitives(primCss)
+  const { light, extBlock } = parseV2Semantics(semCss)
+  const { dark, darkOverride } = parseV2Dark(darkCss)
+  return {
+    primitives,
+    semantics: { light, dark },
+    ext: { rawBlock: extBlock, darkOverride },
+  }
 }

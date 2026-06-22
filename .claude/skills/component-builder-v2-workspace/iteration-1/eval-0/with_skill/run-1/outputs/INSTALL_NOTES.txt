@@ -1,0 +1,11 @@
+No package installation required.
+
+The only external dependency Badge uses is @radix-ui/react-slot (for asChild
+polymorphism), which is already installed in the repo (it powers the Button
+reference component's asChild). No Radix behavioral primitive is needed for a
+Badge — it is static, presentational, pill-shaped markup with no a11y/keyboard/
+portal surface (per references/radix-primitive-map.md, Badge is listed under
+"When Radix does NOT apply").
+
+class-variance-authority, clsx, and tailwind-merge are also already present (used
+by every v2 component via components/v2/lib/cn.ts).

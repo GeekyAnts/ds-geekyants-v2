@@ -1,0 +1,1 @@
+No package install required. Badge is pure presentation (cva + cn + forwardRef); the only dependency it uses is @radix-ui/react-slot (for asChild), which CLAUDE.md states is already installed. No new Radix behavioral primitive was needed, so no `pnpm add @radix-ui/react-*` command was run.

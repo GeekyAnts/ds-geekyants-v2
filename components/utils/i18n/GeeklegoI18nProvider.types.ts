@@ -52,9 +52,9 @@ export interface DropdownMenuI18nStrings {
   defaultMenuLabel?: string;
 }
 
-export interface FormFieldI18nStrings extends LabelI18nStrings {
-  // Extends Label i18n for required/optional indicators
-}
+// Alias of Label i18n for required/optional indicators — no extra members,
+// so a type alias (not an empty extending interface) expresses the intent.
+export type FormFieldI18nStrings = LabelI18nStrings;
 
 export interface FormI18nStrings {
   /** Accessible label for the form element. Default: "Form" */

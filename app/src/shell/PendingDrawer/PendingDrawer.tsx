@@ -9,9 +9,9 @@ import { withPxAnnotation } from '../../utils/colorUtils'
 import { buildTokenGraph, type TokenGraph } from '../../graph/build'
 import { ImpactSummary } from './ImpactSummary'
 import { EdButton, EdChip, EdScrollArea } from '../../editor-ds/primitives'
-import type { GeeklegoTokens, ComponentTokenGroup } from '../../types'
+import type { GeeklegoTokensV2 } from '../../types'
 
-function buildTokenMap(tokens: GeeklegoTokens): Map<string, string> {
+function buildTokenMap(tokens: GeeklegoTokensV2): Map<string, string> {
   const map = new Map<string, string>()
 
   for (const [key, value] of Object.entries(tokens.primitives.colors)) {
@@ -38,18 +38,9 @@ function buildTokenMap(tokens: GeeklegoTokens): Map<string, string> {
     }
   }
 
-  return map
-}
-
-function buildComponentTokenMap(componentGroups: ComponentTokenGroup[]): Map<string, string> {
-  const map = new Map<string, string>()
-
-  for (const group of componentGroups) {
-    for (const section of group.sections) {
-      for (const token of section.tokens) {
-        map.set(token.name, token.value)
-      }
-    }
+  // Flat v2 semantics — CSS var for a key is `--<key>`
+  for (const [k, v] of Object.entries(tokens.semantics.light)) {
+    map.set(`--${k}`, v)
   }
 
   return map
@@ -59,8 +50,7 @@ interface PendingDrawerProps {
   visible: boolean
   onToggle: () => void
   pendingCount: number
-  tokens: GeeklegoTokens
-  componentGroups: ComponentTokenGroup[]
+  tokens: GeeklegoTokensV2
   onOpenExport?: () => void
 }
 
@@ -69,17 +59,11 @@ export function PendingDrawer({
   onToggle,
   pendingCount,
   tokens,
-  componentGroups,
   onOpenExport,
 }: PendingDrawerProps) {
   const [expanded, setExpanded] = useState(pendingCount > 0)
   const [pendingVersion, setPendingVersion] = useState(0)
-  const [tokenMap] = useState(() => {
-    const tm = buildTokenMap(tokens)
-    const ctmm = buildComponentTokenMap(componentGroups)
-    for (const [n, v] of ctmm) tm.set(n, v)
-    return tm
-  })
+  const [tokenMap] = useState(() => buildTokenMap(tokens))
   const [graph, setGraph] = useState<TokenGraph | null>(null)
   const [selectedToken, setSelectedToken] = useState<string | null>(null)
 

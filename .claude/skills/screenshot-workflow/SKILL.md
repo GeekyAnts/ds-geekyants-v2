@@ -4,12 +4,14 @@
 
 This skill automates visual verification of Geeklego components by capturing screenshots from Storybook via Playwright, analyzing them for design issues, and iterating until the component looks production-grade.
 
-**When to use this skill:** After creating or modifying any component, after changing design tokens, or whenever visual verification is needed. Use it as part of Phase 3 (Verification) of the component-builder skill, or standalone when debugging visual issues.
+**When to use this skill:** After creating or modifying any component, after changing design tokens, or whenever visual verification is needed. Use it as part of Phase 4 (Verify) of the `component-builder-v2` skill, or standalone when debugging visual issues.
 
 **Prerequisites:**
 - Playwright is installed (`playwright` in devDependencies)
-- Storybook is configured (`.storybook/`)
-- Components have the standard 7-story structure
+- Storybook is configured (`.storybook/`, globbed to `components/v2/**`)
+- Component has v2 stories (`Default`, `Variants`, `Sizes`, states, each `--ext-*` variant,
+  `asChild` if applicable, `DarkMode`) — see `components/v2/Button/Button.stories.tsx`. There is
+  no fixed story count; cover what the component has.
 
 ---
 
@@ -63,15 +65,16 @@ for s in stories:
 "
 ```
 
-The standard 7 stories for each Geeklego component are:
-- `<level>-<name>--default`
-- `<level>-<name>--variants`
-- `<level>-<name>--sizes`
-- `<level>-<name>--states`
-- `<level>-<name>--dark-mode`
-- `<level>-<name>--playground`
+v2 story IDs are derived from the `title: "v2/<Name>"` meta, so they are prefixed `v2-<name>--`:
+- `v2-<name>--default`
+- `v2-<name>--variants`
+- `v2-<name>--sizes`
+- `v2-<name>--disabled` (or other state stories)
+- `v2-<name>--dark-mode`
 
-Plus any additional custom stories (e.g., `--with-avatar`, `--with-icons`).
+Plus any custom variant stories (e.g. `--gamified` for the Button `--ext-*` canary) and
+`--as-child-link` where applicable. The set is per-component — discover it from `index.json`
+rather than assuming a fixed count.
 
 ---
 
@@ -162,13 +165,12 @@ Read each screenshot using the Read tool and check for these issues:
 
 | Symptom | Likely Cause | Fix |
 |---------|-------------|-----|
-| Invisible text on dark bg | Token resolving to same shade | Check `--color-text-*` dark mode overrides |
-| No visible border on outlined | Border color too subtle or transparent | Check `--item-outlined-border` token |
-| Shadow invisible in dark | Shadow color too light for dark bg | May need split theme selector |
-| Huge gap between title/desc | Content gap token too large | Reduce `--item-content-gap` |
-| Component too narrow/short | Min-height or padding tokens | Check size tokens |
-| Typography same weight | Using body instead of label class | Use `text-label-*` for titles |
-| Variants look identical | Same visual strategy | Ensure different bg/border/shadow approaches |
+| Invisible text on dark bg | Semantic resolving to same shade | Check the dark overrides in `design-system/v2/themes/dark.css` (`--foreground`, `--muted-foreground`) |
+| No visible border on outline variant | `--border`/`--input` too subtle | Check `--border` / `--input` semantic (and its dark override) |
+| Shadow invisible in dark | Shadow color too light for dark bg | Adjust the `--ext-*` shadow token or its dark override |
+| Component too narrow/short | Wrong size class | Check the `size` variant classes in `<name>-variants.ts` |
+| Variants look identical | Same visual strategy | Ensure variants use distinct semantics (`bg-primary` vs `bg-secondary` vs `border-input`) |
+| Custom variant unthemed | `--ext-*` token wrong | Check the `--ext-<component>-<variant>-*` block in `design-system/v2/semantics.css` |
 
 ---
 
@@ -176,8 +178,10 @@ Read each screenshot using the Read tool and check for these issues:
 
 When issues are found:
 
-1. **Token issues** → Edit `design-system/geeklego.css`
-2. **Class/layout issues** → Edit the component `.tsx` file
+1. **Semantic/theme issues** → Edit `design-system/v2/semantics.css` (semantics + `--ext-*`) or
+   `design-system/v2/themes/dark.css` (dark overrides). Never edit the stale 3-tier
+   `design-system/geeklego.css`.
+2. **Variant/class issues** → Edit the component `<name>-variants.ts` (or `.tsx`) file
 3. **Story issues** → Edit the `.stories.tsx` file
 
 After fixing, proceed to Step 6.
@@ -227,11 +231,13 @@ Use these viewport sizes based on what you're capturing:
 
 ## Integration with Component Builder
 
-When used as part of the component-builder skill's Phase 3:
+When used as part of the **`component-builder-v2`** skill's Phase 4 (Verify):
 
-1. After writing all 5 component files, run this screenshot workflow
-2. Capture all 7+ standard stories
-3. Analyze against the design quality checklist
+1. After writing the v2 component files (`<Name>.tsx`, `.types.ts`, `<name>-variants.ts`,
+   `.stories.tsx`), run this screenshot workflow
+2. Capture all of the component's `v2-<name>--*` stories (discover them from `index.json`)
+3. Analyze against the design quality checklist — in particular confirm the semantic chain
+   themes correctly in `DarkMode` (both `data-theme="dark"` and `.dark`)
 4. Fix any issues found before presenting the component as complete
 
 This replaces the manual "eyeball check" in the verification checklist with automated visual capture and AI analysis.

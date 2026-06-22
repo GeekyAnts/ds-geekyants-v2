@@ -7,7 +7,6 @@ import type { KnownComponent } from '../ia/classify.types.ts'
 export type RoutePath =
   | { type: 'foundations'; category: string }
   | { type: 'semantic'; category: string }
-  | { type: 'components'; componentName: KnownComponent }
   | { type: 'token'; tokenName: string }
   | { type: 'home' }
 
@@ -17,7 +16,6 @@ export const ROUTES = {
   // Section routes
   foundations: '/foundations',
   semantic: '/semantic',
-  components: '/components',
 
   // Home
   home: '/',
@@ -27,7 +25,6 @@ export const ROUTES = {
 
 const FOUNDATIONS_CATEGORY_PATTERN = /^\/foundations\/([a-zA-Z0-9_-]+)$/
 const SEMANTIC_CATEGORY_PATTERN = /^\/semantic\/([a-zA-Z0-9_-]+)$/
-const COMPONENTS_PATTERN = /^\/components\/([a-zA-Z0-9_-]+)$/
 const TOKEN_PATTERN = /^\/token\/(.+)$/
 
 // ─── Path Helpers ─────────────────────────────────────────────────────────────
@@ -43,8 +40,6 @@ export function buildRoute(path: RoutePath): string {
       return `#/foundations/${path.category}`
     case 'semantic':
       return `#/semantic/${path.category}`
-    case 'components':
-      return `#/components/${path.componentName}`
     case 'token':
       return `#/token/${encodeURIComponent(path.tokenName)}`
   }
@@ -71,12 +66,6 @@ export function parseRoute(hash: string): RoutePath {
   const semanticMatch = cleanHash.match(SEMANTIC_CATEGORY_PATTERN)
   if (semanticMatch) {
     return { type: 'semantic', category: semanticMatch[1] }
-  }
-
-  // Match components
-  const componentsMatch = cleanHash.match(COMPONENTS_PATTERN)
-  if (componentsMatch) {
-    return { type: 'components', componentName: componentsMatch[1] as KnownComponent }
   }
 
   // Match individual token
@@ -133,7 +122,10 @@ export function registerRouteComponent<T extends keyof RouteComponents>(
   key: T,
   component: RouteComponents[T]
 ): void {
-  routeComponents[key] = component as any
+  // Generic indexed write: TS can't prove the union value type accepts a
+  // single-branch RouteComponents[T]. The assignment is sound at runtime —
+  // narrow the target slot rather than widening `component` to `any`.
+  ;(routeComponents as Record<T, RouteComponents[T]>)[key] = component
 }
 
 /**
@@ -163,13 +155,6 @@ export function foundationsUrl(category: string): string {
  */
 export function semanticUrl(category: string): string {
   return buildRoute({ type: 'semantic', category })
-}
-
-/**
- * Build URL for component page
- */
-export function componentUrl(componentName: KnownComponent): string {
-  return buildRoute({ type: 'components', componentName })
 }
 
 /**

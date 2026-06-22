@@ -42,106 +42,76 @@ export interface Primitives {
   contentFlexibility: ContentFlexibilityPrimitives
 }
 
-// ─── Semantics ───────────────────────────────────────────────────────────────
+// ─── v2 flat ShadCN semantic model ─────────────────────────────────────────────
+// The 2-tier cockpit model. Tier 2 is the flat ShadCN/Tailwind standard vocabulary
+// (primitive → semantic). The editor reads/writes
+// design-system/v2/{primitives,semantics,themes/dark}.css against this shape.
+//
+// NOTE (Phase 5 done): the old 3-tier model (GeeklegoTokens, SemanticBlock,
+// ComponentToken*, TypographyMapping, ResponsiveOverride, TypographyClass) has been
+// removed now that no consumer references it. Only the v2 flat model below remains.
 
-export interface SemanticColorGroup {
-  [tokenSuffix: string]: string
+/** The standard ShadCN/Tailwind core semantic keys (excludes the namespaced --ext-* set). */
+export type V2SemanticKey =
+  | 'background' | 'foreground'
+  | 'primary' | 'primary-foreground'
+  | 'secondary' | 'secondary-foreground'
+  | 'muted' | 'muted-foreground'
+  | 'accent' | 'accent-foreground'
+  | 'destructive' | 'destructive-foreground'
+  | 'border' | 'input' | 'ring'
+  | 'card' | 'card-foreground'
+  | 'popover' | 'popover-foreground'
+  | 'radius'
+
+/** The complete allowlist of v2 core semantic keys (the only names applyV2SemanticToken accepts). */
+export const V2_SEMANTIC_KEYS: readonly V2SemanticKey[] = [
+  'background', 'foreground',
+  'primary', 'primary-foreground',
+  'secondary', 'secondary-foreground',
+  'muted', 'muted-foreground',
+  'accent', 'accent-foreground',
+  'destructive', 'destructive-foreground',
+  'border', 'input', 'ring',
+  'card', 'card-foreground',
+  'popover', 'popover-foreground',
+  'radius',
+] as const
+
+/**
+ * A flat semantic alias map: semantic key → value (typically `var(--color-…)` chaining a primitive).
+ * Keyed by string (not V2SemanticKey) so a forward-compatible extra semantic round-trips;
+ * the allowlist is enforced at the parser/apply layer, not the type.
+ */
+export interface V2Semantics {
+  [key: string]: string
 }
 
-export interface SemanticBlock {
-  bg: SemanticColorGroup
-  surface: SemanticColorGroup
-  text: SemanticColorGroup
-  border: SemanticColorGroup
-  action: SemanticColorGroup
-  status: SemanticColorGroup
-  state: SemanticColorGroup
-  dataSeries: Record<string, string>
-  shadows: Record<string, string>
-  elevationOpacity: Record<string, number>
-  spacingComponent: Record<string, string>
-  spacingLayout: Record<string, string>
-  sizeComponent: Record<string, string>
-  radiusComponent: Record<string, string>
-  motion: {
-    duration: Record<string, string>
-    easing: Record<string, string>
-  }
-  layer: Record<string, string>
-  borders: Record<string, string>
-  colorControlThumb?: string
-  colorRing?: string
-  colorOverlayBackdrop: string
-  iconSemantic: Record<string, string>
-  sizeFixed: Record<string, string>
-  typographySemantics: Record<string, {
-    size: string
-    weight: string
-    leading: string
-    tracking: string
-  }>
-  contentFlexibility: Record<string, string>
+/**
+ * The opaque --ext-* custom-variant block. v2 treats this as a passthrough blob
+ * (not regenerated token-by-token) because it mixes color and non-color tokens
+ * (e.g. --ext-button-gamified-shadow is in :root/dark but NOT in @theme inline).
+ *  - rawBlock: the full --ext-* section from semantics.css (its own :root + @theme inline).
+ *  - darkOverride: the interleaved --ext-* override(s) inside themes/dark.css.
+ */
+export interface V2ExtBlock {
+  rawBlock: string
+  darkOverride: string
 }
 
-// ─── Typography ───────────────────────────────────────────────────────────────
-
-export interface TypographyClass {
-  name: string
-  fontFamily: string
-  fontSize: string
-  fontWeight: string
-  lineHeight: string
-  letterSpacing: string
-  textTransform?: string
-}
-
-// ─── Responsive ──────────────────────────────────────────────────────────────
-
-export interface ResponsiveOverride {
-  maxWidth: string
-  spacingLayout?: Record<string, string>
-}
-
-// ─── Root token model ─────────────────────────────────────────────────────────
-
-export interface GeeklegoTokens {
+/** The v2 cockpit's root token model: primitives (reused shape) + flat light/dark semantics + opaque ext blob. */
+export interface GeeklegoTokensV2 {
   primitives: Primitives
   semantics: {
-    light: SemanticBlock
-    dark: Partial<SemanticBlock>
+    light: V2Semantics
+    dark: V2Semantics
   }
-  typographyClasses: TypographyClass[]
-  responsiveOverrides: ResponsiveOverride[]
-}
-
-// ─── Component tokens ────────────────────────────────────────────────────────
-
-export interface ComponentToken {
-  name: string
-  value: string
-}
-
-export interface ComponentTokenSection {
-  label: string
-  tokens: ComponentToken[]
-}
-
-export interface TypographyMapping {
-  size: string       // 'sm' | 'md' | 'lg' | 'xs' | 'xl' | 'default' etc.
-  className: string  // 'text-button-md' | 'text-body-sm' etc.
-}
-
-export interface ComponentTokenGroup {
-  componentName: string
-  level: 'atom' | 'molecule' | 'organism' | 'unknown'
-  generatedDate: string
-  sections: ComponentTokenSection[]
-  typography?: TypographyMapping[]
+  ext: V2ExtBlock
 }
 
 // ─── UI state ─────────────────────────────────────────────────────────────────
 
-export type TabId = 'primitives' | 'semantics' | 'components' | 'typography' | 'responsive' | 'export'
+export type TabId = 'primitives' | 'semantics' | 'responsive' | 'export'
 export type ThemeMode = 'light' | 'dark'
 export type PrimitiveSection =
   | 'colors' | 'typography' | 'spacing' | 'sizing'
@@ -158,12 +128,4 @@ export interface ColorOption {
 export interface TokenEntry {
   name: string
   value: string
-}
-
-// ─── History checkpoints ─────────────────────────────────────────────────────
-
-export interface HistoryEntry {
-  tokens: GeeklegoTokens
-  label?: string
-  timestamp: number
 }

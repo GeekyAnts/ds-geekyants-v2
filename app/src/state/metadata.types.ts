@@ -19,8 +19,8 @@ export interface TokensMetadata {
 export interface MetadataDiff {
   tokenName: string
   field: keyof TokenMetadata
-  oldValue?: any
-  newValue: any
+  oldValue?: unknown
+  newValue: unknown
 }
 
 export type MetadataStagedChanges = Record<string, Partial<TokenMetadata>>

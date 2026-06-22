@@ -1,4 +1,4 @@
-import type { GeeklegoTokens, SemanticBlock } from '../types.ts'
+import type { GeeklegoTokensV2, V2Semantics } from '../types.ts'
 
 // ─── Validation types ────────────────────────────────────────────────────────
 
@@ -15,17 +15,12 @@ export interface ValidationResult {
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-const VAR_REF = /^var\(--[\w-]+(?:,\s*[^)]+)?\)$/
 const HARDCODED_HEX = /^#[0-9A-Fa-f]{3,8}$/
 const HARDCODED_PX = /^\d+(?:\.\d+)?px$/
 const HARDCODED_REM = /^\d+(?:\.\d+)?rem$/
 
 function isHardcoded(value: string): boolean {
   return HARDCODED_HEX.test(value) || HARDCODED_PX.test(value) || HARDCODED_REM.test(value)
-}
-
-function isVarRef(value: string): boolean {
-  return VAR_REF.test(value.trim())
 }
 
 /** Extract the token name from a var() reference */
@@ -35,7 +30,7 @@ function extractVarName(value: string): string | null {
 }
 
 /** Collect all defined primitive token names from the primitives object */
-function collectPrimitiveNames(primitives: GeeklegoTokens['primitives']): Set<string> {
+function collectPrimitiveNames(primitives: GeeklegoTokensV2['primitives']): Set<string> {
   const names = new Set<string>()
   for (const [family, shades] of Object.entries(primitives.colors)) {
     for (const shade of Object.keys(shades)) {
@@ -77,192 +72,62 @@ function collectPrimitiveNames(primitives: GeeklegoTokens['primitives']): Set<st
   return names
 }
 
-/** Collect all semantic token names from a SemanticBlock */
-function collectSemanticNames(sem: SemanticBlock): Set<string> {
+/** Collect all semantic token names from a flat V2Semantics map. Each key → `--<key>`. */
+function collectSemanticNames(sem: V2Semantics): Set<string> {
   const names = new Set<string>()
-  const colorGroups = ['bg', 'surface', 'text', 'border', 'action', 'status', 'state'] as const
-  for (const group of colorGroups) {
-    if (sem[group]) {
-      for (const k of Object.keys(sem[group])) {
-        names.add(`--color-${group}-${k}`)
-      }
-    }
+  for (const k of Object.keys(sem)) {
+    names.add(`--${k}`)
   }
-  if (sem.dataSeries) {
-    for (const k of Object.keys(sem.dataSeries)) names.add(`--color-data-series-${k}`)
-  }
-  if (sem.shadows) {
-    for (const k of Object.keys(sem.shadows)) names.add(`--shadow-${k}`)
-  }
-  for (const k of Object.keys(sem.spacingComponent)) names.add(`--spacing-component-${k}`)
-  for (const k of Object.keys(sem.spacingLayout)) names.add(`--spacing-layout-${k}`)
-  for (const k of Object.keys(sem.sizeComponent)) names.add(`--size-component-${k}`)
-  for (const k of Object.keys(sem.radiusComponent)) names.add(`--radius-component-${k}`)
-  for (const k of Object.keys(sem.motion)) names.add(`--${k}`)
-  for (const k of Object.keys(sem.layer)) names.add(`--layer-${k}`)
-  for (const k of Object.keys(sem.borders)) names.add(`--border-${k}`)
-  if (sem.contentFlexibility) {
-    for (const k of Object.keys(sem.contentFlexibility)) names.add(`--content-${k}`)
-  }
-
-  // Additional semantic groups
-  if (sem.colorOverlayBackdrop) {
-    names.add(`--color-overlay-backdrop`)
-  }
-  if (sem.text?.['on-status-solid']) {
-    names.add(`--color-text-on-status-solid`)
-  }
-  if (sem.border?.info) {
-    names.add(`--color-border-info`)
-  }
-  if (sem.iconSemantic) {
-    for (const k of Object.keys(sem.iconSemantic)) names.add(`--icon-semantic-${k}`)
-  }
-  if (sem.sizeFixed) {
-    for (const k of Object.keys(sem.sizeFixed)) names.add(`--size-fixed-${k}`)
-  }
-  if (sem.typographySemantics) {
-    for (const [style, properties] of Object.entries(sem.typographySemantics)) {
-      if (properties.size) names.add(`--typography-${style}-size`)
-      if (properties.weight) names.add(`--typography-${style}-weight`)
-      if (properties.leading) names.add(`--typography-${style}-leading`)
-      if (properties.tracking) names.add(`--typography-${style}-tracking`)
-    }
-  }
-
   return names
 }
 
 // ─── Validation checks ──────────────────────────────────────────────────────
 
 function validateSemanticValues(
-  sem: SemanticBlock,
+  sem: V2Semantics,
   mode: string,
   primitiveNames: Set<string>,
   warnings: ValidationEntry[],
   errors: ValidationEntry[],
 ): void {
-  const colorGroups = ['bg', 'surface', 'text', 'border', 'action', 'status', 'state'] as const
-  for (const group of colorGroups) {
-    const g = sem[group]
-    if (!g) continue
-    for (const [k, v] of Object.entries(g)) {
-      const path = `semantics.${mode}.${group}.${k}`
-      if (isHardcoded(v)) {
-        warnings.push({ message: `Hardcoded value "${v}" — should reference a primitive via var()`, path })
-      }
-    }
-  }
-
-  // Check shadows for hardcoded values (skip complex multi-value shadows)
-  if (sem.shadows) {
-    for (const [k, v] of Object.entries(sem.shadows)) {
-      if (HARDCODED_HEX.test(v)) {
-        warnings.push({ message: `Shadow "${k}" uses hardcoded hex`, path: `semantics.${mode}.shadows.${k}` })
-      }
-    }
-  }
-
-  // Check non-color semantic groups for hardcoded values
-  const refGroups: Array<[string, Record<string, string> | undefined]> = [
-    ['motion', sem.motion
-      ? { ...sem.motion.duration, ...sem.motion.easing }
-      : undefined],
-    ['layer', sem.layer as Record<string, string> | undefined],
-    ['borders', sem.borders as Record<string, string> | undefined],
-    ['spacingComponent', sem.spacingComponent as Record<string, string> | undefined],
-    ['spacingLayout', sem.spacingLayout as Record<string, string> | undefined],
-    ['radiusComponent', sem.radiusComponent as Record<string, string> | undefined],
-    ['sizeComponent', sem.sizeComponent as Record<string, string> | undefined],
-  ]
-  for (const [groupName, group] of refGroups) {
-    if (!group) continue
-    for (const [k, v] of Object.entries(group)) {
-      if (isHardcoded(v)) {
-        warnings.push({
-          message: `Hardcoded value "${v}" in ${groupName}.${k} — should reference a primitive via var()`,
-          path: `semantics.${mode}.${groupName}.${k}`,
-        })
-      }
+  // Flat v2 semantics: each entry should chain to a primitive via var(), not a raw value.
+  for (const [k, v] of Object.entries(sem)) {
+    const path = `semantics.${mode}.${k}`
+    if (isHardcoded(v)) {
+      warnings.push({ message: `Hardcoded value "${v}" — should reference a primitive via var()`, path })
     }
   }
 }
 
 function validateDarkOverrides(
-  light: SemanticBlock,
-  dark: Partial<SemanticBlock>,
+  light: V2Semantics,
+  dark: V2Semantics,
   warnings: ValidationEntry[],
 ): void {
-  // Check that color semantics with light-mode values have dark overrides
-  const colorGroups = ['bg', 'text', 'action'] as const
-  for (const group of colorGroups) {
-    const lightGroup = light[group]
-    const darkGroup = dark[group]
-    if (!lightGroup) continue
-    for (const k of Object.keys(lightGroup)) {
-      if (!darkGroup || !(k in darkGroup)) {
-        // Only warn for primary tokens, not every single one
-        if (k === 'primary' || k === 'secondary' || k === 'inverse') {
-          warnings.push({
-            message: `Missing dark mode override for --color-${group}-${k}`,
-            path: `semantics.dark.${group}.${k}`,
-          })
-        }
-      }
-    }
-  }
-
-  // Check for specific tokens that should have dark overrides
-  // Check text["on-status-solid"]
-  if (light.text && light.text['on-status-solid']) {
-    const darkText = dark.text
-    if (!darkText || !darkText['on-status-solid']) {
+  // Flat v2: warn when a key-surface semantic defined in light has no dark override.
+  const KEY_SEMANTICS = ['background', 'foreground', 'primary', 'secondary', 'accent', 'card', 'popover']
+  for (const k of Object.keys(light)) {
+    if (!KEY_SEMANTICS.includes(k)) continue
+    if (!(k in dark)) {
       warnings.push({
-        message: `Missing dark mode override for --color-text-on-status-solid`,
-        path: 'semantics.dark.text.on-status-solid',
-      })
-    }
-  }
-
-  // Check border["info"]
-  if (light.border && light.border['info']) {
-    const darkBorder = dark.border
-    if (!darkBorder || !darkBorder['info']) {
-      warnings.push({
-        message: `Missing dark mode override for --color-border-info`,
-        path: 'semantics.dark.border.info',
-      })
-    }
-  }
-
-  // Check colorOverlayBackdrop
-  if (light.layer && light.layer.colorOverlayBackdrop) {
-    const darkLayer = dark.layer
-    if (!darkLayer || !darkLayer.colorOverlayBackdrop) {
-      warnings.push({
-        message: `Missing dark mode override for --layer-color-overlay-backdrop`,
-        path: 'semantics.dark.layer.colorOverlayBackdrop',
+        message: `Missing dark mode override for --${k}`,
+        path: `semantics.dark.${k}`,
       })
     }
   }
 }
 
 function detectCircularRefs(
-  sem: SemanticBlock,
+  sem: V2Semantics,
   mode: string,
   blockers: ValidationEntry[],
 ): void {
-  // Build a simple ref graph from the semantic block
+  // Build a simple ref graph from the flat semantic map (each key → `--<key>`).
   const refs = new Map<string, string>()
-  const colorGroups = ['bg', 'surface', 'text', 'border', 'action', 'status', 'state'] as const
-  for (const group of colorGroups) {
-    const g = sem[group]
-    if (!g) continue
-    for (const [k, v] of Object.entries(g)) {
-      const name = `--color-${group}-${k}`
-      const target = extractVarName(v)
-      if (target) refs.set(name, target)
-    }
+  for (const [k, v] of Object.entries(sem)) {
+    const name = `--${k}`
+    const target = extractVarName(v)
+    if (target) refs.set(name, target)
   }
 
   // Walk each ref chain looking for cycles (max depth 10)
@@ -287,7 +152,7 @@ function detectCircularRefs(
 
 // ─── Main validator ──────────────────────────────────────────────────────────
 
-export function validateTokens(tokens: GeeklegoTokens): ValidationResult {
+export function validateTokens(tokens: GeeklegoTokensV2): ValidationResult {
   const warnings: ValidationEntry[] = []
   const errors: ValidationEntry[] = []
   const blockers: ValidationEntry[] = []
@@ -303,30 +168,6 @@ export function validateTokens(tokens: GeeklegoTokens): ValidationResult {
 
   // Check for circular references
   detectCircularRefs(tokens.semantics.light, 'light', blockers)
-
-  // Check spacing values for unusually large values
-  for (const [k, v] of Object.entries(tokens.semantics.light.spacingComponent)) {
-    if (isVarRef(v)) {
-      const numMatch = v.match(/spacing-(\d+)/)
-      if (numMatch && parseInt(numMatch[1]) > 32) {
-        warnings.push({
-          message: `Unusually large component spacing: ${v}`,
-          path: `semantics.light.spacingComponent.${k}`,
-        })
-      }
-    }
-  }
-
-  // Check typography classes for missing required fields
-  for (const cls of tokens.typographyClasses) {
-    if (cls.name.endsWith('-responsive')) continue; // system-generated, not validated here
-    if (!cls.fontFamily || !cls.fontSize || !cls.fontWeight || !cls.lineHeight) {
-      errors.push({
-        message: `Typography class "${cls.name}" is missing required fields`,
-        path: `typographyClasses.${cls.name}`,
-      })
-    }
-  }
 
   return { warnings, errors, blockers }
 }

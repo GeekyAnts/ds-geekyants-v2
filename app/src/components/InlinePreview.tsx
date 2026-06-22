@@ -31,7 +31,8 @@ export function InlinePreview({
     const hexValue =
       displayValue.startsWith('#') ||
       displayValue.startsWith('rgb') ||
-      displayValue.startsWith('hsl')
+      displayValue.startsWith('hsl') ||
+      displayValue.startsWith('oklch')
         ? displayValue
         : displayValue.replace('var(', '').replace(')', '#808080')
 

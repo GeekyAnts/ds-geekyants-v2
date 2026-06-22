@@ -2,6 +2,14 @@
 
 Per-component catalogue of system-generated strings that must be externalizable via `i18nStrings`.
 
+> **v2 note.** The tables below are the historical inventory of the old 3-tier library — the
+> `Level` columns (L1/L2/L3) are 3-tier labels and the `components/atoms|molecules|organisms/…`
+> paths point at components deleted in the 2-tier cut. Kept as a reference for *which kinds of
+> strings* are system strings and how each was classified. For v2, components live flat under
+> `components/v2/<Name>/`; ignore the Level column and add new rows there. The "How to Add a New
+> Entry" and "String Classification Guide" sections at the bottom are architecture-agnostic and
+> remain the live guidance.
+
 **System string** = any string a user reads or a screen reader announces that is NOT consumer-supplied content (not `children`, `title`, `label`, `placeholder` props that the consumer explicitly passes).
 
 ---

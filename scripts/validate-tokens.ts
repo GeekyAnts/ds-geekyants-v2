@@ -1,9 +1,17 @@
 #!/usr/bin/env node
 /**
- * Geeklego Token Validator
+ * Geeklego Token Validator (v2 — 2-tier)
  *
- * Reads design-system/geeklego.css and checks that every var(--name)
- * reference has a corresponding --name: declaration somewhere in the file.
+ * Reads the v2 design system (design-system/v2/{primitives,semantics,themes/dark}.css),
+ * concatenated, and checks that every var(--name) reference resolves to a --name:
+ * declaration somewhere in the chain (primitive → semantic → utility). It also scans
+ * the v2 component files for broken var() refs and hardcoded values.
+ *
+ * 2-tier note: there is NO component-token tier in v2. The old component-tier passes
+ * (cross-block component duplicates, the --{component}-{property}-{scale} naming rule,
+ * and the "no primitives in TSX" rule) have been removed. v2 components style with
+ * standard semantic Tailwind utilities (bg-primary, …) rather than var() refs in TSX,
+ * so the only var() refs expected in components are the namespaced --ext-* tokens.
  *
  * Usage:
  *   npm run validate-tokens
@@ -19,7 +27,17 @@ import { promisify } from 'node:util'
 const globAsync = promisify(glob)
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
-const cssPath = resolve(__dirname, '../design-system/geeklego.css')
+
+// The v2 design system is split across three files; validate them as one chain.
+const V2_CSS_FILES = [
+  '../design-system/v2/primitives.css',
+  '../design-system/v2/semantics.css',
+  '../design-system/v2/themes/dark.css',
+].map((rel) => resolve(__dirname, rel))
+
+function readV2Css(): string {
+  return V2_CSS_FILES.map((p) => readFileSync(p, 'utf-8')).join('\n')
+}
 
 export function validateCssTokens(css: string): {
   definedCount: number
@@ -52,50 +70,67 @@ export function validateCssTokens(css: string): {
   return { definedCount: defined.size, broken }
 }
 
+/**
+ * GUARD 1 (source) — fail if an `--opacity-*` declaration appears inside an
+ * `@theme { … }` block. Tailwind v4's slash-opacity modifier (e.g. bg-primary/90)
+ * resolves a registered --opacity-90 into `color-mix(... var(--opacity-90) ...)`,
+ * and the unitless decimal is invalid inside color-mix() (a % is required) — the
+ * rule is silently discarded and the color falls back to transparent. Stock
+ * Tailwind/ShadCN does not register an --opacity-* theme namespace. The opacity
+ * scale may live in :root (cockpit-editable) but must NEVER be inside @theme.
+ * Brace-depth tracked so only declarations literally inside @theme are flagged.
+ */
+export function validateNoOpacityInTheme(css: string): Array<{ name: string; line: number }> {
+  const offenders: Array<{ name: string; line: number }> = []
+  const lines = css.split('\n')
+  let inTheme = false
+  let depth = 0 // brace depth *within* the current @theme block
+  lines.forEach((line, i) => {
+    if (!inTheme) {
+      // `@theme {` opens a block (handle `@theme inline {` too).
+      if (/@theme\b[^{]*\{/.test(line)) {
+        inTheme = true
+        depth = (line.match(/\{/g)?.length ?? 0) - (line.match(/\}/g)?.length ?? 0)
+      }
+      return
+    }
+    // Inside @theme: flag any --opacity-* define before tracking braces on this line.
+    const m = line.match(/--(opacity-[\w-]+)\s*:/)
+    if (m) offenders.push({ name: m[1], line: i + 1 })
+    depth += (line.match(/\{/g)?.length ?? 0) - (line.match(/\}/g)?.length ?? 0)
+    if (depth <= 0) inTheme = false
+  })
+  return offenders
+}
+
+/**
+ * GUARD 2 (output, belt-and-suspenders) — scan the compiled dist CSS for the
+ * invalid pattern `color-mix(… var(--opacity-…)` which is the symptom of Guard 1's
+ * cause leaking through (or any future mechanism that produces a unitless value
+ * inside color-mix). Returns the offending line numbers. No-op if dist is absent.
+ */
+export function validateNoUnitlessColorMix(distCss: string): number[] {
+  const offenders: number[] = []
+  distCss.split('\n').forEach((line, i) => {
+    if (/color-mix\([^)]*var\(--opacity-/.test(line)) offenders.push(i + 1)
+  })
+  return offenders
+}
+
 export interface ComponentRef { filePath: string; content: string }
 export interface BrokenComponentRef { name: string; file: string; line: number }
 
-const TAILWIND_INTERNAL_PREFIXES = ['tw-']
+// Framework-injected runtime CSS variables — NOT design tokens, so they are
+// intentionally absent from the design-system CSS and must not be flagged as
+// broken refs. `tw-*` is Tailwind's internal set; `radix-*` are set at runtime
+// by Radix primitives (e.g. --radix-popover-content-transform-origin).
+const FRAMEWORK_INTERNAL_PREFIXES = ['tw-', 'radix-']
 
-const PRIMITIVE_TOKEN_PREFIXES = [
-  'color-brand-', 'color-neutral-', 'color-success-', 'color-warning-',
-  'color-error-', 'color-info-', 'color-slate-', 'color-gray-',
-  'color-blue-', 'color-green-', 'color-red-', 'color-yellow-',
-  'color-orange-', 'color-purple-', 'color-pink-', 'color-cyan-', 'color-teal-',
-  'spacing-0', 'spacing-1', 'spacing-2', 'spacing-3', 'spacing-4',
-  'spacing-5', 'spacing-6', 'spacing-7', 'spacing-8', 'spacing-9',
-  'spacing-10', 'spacing-11', 'spacing-12', 'spacing-14', 'spacing-16',
-  'spacing-20', 'spacing-24', 'spacing-28', 'spacing-30', 'spacing-32',
-  'spacing-36', 'spacing-40', 'spacing-44', 'spacing-48', 'spacing-52',
-  'spacing-56', 'spacing-60', 'spacing-64', 'spacing-72', 'spacing-80',
-  'spacing-96',
-  'font-size-', 'font-weight-', 'font-family-sans', 'font-family-mono',
-  'line-height-', 'letter-spacing-',
-]
-
-function isPrimitiveRef(name: string): boolean {
-  if (name.startsWith('spacing-')) {
-    const rest = name.slice(8)
-    return (/^-?$/.test(rest) || (/^component-/.test(rest) === false && /^layout-/.test(rest) === false && /^raw-/.test(rest) === false))
-  }
-  return PRIMITIVE_TOKEN_PREFIXES.some(prefix => name.startsWith(prefix))
-}
-
-// Known property prefixes that should NOT appear at the start of a component token name.
-// Component tokens must start with the component name: --{component}-{property}-{scale}.
-const MISPLACED_PREFIXES = ['size-', 'color-', 'spacing-', 'icon-', 'radius-', 'border-', 'shadow-', 'text-']
-
-function pascalToKebab(str: string): string {
-  return String(str).replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase()
-}
-
-// Dynamic CSS custom props set via inline styles (e.g., style={{ '--var': value }})
-// These should not appear in geeklego.css as they're computed at runtime
-const INLINE_STYLE_VARS = new Set([
-  'spectrum-hue-color',
-  'track-bg',
-  'swatch-value',
-])
+// Dynamic CSS custom props injected at runtime via inline styles
+// (e.g. style={{ '--x': value }} consumed by a className). These are computed
+// per-render and so are intentionally absent from the design-system CSS.
+// Add a v2 component's runtime-injected var name here if it consumes one.
+const INLINE_STYLE_VARS = new Set<string>([])
 
 export function validateNoDuplicateDeclarations(css: string): Array<{ prop: string; firstLine: number; dupLine: number; firstValue: string; dupValue: string; selector: string }> {
   const duplicates: Array<{ prop: string; firstLine: number; dupLine: number; firstValue: string; dupValue: string; selector: string }> = []
@@ -146,139 +181,11 @@ export function validateNoDuplicateDeclarations(css: string): Array<{ prop: stri
   return duplicates
 }
 
-export function validateNoCrossBlockComponentDuplicates(css: string): Array<{ prop: string; componentName: string; blockA: { selector: string; line: number; value: string }; blockB: { selector: string; line: number; value: string } }> {
-  const crossDups: Array<{ prop: string; componentName: string; blockA: { selector: string; line: number; value: string }; blockB: { selector: string; line: number; value: string } }> = []
-  const lines = css.split('\n')
-
-  const componentBlockRegex = /\/\*\s+([\w\s]+?)\s+— generated \d{4}-\d{2}-\d{2}\s*\*\//g
-  const blocks: Array<{ name: string; startLine: number; endLine: number; selector: string; props: Record<string, { line: number; value: string }> }> = []
-
-  let currentHeader: { name: string; startLine: number } | null = null
-  let depth = 0
-  let blockStart = -1
-  let currentSelector = ''
-  let currentProps: Record<string, { line: number; value: string }> = {}
-
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i]
-    const headerMatch = componentBlockRegex.exec(line)
-    if (headerMatch) {
-      if (currentHeader && depth === 0) {
-        blocks.push({ ...currentHeader, endLine: i, selector: currentSelector, props: currentProps })
-      }
-      componentBlockRegex.lastIndex = 0
-      const nameMatch = line.match(/\/\*\s+([\w\s]+?)\s+— generated/)
-      if (nameMatch) {
-        currentHeader = { name: nameMatch[1].trim(), startLine: i }
-      }
-    }
-
-    if (currentHeader) {
-      const opens = (line.match(/\{/g) || []).length
-      const closes = (line.match(/\}/g) || []).length
-
-      if (opens > 0 && depth === 0) {
-        const trimmed = line.trim()
-        const braceIndex = trimmed.indexOf('{')
-        currentSelector = braceIndex > 0 ? trimmed.slice(0, braceIndex).trim() : trimmed
-        currentProps = {}
-      }
-      depth += opens
-
-      if (depth >= 1) {
-        const match = line.match(/^\s*(--[\w-]+)\s*:\s*(.*?)\s*;/)
-        if (match) {
-          currentProps[match[1]] = { line: i, value: match[2] }
-        }
-      }
-
-      depth -= closes
-      if (closes > 0 && depth === 0) {
-        blocks.push({ ...currentHeader, endLine: i, selector: currentSelector, props: currentProps })
-        currentHeader = null
-      }
-    }
-  }
-
-  if (currentHeader && blocks.length > 0 && blocks[blocks.length - 1].name !== currentHeader.name) {
-    blocks.push({ ...currentHeader, endLine: lines.length - 1, selector: currentSelector, props: currentProps })
-  }
-
-  for (let i = 0; i < blocks.length; i++) {
-    for (let j = i + 1; j < blocks.length; j++) {
-      if (blocks[i].name.toLowerCase() !== blocks[j].name.toLowerCase()) continue
-      for (const [prop, aInfo] of Object.entries(blocks[i].props)) {
-        if (prop in blocks[j].props) {
-          crossDups.push({
-            prop,
-            componentName: blocks[i].name,
-            blockA: { selector: blocks[i].selector, line: aInfo.line + 1, value: aInfo.value },
-            blockB: { selector: blocks[j].selector, line: blocks[j].props[prop].line + 1, value: blocks[j].props[prop].value },
-          })
-        }
-      }
-    }
-  }
-
-  return crossDups
-}
-
-export function validateTokenNamingConvention(css: string): string[] {
-  const warnings: string[] = []
-
-  // Regex to extract component blocks with their contents
-  // Matches: /* ComponentName — generated YYYY-MM-DD */ followed by tokens up to the next /* or end of file
-  const componentBlockRegex = /\/\*\s+[\w\s]+ — generated \d{4}-\d{2}-\d{2}\s*\*\/([\s\S]*?)(?=\/\*|$)/g
-  const blockNameRegex = /\/\*\s+([\w\s]+?)\s+— generated/
-
-  let componentMatch: RegExpExecArray | null
-  while ((componentMatch = componentBlockRegex.exec(css)) !== null) {
-    const header = componentMatch[0]
-    const blockContent = componentMatch[1]
-
-    // Extract component name from block header
-    const headerNameMatch = header.match(blockNameRegex)
-    if (!headerNameMatch) continue
-
-    // Now scan tokens ONLY within this component block
-    const defineRegex = /--([\w-]+)\s*:/g
-    let tokenMatch: RegExpExecArray | null
-    while ((tokenMatch = defineRegex.exec(blockContent)) !== null) {
-      const name = tokenMatch[1]
-
-      // Skip inline style vars - they don't appear in CSS component blocks
-      if (INLINE_STYLE_VARS.has(name)) continue
-
-      // Skip legitimate patterns where the whole token IS a semantic concept, not a component
-      const isLegitimateSemantic = /[a-z]+-(icon|component|layer)$/.test(name)
-      if (isLegitimateSemantic) continue
-
-      // Flag ANY token inside a component block that starts with a MISPLACED_PREFIX,
-      // regardless of whether it ends with a size scale. This catches both
-      // `--size-avatar-md` and `--color-picker-bg` patterns.
-      for (const prefix of MISPLACED_PREFIXES) {
-        if (name.startsWith(prefix)) {
-          warnings.push(`  Naming violation: --${name} (property prefix '${prefix}' before component name — use --{component}-{property} ordering)`)
-          break
-        }
-      }
-
-      // Check cross-contamination: token prefix (kebab-case) must match block name
-      const kebabBlockName = pascalToKebab(headerNameMatch[1])
-      if (!name.startsWith(kebabBlockName + '-') && name !== kebabBlockName) {
-        warnings.push(`  Cross-contamination: token --${name} inside '${headerNameMatch[1]}' block (expected --${kebabBlockName}-* prefix — belongs in its own block)`)
-      }
-    }
-  }
-
-  return warnings
-}
-
 export function validateComponentTokenRefs(
   css: string,
   componentFiles: ComponentRef[]
 ): { broken: BrokenComponentRef[] } {
-  // Build the set of all defined token names from geeklego.css
+  // Build the set of all defined token names from the v2 design system
   const defined = new Set<string>()
   const defineRegex = /--([\w-]+?)\s*?(?::|;)/g
   let m: RegExpExecArray | null
@@ -310,11 +217,9 @@ export function validateComponentTokenRefs(
       let match: RegExpExecArray | null
       while ((match = varRegex.exec(line)) !== null) {
         const name = match[1]
-        // Skip Tailwind internals
-        if (TAILWIND_INTERNAL_PREFIXES.some(prefix => name.startsWith(prefix))) continue
-        // Skip icon component tokens (e.g., --size-icon-sm) - used as react props to lucide-react
-        if (/[a-z]+-(icon|component|layer)-(xs|sm|md|lg|xl|2xl|3xl)$/.test(name)) continue
-        // Skip inline style CSS custom properties set dynamically via React inline styles
+        // Skip framework-injected runtime vars (Tailwind tw-*, Radix radix-*)
+        if (FRAMEWORK_INTERNAL_PREFIXES.some(prefix => name.startsWith(prefix))) continue
+        // Skip CSS custom properties injected dynamically via React inline styles
         if (INLINE_STYLE_VARS.has(name)) continue
         if (!defined.has(name)) {
           broken.push({ name, file: filePath, line: i + 1 })
@@ -324,27 +229,6 @@ export function validateComponentTokenRefs(
   }
 
   return { broken }
-}
-export function validateNoPrimitiveRefsInComponents(
-  componentFiles: ComponentRef[]
-): { violations: BrokenComponentRef[] } {
-  const violations: BrokenComponentRef[] = []
-
-  for (const { filePath, content } of componentFiles) {
-    const lines = content.split('\n')
-    lines.forEach((line, i) => {
-      const varRegex = /var\(--([\w-]+)\)/g
-      let match: RegExpExecArray | null
-      while ((match = varRegex.exec(line)) !== null) {
-        const name = match[1]
-        if (isPrimitiveRef(name)) {
-          violations.push({ name, file: filePath, line: i + 1 })
-        }
-      }
-    })
-  }
-
-  return { violations }
 }
 
 export interface HardcodedViolation {
@@ -361,8 +245,8 @@ export function validateNoHardcodedValuesInComponents(
   // After stripping var(), detect:
   // 1. Tailwind arbitrary values with hardcoded units: w-[40px], gap-[8rem]
   //    Note: [a-zA-Z] prefix avoids consuming digits that (\d+) should capture
-  const BRACKET_PX = /\[[a-zA-Z\s\-\/]*(\d+)(px)[a-zA-Z\s\-\/]*\]/
-  const BRACKET_REM = /\[[a-zA-Z\s\-\/]*(\d+(?:\.\d+)?)(rem)[a-zA-Z\s\-\/]*\]/
+  const BRACKET_PX = /\[[a-zA-Z\s\-/]*(\d+)(px)[a-zA-Z\s\-/]*\]/
+  const BRACKET_REM = /\[[a-zA-Z\s\-/]*(\d+(?:\.\d+)?)(rem)[a-zA-Z\s\-/]*\]/
   const BRACKET_HEX = /\[[^\]]*#([0-9a-fA-F]{3,8})[^\]]*\]/
 
   // 2. Inline style string values: 'calc(TOKEN + 8px)', '2rem', '#6366f1'
@@ -411,11 +295,11 @@ export function validateNoHardcodedValuesInComponents(
 if (import.meta.url === `file://${process.argv[1]}`) {
 async function main() {
   try {
-    const css = readFileSync(cssPath, 'utf-8')
+    const css = readV2Css()
     const { definedCount, broken } = validateCssTokens(css)
 
-    console.log('\nGeeklego Token Validator')
-    console.log('─────────────────────────')
+    console.log('\nGeeklego Token Validator (v2 — 2-tier)')
+    console.log('──────────────────────────────────────')
     console.log(`Defined tokens : ${definedCount}`)
 
     if (broken.length === 0) {
@@ -423,17 +307,19 @@ async function main() {
     } else {
       console.log(`\n✕  ${broken.length} broken reference(s) found:\n`)
       broken.forEach(({ name, line }) => {
-        console.log(`   var(--${name})   (first seen: line ${line})`)
+        console.log(`   var(--${name})   (first seen: concatenated line ${line})`)
       })
       console.log(
-        '\nFix: update the component token block in design-system/geeklego.css\n' +
-        'to reference the correct semantic token names.\n'
+        '\nFix: every var(--name) must chain primitive → semantic in\n' +
+        'design-system/v2/{primitives,semantics,themes/dark}.css.\n'
       )
       process.exit(1)
     }
 
-    // Cross-file validation: scan all component .tsx files for var() references
-    const componentGlob = resolve(__dirname, '../components/**/*.tsx')
+    // Cross-file validation: scan v2 component files for var() references.
+    // v2 components style with semantic Tailwind utilities, so the only var()
+    // refs expected here are the namespaced --ext-* custom-variant tokens.
+    const componentGlob = resolve(__dirname, '../components/v2/**/*.{tsx,ts}')
     const componentFilePaths = (await globAsync(componentGlob)) as string[]
 
     const refs: ComponentRef[] = await Promise.all(
@@ -455,67 +341,23 @@ async function main() {
       console.log('✓  All component var() references are valid.\n')
     }
 
-    // Naming convention check (hard failure if violations found)
-    const namingWarnings = validateTokenNamingConvention(css)
-    if (namingWarnings.length > 0) {
-      console.log(`\n✕  ${namingWarnings.length} naming convention violation(s) found:\n`)
-      console.log('Component tokens must use --{component}-{property}-{scale} format.')
-      console.log('Example correct:   --avatar-size-md')
-      console.log('Example wrong:     --size-avatar-md\n')
-      namingWarnings.forEach(w => console.log(w))
-      process.exit(1)
-    } else {
-      console.log('\n✓  Naming convention check passed.\n')
-    }
-
     // Within-block duplicate detection
     const duplicates = validateNoDuplicateDeclarations(css)
     if (duplicates.length > 0) {
-      console.log(`\n✕  ${duplicates.length} duplicate declaration(s) found within component blocks:\n`)
-      console.log('Each --component-property must be defined exactly once per CSS block.')
+      console.log(`\n✕  ${duplicates.length} duplicate declaration(s) found within a CSS block:\n`)
+      console.log('Each token must be defined exactly once per CSS block.')
       console.log('The first (earlier) definition is dead code — only the last one is used.\n')
       for (const d of duplicates) {
         console.log(`   ${d.prop}`)
         console.log(`     Line ${d.firstLine}: "${d.firstValue}"`)
         console.log(`     Line ${d.dupLine}:  "${d.dupValue}"  ← wins (keep this)`)
       }
-      console.log('\nFix: remove the earlier line(s) or run: node scripts/dedup-component-tokens.cjs')
       process.exit(1)
     } else {
       console.log('✓  No duplicate declarations found within blocks.\n')
     }
 
-    // Cross-block duplicate detection — catches same property in multiple component blocks
-    const crossDups = validateNoCrossBlockComponentDuplicates(css)
-    if (crossDups.length > 0) {
-      console.log(`\n✕  ${crossDups.length} cross-block duplicate token definition(s) found:\n`)
-      console.log('A component token must be defined only once per component block.')
-      console.log('Never create a separate [data-theme="dark"] block at the component level.\n')
-      for (const d of crossDups) {
-        console.log(`   --${d.prop}  (component: "${d.componentName}")`)
-        console.log(`     Block 1 (${d.blockA.selector}): Line ${d.blockA.line} — "${d.blockA.value}"`)
-        console.log(`     Block 2 (${d.blockB.selector}): Line ${d.blockB.line} — "${d.blockB.value}"`)
-      }
-      console.log('\nFix: merge the duplicate into a single :root, [data-theme="dark"] block.')
-      console.log('If the value differs per theme, create the difference at the semantic level.\n')
-      process.exit(1)
-    } else {
-      console.log('✓  No cross-block duplicate definitions found.\n')
-    }
-    // Pass 5: Primitive token reference check
-    const { violations } = validateNoPrimitiveRefsInComponents(refs)
-    if (violations.length > 0) {
-      console.log(`\n\u2715  ${violations.length} primitive token reference(s) in component files (must use semantic/component tokens instead):`)
-      console.log('   Token chain rule: primitive \u2192 semantic \u2192 component. Never skip a level.')
-      violations.forEach(({ name, file, line }) => {
-        console.log(`   var(--${name})   in ${file}:${line}`)
-      })
-      process.exit(1)
-    } else {
-      console.log('\u2713  No primitive token references in component files.\n')
-    }
-
-    // Pass 6: Hardcoded value detection
+    // Hardcoded value detection
     const { violations: hardcodedViolations } = validateNoHardcodedValuesInComponents(refs)
     if (hardcodedViolations.length > 0) {
       console.log(`\n\u2715  ${hardcodedViolations.length} hardcoded value(s) in component files (must use tokens):`)
@@ -526,6 +368,61 @@ async function main() {
       process.exit(1)
     } else {
       console.log('\u2713  No hardcoded px/rem/hex values in component files.\n')
+    }
+
+    // GUARD 1 \u2014 no --opacity-* inside @theme (the root cause of the invalid
+    // color-mix slash-opacity bug). Scans the concatenated v2 CSS.
+    const opacityInTheme = validateNoOpacityInTheme(css)
+    if (opacityInTheme.length > 0) {
+      console.log(`\n\u2715  ${opacityInTheme.length} --opacity-* token(s) registered inside @theme:`)
+      console.log('   Tailwind v4 turns bg-*/NN into color-mix(... var(--opacity-NN) ...), which is')
+      console.log('   INVALID (unitless decimal where a % is required) \u2014 hovers fall back to transparent.')
+      console.log('   Move the opacity scale OUT of @theme (keep it in :root only).\n')
+      opacityInTheme.forEach(({ name, line }) => {
+        console.log(`   --${name}   (concatenated line ${line})`)
+      })
+      process.exit(1)
+    } else {
+      console.log('\u2713  No --opacity-* registered inside @theme.\n')
+    }
+
+    // GUARD 1b \u2014 the same check on the Token Editor's restore baseline
+    // (design-system/v2-defaults/primitives.css). "Restore to Default" copies this
+    // snapshot over the live files, so if the snapshot is stale/broken the bug comes
+    // back on restore even when the live files are fixed. Skipped if no snapshot yet.
+    const defaultsPrimPath = resolve(__dirname, '../design-system/v2-defaults/primitives.css')
+    let defaultsPrim: string | null = null
+    try { defaultsPrim = readFileSync(defaultsPrimPath, 'utf-8') } catch { defaultsPrim = null }
+    if (defaultsPrim !== null) {
+      const offenders = validateNoOpacityInTheme(defaultsPrim)
+      if (offenders.length > 0) {
+        console.log(`\n\u2715  ${offenders.length} --opacity-* inside @theme in the RESTORE BASELINE (design-system/v2-defaults/primitives.css):`)
+        console.log('   "Restore to Default" would re-introduce the broken color-mix bug.')
+        console.log('   Refresh the snapshot from the corrected live files:')
+        console.log('     cp design-system/v2/primitives.css design-system/v2-defaults/primitives.css (+ semantics.css, themes/dark.css \u2192 dark.css)\n')
+        process.exit(1)
+      } else {
+        console.log('\u2713  Restore baseline (v2-defaults) has no --opacity-* inside @theme.\n')
+      }
+    }
+
+    // GUARD 2 \u2014 scan the compiled dist CSS (if built) for the invalid
+    // color-mix(... var(--opacity-...)) symptom. Skipped if dist is absent.
+    const distPath = resolve(__dirname, '../dist/geeklego.css')
+    let distCss: string | null = null
+    try { distCss = readFileSync(distPath, 'utf-8') } catch { distCss = null }
+    if (distCss !== null) {
+      const badMix = validateNoUnitlessColorMix(distCss)
+      if (badMix.length > 0) {
+        console.log(`\n\u2715  ${badMix.length} invalid color-mix(... var(--opacity-...)) in dist/geeklego.css:`)
+        console.log('   These compile to transparent. Rebuild after removing --opacity-* from @theme.\n')
+        badMix.slice(0, 10).forEach((line) => console.log(`   dist/geeklego.css:${line}`))
+        process.exit(1)
+      } else {
+        console.log('\u2713  No invalid color-mix(... var(--opacity-...)) in dist/geeklego.css.\n')
+      }
+    } else {
+      console.log('\u2139  dist/geeklego.css not built \u2014 skipping output color-mix guard.\n')
     }
   } catch (err) {
     console.error('Error:', err)

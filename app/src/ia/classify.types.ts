@@ -3,7 +3,7 @@
 /**
  * Top-level IA sections as defined in Phase 1
  */
-export type IATopLevel = 'foundations' | 'semantic' | 'components' | 'uncategorized'
+export type IATopLevel = 'foundations' | 'semantic' | 'uncategorized'
 
 /**
  * Sub-categories within Foundations section

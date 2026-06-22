@@ -1,6 +1,5 @@
 export { default as ScaleView } from './ScaleView'
 export { default as CategoryPage } from './CategoryPage'
 export { default as CategoryGroup } from './CategoryGroup'
-export { default as ComponentPage } from './ComponentPage/ComponentPage'
 export { default as FilterBar } from '../components/FilterBar'
 export { default as TokenRow } from './TokenRow'

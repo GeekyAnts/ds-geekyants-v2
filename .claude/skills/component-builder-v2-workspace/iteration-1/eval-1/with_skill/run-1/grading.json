@@ -1,0 +1,42 @@
+{
+  "eval_id": 1,
+  "config": "with_skill",
+  "summary": {
+    "passed": 6,
+    "failed": 0,
+    "total": 6,
+    "pass_rate": 1.0
+  },
+  "expectations": [
+    {
+      "text": "Builds on @radix-ui/react-tooltip (does NOT hand-roll hover/focus/positioning)",
+      "passed": true,
+      "evidence": "imports @radix-ui/react-tooltip"
+    },
+    {
+      "text": "Install command uses npm, NOT pnpm  [TARGETED FIX]",
+      "passed": true,
+      "evidence": "npm install @radix-ui/react-tooltip"
+    },
+    {
+      "text": "Pass-through Radix parts re-exported; only Content styled (compound pattern)",
+      "passed": true,
+      "evidence": "Trigger + Content sub-components present"
+    },
+    {
+      "text": "Uses popover semantic tokens (bg-popover / text-popover-foreground)",
+      "passed": true,
+      "evidence": "bg-popover used"
+    },
+    {
+      "text": "No hand-rolled focus trap / escape / click-outside hooks",
+      "passed": true,
+      "evidence": "no hand-rolled a11y hooks"
+    },
+    {
+      "text": "side default is top (request: 'above by default')",
+      "passed": true,
+      "evidence": "side=top defaulted"
+    }
+  ]
+}

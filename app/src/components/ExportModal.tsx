@@ -1,38 +1,51 @@
 import { useState, useEffect } from 'react'
-import { Check, ArrowDown, Download, Trash2, RotateCcw } from 'lucide-react'
+import { Check, Download, Trash2, RotateCcw, FileCode, FileJson, FileText, Smartphone, Loader2 } from 'lucide-react'
 import { createSnapshot, getAllSnapshots, deleteSnapshot, restoreSnapshot, downloadSnapshotAsJSON, type TokenSnapshot } from '../utils/snapshotManager'
 import { getAllStaged, stage, unstage, discardAll, hasPendingChanges, getPendingCount, getStagedNewTokens } from '../state/staging'
 import { generateOriginalCss, generateMergedCss, getDiffHunks } from '../utils/exportFormatter'
-import type { ComponentTokenGroup } from '../types'
+import type { GeeklegoTokensV2 } from '../types'
+import type { ValidationSummary } from '../validators/validateAll'
 import DiffView from './DiffView'
+
+type DiffHunk = ReturnType<typeof getDiffHunks>[number]
 
 interface ExportModalProps {
   isOpen: boolean
   onClose: () => void
   onExport: () => Promise<void>
+  onExportTarget: (target: 'ir' | 'design-md') => Promise<{ content: string; path: string }>
   onRestoreDefault: () => Promise<void>
-  tokens: any
-  componentGroups?: ComponentTokenGroup[]
-  validationSummary?: { blocks: any[]; warnings: any[]; notices: any[] }
+  tokens: GeeklegoTokensV2
+  validationSummary?: ValidationSummary
   hasBlockers: boolean
+}
+
+type ExportTarget = 'ir' | 'design-md'
+
+interface TargetResult {
+  path: string
+  filename: string
 }
 
 type ModalStep = 'review' | 'validation' | 'diff' | 'export'
 
-export default function ExportModal({ isOpen, onClose, onExport, onRestoreDefault, tokens, componentGroups, validationSummary, hasBlockers }: ExportModalProps) {
+export default function ExportModal({ isOpen, onClose, onExport, onExportTarget, onRestoreDefault, tokens, validationSummary, hasBlockers }: ExportModalProps) {
   const [currentStep, setCurrentStep] = useState<ModalStep>('review')
   const [isExporting, setIsExporting] = useState(false)
   const [hasExported, setHasExported] = useState(false)
   const [isRestoring, setIsRestoring] = useState(false)
   const [hasRestored, setHasRestored] = useState(false)
   const [restoreConfirm, setRestoreConfirm] = useState(false)
-  const [diffHunks, setDiffHunks] = useState<any[]>([])
+  const [diffHunks, setDiffHunks] = useState<DiffHunk[]>([])
   const [selectedSnapshot, setSelectedSnapshot] = useState<TokenSnapshot | null>(null)
   const [allSnapshots, setAllSnapshots] = useState<TokenSnapshot[]>([])
+  const [targetBusy, setTargetBusy] = useState<ExportTarget | null>(null)
+  const [targetResults, setTargetResults] = useState<Partial<Record<ExportTarget, TargetResult>>>({})
+  const [targetError, setTargetError] = useState<string | null>(null)
 
   const stagedEdits = getAllStaged()
-  const originalCss = hasPendingChanges() ? generateOriginalCss(tokens, componentGroups) : ''
-  const mergedCss = hasPendingChanges() ? generateMergedCss(tokens, stagedEdits, getStagedNewTokens(), componentGroups) : ''
+  const originalCss = hasPendingChanges() ? generateOriginalCss(tokens) : ''
+  const mergedCss = hasPendingChanges() ? generateMergedCss(tokens, stagedEdits, getStagedNewTokens()) : ''
 
   useEffect(() => {
     if (isOpen && currentStep === 'diff') {
@@ -46,6 +59,9 @@ export default function ExportModal({ isOpen, onClose, onExport, onRestoreDefaul
       setHasExported(false)
       setHasRestored(false)
       setRestoreConfirm(false)
+      setTargetBusy(null)
+      setTargetResults({})
+      setTargetError(null)
     }
   }, [isOpen])
 
@@ -125,6 +141,31 @@ export default function ExportModal({ isOpen, onClose, onExport, onRestoreDefaul
       // error already logged in handleExport in EditorShell
     } finally {
       setIsExporting(false)
+    }
+  }
+
+  async function handleExportTarget(target: ExportTarget) {
+    setTargetBusy(target)
+    setTargetError(null)
+    try {
+      const { content, path } = await onExportTarget(target)
+      const filename = target === 'ir' ? 'tokens.json' : 'design-system.md'
+      const mime = target === 'ir' ? 'application/json' : 'text/markdown'
+      // Offer the generated file as a download (Blob → anchor).
+      const blob = new Blob([content], { type: mime })
+      const objectUrl = URL.createObjectURL(blob)
+      const anchor = document.createElement('a')
+      anchor.href = objectUrl
+      anchor.download = filename
+      document.body.appendChild(anchor)
+      anchor.click()
+      anchor.remove()
+      URL.revokeObjectURL(objectUrl)
+      setTargetResults((prev) => ({ ...prev, [target]: { path, filename } }))
+    } catch (err) {
+      setTargetError(err instanceof Error ? err.message : `Export failed for ${target}`)
+    } finally {
+      setTargetBusy(null)
     }
   }
 
@@ -258,26 +299,126 @@ export default function ExportModal({ isOpen, onClose, onExport, onRestoreDefaul
 
           {currentStep === 'export' && (
             <div className="ed-export-final">
-              <h4>Export</h4>
-              {hasExported ? (
-                <div className="ed-export-success">
-                  <div className="ed-export-check-icon"><Check size={20} aria-hidden="true" /></div>
-                  <p>Exported successfully! The CSS has been updated.</p>
-                </div>
-              ) : (
-                <div className="ed-export-actions-panel">
-                  <div className="ed-export-action-item">
-                    <button className="ed-export-btn-primary" onClick={handleExport} disabled={hasBlockers || isExporting || isRestoring}>
-                      {isExporting ? 'Exporting...' : 'Export to geeklego.css'}
-                    </button>
-                  </div>
-                  {!hasBlockers && (
-                    <div className="ed-export-action-item">
-                      <button className="ed-export-btn-secondary" onClick={createNewSnapshot} disabled={isExporting || isRestoring}>
-                        Save as Snapshot
-                      </button>
+              <h4>Export Targets</h4>
+
+              <div className="ed-export-targets">
+                {/* CSS — the existing, primary action. Writes the v2 CSS via onExport. */}
+                <div className="ed-export-target-card">
+                  <div className="ed-export-target-head">
+                    <FileCode size={18} aria-hidden="true" />
+                    <div className="ed-export-target-titles">
+                      <span className="ed-export-target-name">CSS</span>
+                      <span className="ed-export-target-desc">Write the v2 design system to <code>design-system/v2/</code> and rebuild <code>dist/geeklego.css</code>.</span>
                     </div>
+                  </div>
+                  {hasExported ? (
+                    <div className="ed-export-target-done">
+                      <Check size={14} aria-hidden="true" />
+                      <span>CSS exported &amp; rebuilt.</span>
+                    </div>
+                  ) : (
+                    <button
+                      className="ed-export-btn-primary ed-export-target-btn"
+                      onClick={handleExport}
+                      disabled={hasBlockers || isExporting || isRestoring || targetBusy !== null}
+                    >
+                      {isExporting ? 'Exporting…' : 'Export to CSS'}
+                    </button>
                   )}
+                </div>
+
+                {/* IR — DTCG JSON. Shells out to scripts/export-ir.ts, offers tokens.json download. */}
+                <div className="ed-export-target-card">
+                  <div className="ed-export-target-head">
+                    <FileJson size={18} aria-hidden="true" />
+                    <div className="ed-export-target-titles">
+                      <span className="ed-export-target-name">Intermediate Representation (W3C DTCG JSON)</span>
+                      <span className="ed-export-target-desc">The versioned token contract every downstream target consumes. Exports the last <strong>saved</strong> on-disk tokens.</span>
+                    </div>
+                  </div>
+                  {targetResults.ir ? (
+                    <div className="ed-export-target-done">
+                      <Check size={14} aria-hidden="true" />
+                      <span>Downloaded <code>{targetResults.ir.filename}</code> · wrote <code>{targetResults.ir.path}</code></span>
+                    </div>
+                  ) : (
+                    <button
+                      className="ed-export-btn-secondary ed-export-target-btn"
+                      onClick={() => handleExportTarget('ir')}
+                      disabled={isExporting || isRestoring || targetBusy !== null}
+                    >
+                      {targetBusy === 'ir'
+                        ? (<><Loader2 size={13} className="ed-export-spin" aria-hidden="true" /> Generating…</>)
+                        : 'Generate IR (tokens.json)'}
+                    </button>
+                  )}
+                </div>
+
+                {/* design.md — human-readable Markdown. Shells out to scripts/export-design-md.ts. */}
+                <div className="ed-export-target-card">
+                  <div className="ed-export-target-head">
+                    <FileText size={18} aria-hidden="true" />
+                    <div className="ed-export-target-titles">
+                      <span className="ed-export-target-name">Design documentation (Markdown)</span>
+                      <span className="ed-export-target-desc">Human-readable token reference generated from the IR. Exports the last <strong>saved</strong> on-disk tokens.</span>
+                    </div>
+                  </div>
+                  {targetResults['design-md'] ? (
+                    <div className="ed-export-target-done">
+                      <Check size={14} aria-hidden="true" />
+                      <span>Downloaded <code>{targetResults['design-md'].filename}</code> · wrote <code>{targetResults['design-md'].path}</code></span>
+                    </div>
+                  ) : (
+                    <button
+                      className="ed-export-btn-secondary ed-export-target-btn"
+                      onClick={() => handleExportTarget('design-md')}
+                      disabled={isExporting || isRestoring || targetBusy !== null}
+                    >
+                      {targetBusy === 'design-md'
+                        ? (<><Loader2 size={13} className="ed-export-spin" aria-hidden="true" /> Generating…</>)
+                        : 'Generate design.md'}
+                    </button>
+                  )}
+                </div>
+
+                {/* React Native — stub, owned by platform teams (consumes the IR). */}
+                <div className="ed-export-target-card ed-export-target-stub">
+                  <div className="ed-export-target-head">
+                    <Smartphone size={18} aria-hidden="true" />
+                    <div className="ed-export-target-titles">
+                      <span className="ed-export-target-name">React Native <span className="ed-export-target-pill">Coming soon</span></span>
+                      <span className="ed-export-target-desc">Stub — owned by platform teams (consumes the IR).</span>
+                    </div>
+                  </div>
+                  <button className="ed-export-btn-secondary ed-export-target-btn" disabled aria-disabled="true">
+                    Not available
+                  </button>
+                </div>
+
+                {/* Flutter — stub, owned by platform teams (consumes the IR). */}
+                <div className="ed-export-target-card ed-export-target-stub">
+                  <div className="ed-export-target-head">
+                    <Smartphone size={18} aria-hidden="true" />
+                    <div className="ed-export-target-titles">
+                      <span className="ed-export-target-name">Flutter <span className="ed-export-target-pill">Coming soon</span></span>
+                      <span className="ed-export-target-desc">Stub — owned by platform teams (consumes the IR).</span>
+                    </div>
+                  </div>
+                  <button className="ed-export-btn-secondary ed-export-target-btn" disabled aria-disabled="true">
+                    Not available
+                  </button>
+                </div>
+              </div>
+
+              {targetError && (
+                <div className="ed-export-target-error">{targetError}</div>
+              )}
+
+              {!hasBlockers && !hasExported && (
+                <div className="ed-export-action-item">
+                  <button className="ed-export-btn-secondary" onClick={createNewSnapshot} disabled={isExporting || isRestoring || targetBusy !== null}>
+                    Save as Snapshot
+                  </button>
                 </div>
               )}
 
@@ -294,7 +435,7 @@ export default function ExportModal({ isOpen, onClose, onExport, onRestoreDefaul
                 ) : (
                   <>
                     <p className="ed-export-restore-description">
-                      Reset <code>geeklego.css</code> back to <code>geeklego.default.css</code>. All custom edits will be lost.
+                      Reset the v2 design system (<code>design-system/v2/</code>) back to its saved defaults. All custom edits will be lost.
                     </p>
                     {restoreConfirm ? (
                       <div className="ed-export-restore-confirm">

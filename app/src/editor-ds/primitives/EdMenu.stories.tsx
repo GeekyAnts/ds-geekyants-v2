@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react-vite'
 import { EdMenu } from './EdMenu'
 import { EdMenuProps, EdMenuItem } from './EdMenu.types'
 import { MoreHorizontal, Edit, Trash2, Copy, Share2 } from 'lucide-react'

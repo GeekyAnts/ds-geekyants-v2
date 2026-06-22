@@ -9,9 +9,9 @@ interface ImportMeta {
   readonly env: ImportMetaEnv
   hot?: {
     accept?: (cb: () => void) => void
-    dispose?: (cb: (data: any) => void) => void
+    dispose?: (cb: (data: unknown) => void) => void
     decline?: () => void
     invalidate?: () => void
-    on?: (event: string, cb: (...args: any[]) => void) => void
+    on?: (event: string, cb: (...args: unknown[]) => void) => void
   }
 }

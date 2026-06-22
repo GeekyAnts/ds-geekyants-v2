@@ -1,14 +1,15 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { EdDialog } from '../editor-ds/primitives/EdDialog'
 import { EdColorPicker } from '../editor-ds/primitives/EdColorPicker'
-import type { GeeklegoTokens } from '../types'
+import type { GeeklegoTokensV2 } from '../types'
+import { V2_SEMANTIC_KEYS } from '../types'
 import { stageNewToken, getStagedNewTokens, getAllStaged, getStagedValue, type TokenTreePath } from '../state/staging'
 import { withPxAnnotation } from '../utils/colorUtils'
 
 interface AddTokenDialogProps {
   isOpen: boolean
   onClose: () => void
-  geeklegoTokens: GeeklegoTokens
+  geeklegoTokens: GeeklegoTokensV2
   defaultNamePrefix?: string
   defaultCategory?: string
 }
@@ -20,41 +21,11 @@ function deriveTreePath(name: string): TokenTreePath | null {
   if (colorPrimMatch) {
     return { kind: 'primitiveColor', family: colorPrimMatch[1], shade: colorPrimMatch[2] }
   }
-  const semanticColorGroups: Array<[string, string]> = [
-    ['--color-data-series-', 'dataSeries'],
-    ['--color-bg-', 'bg'],
-    ['--color-surface-', 'surface'],
-    ['--color-text-', 'text'],
-    ['--color-border-', 'border'],
-    ['--color-action-', 'action'],
-    ['--color-status-', 'status'],
-    ['--color-state-', 'state'],
-  ]
-  for (const [prefix, group] of semanticColorGroups) {
-    if (name.startsWith(prefix)) {
-      const key = name.slice(prefix.length)
-      if (key) return { kind: 'semanticColorGroup', group, key }
-    }
-  }
-  if (name.startsWith('--spacing-component-')) {
-    const key = name.slice('--spacing-component-'.length)
-    if (key) return { kind: 'semanticFlat', group: 'spacingComponent', key }
-  }
-  if (name.startsWith('--spacing-layout-')) {
-    const key = name.slice('--spacing-layout-'.length)
-    if (key) return { kind: 'semanticFlat', group: 'spacingLayout', key }
-  }
-  if (name.startsWith('--radius-component-')) {
-    const key = name.slice('--radius-component-'.length)
-    if (key) return { kind: 'semanticFlat', group: 'radiusComponent', key }
-  }
-  if (name.startsWith('--size-component-')) {
-    const key = name.slice('--size-component-'.length)
-    if (key) return { kind: 'semanticFlat', group: 'sizeComponent', key }
-  }
-  if (name.startsWith('--shadow-')) {
-    const key = name.slice('--shadow-'.length)
-    if (key) return { kind: 'semanticFlat', group: 'shadows', key }
+  // Flat v2 semantics — CSS var for a key is `--<key>`. A semantic token maps to a
+  // single flat 'semantic' tree path keyed by the bare key (no group nesting).
+  const bareKey = name.replace(/^--/, '')
+  if ((V2_SEMANTIC_KEYS as readonly string[]).includes(bareKey)) {
+    return { kind: 'semanticFlat', group: 'semantic', key: bareKey }
   }
   const primitivePrefixes: Array<[string, string]> = [
     ['--font-size-', 'fontSize'],
@@ -81,40 +52,38 @@ function deriveTreePath(name: string): TokenTreePath | null {
   return null
 }
 
+// A flat v2 semantic key whose alias resolves to a non-color primitive.
+function isNonColorSemanticKey(key: string): boolean {
+  return key === 'radius'
+}
+
 function isColorTreePath(path: TokenTreePath | null): boolean {
   if (!path) return false
   if (path.kind === 'primitiveColor') return true
-  if (path.kind === 'semanticColorGroup') return true
+  // Flat v2 semantics: color unless the key aliases a non-color primitive (e.g. radius)
+  if (path.kind === 'semanticFlat') return !isNonColorSemanticKey(path.key)
   return false
 }
 
 // Returns true for tokens that must alias a parent primitive (no raw values allowed)
 function isAliasOnlyTreePath(path: TokenTreePath | null): boolean {
   if (!path) return false
-  if (path.kind === 'semanticColorGroup') return true
   if (path.kind === 'semanticFlat') return true
   return false
 }
 
 // Maps a treePath to the CSS name prefix of the primitives it should alias
 function getPrimitiveScopePrefix(path: TokenTreePath): string | null {
-  if (path.kind === 'semanticColorGroup') return '--color-'
   if (path.kind === 'semanticFlat') {
-    const map: Record<string, string> = {
-      spacingComponent: '--spacing-',
-      spacingLayout: '--spacing-',
-      radiusComponent: '--radius-',
-      sizeComponent: '--size-',
-      shadows: '--shadow-',
-    }
-    return map[path.group] ?? null
+    // Flat v2 semantics alias a primitive: radius → --radius-, everything else → --color-
+    return isNonColorSemanticKey(path.key) ? '--radius-' : '--color-'
   }
   return null
 }
 
 // ─── Flatten all known token names for duplicate detection ─────────────────────
 
-function getAllTokenNames(geeklegoTokens: GeeklegoTokens): Set<string> {
+function getAllTokenNames(geeklegoTokens: GeeklegoTokensV2): Set<string> {
   const names = new Set<string>()
   const PRIM_PREFIX: Record<string, string> = {
     colors: 'color', fontFamily: 'font-family', fontSize: 'font-size',
@@ -122,13 +91,6 @@ function getAllTokenNames(geeklegoTokens: GeeklegoTokens): Set<string> {
     spacing: 'spacing', radius: 'radius', borderWidth: 'border-width',
     opacity: 'opacity', zIndex: 'z-index', duration: 'duration', easing: 'ease',
     sizeScale: 'size', iconSize: 'icon-size',
-  }
-  const SEMANTIC_PREFIX: Record<string, string> = {
-    bg: 'color-bg', surface: 'color-surface', text: 'color-text', border: 'color-border',
-    action: 'color-action', status: 'color-status', state: 'color-state',
-    dataSeries: 'color-data-series', shadows: 'shadow', spacingComponent: 'spacing-component',
-    spacingLayout: 'spacing-layout', sizeComponent: 'size-component',
-    radiusComponent: 'radius-component', layer: 'layer', borders: 'border',
   }
   const prims = geeklegoTokens.primitives as unknown as Record<string, unknown>
   for (const [cat, vals] of Object.entries(prims)) {
@@ -144,20 +106,9 @@ function getAllTokenNames(geeklegoTokens: GeeklegoTokens): Set<string> {
       }
     }
   }
-  const sem = geeklegoTokens.semantics?.light as unknown as Record<string, unknown> | undefined
-  if (sem) {
-    for (const [group, vals] of Object.entries(sem)) {
-      const prefix = SEMANTIC_PREFIX[group]
-      if (!prefix || !vals || typeof vals !== 'object') continue
-      for (const [k, v] of Object.entries(vals as Record<string, unknown>)) {
-        if (typeof v === 'string') names.add(`--${prefix}-${k}`)
-        else if (v && typeof v === 'object') {
-          for (const k2 of Object.keys(v as Record<string, unknown>)) {
-            names.add(`--${prefix}-${k}-${k2}`)
-          }
-        }
-      }
-    }
+  // Flat v2 semantics — CSS var for a key is `--<key>`
+  for (const k of Object.keys(geeklegoTokens.semantics.light)) {
+    names.add(`--${k}`)
   }
   return names
 }
@@ -176,7 +127,7 @@ function validateName(name: string, existingNames: Set<string>): string | null {
 
 interface Candidate { name: string; value: string }
 
-function buildCandidates(geeklegoTokens: GeeklegoTokens, scopePrefix: string): Candidate[] {
+function buildCandidates(geeklegoTokens: GeeklegoTokensV2, scopePrefix: string): Candidate[] {
   const result: Candidate[] = []
   const PRIM_PREFIX: Record<string, string> = {
     colors: 'color', fontFamily: 'font-family', fontSize: 'font-size',
@@ -453,8 +404,7 @@ export function AddTokenDialog({ isOpen, onClose, geeklegoTokens, defaultNamePre
   const treePathLabel = treePath
     ? treePath.kind === 'primitiveColor' ? `Primitive color — ${treePath.family} / ${treePath.shade}`
     : treePath.kind === 'primitiveFlat' ? `Primitive — ${treePath.category}`
-    : treePath.kind === 'semanticColorGroup' ? `Semantic color — ${treePath.group}`
-    : `Semantic — ${treePath.group}`
+    : `Semantic — ${treePath.key}`
     : null
 
   return (

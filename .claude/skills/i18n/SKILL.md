@@ -20,6 +20,14 @@ Before starting any i18n work, read:
 - `components/utils/i18n/useGeeklegoI18n.ts` — hook signature and merge logic
 - `.claude/skills/i18n/references/string-inventory.md` — which components have system strings
 
+> **v2 note.** The `components/utils/i18n/` module is architecture-agnostic and survives v2
+> unchanged. Two things to keep v2-correct: (1) v2 components live flat under
+> `components/v2/<Name>/`, so the relative import depth to utils is **`../../../utils/i18n/...`**
+> (three levels up), not `../../`. (2) There are no atom/molecule/organism tiers — process
+> components in dependency order (leaves first), not by tier label. RTL fixes use standard
+> Tailwind v4 logical-property utilities (`ps-3`, `pe-3`, `ms-auto`, `start-0`) — not
+> `ps-[var(--token)]` arbitraries.
+
 ---
 
 ## Architecture Overview
@@ -51,7 +59,7 @@ Geeklego ships no i18n library. No new `npm install` needed.
 2. Determine scope:
    - Is this a **new component**? → Check inventory for known system strings, then apply pattern in Phase 2 during component generation
    - Is this a **single component retrofit**? → Identify system strings, proceed to Phase 2 for that component
-   - Is this a **full library retrofit**? → List all affected components in bottom-up level order (atoms before molecules before organisms), wait for user approval before writing
+   - Is this a **full library retrofit**? → List all affected components in dependency order (leaf components before the components that compose them), wait for user approval before writing
 3. Check whether `components/utils/i18n/` already exists. If not, create it (see Phase 2A)
 
 Present the work list and **wait for approval** before writing any files.
@@ -71,17 +79,17 @@ Create exactly 4 files in `components/utils/i18n/`:
 | `useGeeklegoI18n.ts` | Internal `useComponentI18n` hook |
 | `index.ts` | Public barrel (provider + types only — NOT the hook) |
 
-**Critical:** The hook is NOT exported from `index.ts`. Components import it via relative path: `import { useComponentI18n } from '../../utils/i18n/useGeeklegoI18n'`
+**Critical:** The hook is NOT exported from `index.ts`. Components import it via relative path: `import { useComponentI18n } from '../../../utils/i18n/useGeeklegoI18n'`
 
 ### Phase 2B — Per-Component Retrofit Pattern
 
-For each component in the approved list (process bottom-up: atoms → molecules → organisms):
+For each component in the approved list (process in dependency order: leaf components before the components that compose them):
 
 **Step 1 — Add to types file:**
 ```typescript
-// IMPORT from the public barrel, NOT the private path:
-import type { ComponentNameI18nStrings } from '../../utils/i18n';
-// ❌ Do NOT import from: '../../utils/i18n/GeeklegoI18nProvider.types'
+// IMPORT from the public barrel, NOT the private path (depth is ../../../ from a v2 component):
+import type { ComponentNameI18nStrings } from '../../../utils/i18n';
+// ❌ Do NOT import from: '../../../utils/i18n/GeeklegoI18nProvider.types'
 // ❌ Do NOT define the interface inline in the types file
 
 export interface ComponentNameProps ... {
@@ -93,7 +101,7 @@ export interface ComponentNameProps ... {
 
 **Step 2 — Add to tsx file:**
 ```typescript
-import { useComponentI18n } from '../../utils/i18n/useGeeklegoI18n';
+import { useComponentI18n } from '../../../utils/i18n/useGeeklegoI18n';
 
 // In destructuring:
 { ..., i18nStrings, ...rest }
@@ -132,16 +140,17 @@ const resolvedDeltaLabel = deltaLabelProp ?? i18n.deltaLabel;
 
 ### Phase 2C — RTL Fixes
 
-When updating any component (or for the Input atom which needs it now):
+When updating any component, swap physical directional utilities for logical ones (standard
+Tailwind v4 utilities — `ps-3`, not `ps-[var(--token)]`):
 
 | Replace | With | When |
 |---|---|---|
-| `pl-[var(--token)]` | `ps-[var(--token)]` | Content padding that should mirror in RTL |
-| `pr-[var(--token)]` | `pe-[var(--token)]` | Content padding that should mirror in RTL |
-| `ml-[var(--token)]` | `ms-[var(--token)]` | Directional margin |
-| `mr-[var(--token)]` | `me-[var(--token)]` | Directional margin |
-| `left-[var(--token)]` | `start-[var(--token)]` | Icon/content inline-start positioning |
-| `right-[var(--token)]` | `end-[var(--token)]` | Icon/content inline-end positioning |
+| `pl-*` | `ps-*` | Content padding that should mirror in RTL |
+| `pr-*` | `pe-*` | Content padding that should mirror in RTL |
+| `ml-*` | `ms-*` | Directional margin |
+| `mr-*` | `me-*` | Directional margin |
+| `left-*` | `start-*` | Icon/content inline-start positioning |
+| `right-*` | `end-*` | Icon/content inline-end positioning |
 
 **Exempt from RTL conversion:** `left-0`/`right-0` on absolutely-positioned overlays (tooltips, dropdowns) — these align with their trigger which already mirrors in RTL flow.
 
@@ -174,7 +183,7 @@ Run through this checklist before presenting work as complete.
 - [ ] Template functions typed as `(arg: T) => string`, never concatenated inline
 - [ ] Existing content props unchanged — no breaking changes
 - [ ] **Hook is NOT dead code** — `useComponentI18n` is both imported AND called (search for the call site, not just the import)
-- [ ] **Import from public barrel** — `.types.ts` imports the i18n type from `../../utils/i18n`, NOT from `GeeklegoI18nProvider.types` private path
+- [ ] **Import from public barrel** — `.types.ts` imports the i18n type from `../../../utils/i18n`, NOT from `GeeklegoI18nProvider.types` private path
 - [ ] **No duplicate inline interface** — The i18n interface is NOT redefined in the component's `.types.ts`; it is imported and re-exported
 - [ ] **Forwarding** — If the component delegates to a child that also has `i18nStrings`, the prop is forwarded (not swallowed)
 - [ ] **Default options resolved from i18n** — If the component has a static default options array with hardcoded labels (e.g. ThemeSwitcher defaults), those labels are resolved from i18n, not hardcoded at module scope
@@ -202,7 +211,7 @@ Run through this checklist before presenting work as complete.
 
 ## Adding i18nStrings to a New Component
 
-When the component-builder skill generates a new component, include i18n if the component has any system-generated strings (not consumer content). Common system strings:
+When the `component-builder-v2` skill generates a new component, include i18n if the component has any system-generated strings (not consumer content). Common system strings:
 
 - `aria-label` on landmark elements (`<nav>`, `<aside>`, etc.)
 - `aria-label` on icon-only buttons where the label is a fixed phrase

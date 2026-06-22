@@ -1,0 +1,29 @@
+{
+  "skill_name": "component-builder-v2",
+  "evals": [
+    {
+      "id": 0,
+      "name": "simple-badge-no-radix",
+      "prompt": "Add a Badge component to the library. It should support a few color variants (default, secondary, destructive, outline) and render as a small pill-shaped label. We use it to tag statuses on cards.",
+      "expected_output": "A components/v2/Badge/ slice: Badge.tsx (forwardRef + cn, no Radix needed — it's static markup), badge-variants.ts (cva with the 4 variants using ONLY standard semantic utilities like bg-primary/bg-secondary/bg-destructive/border-input, no hardcoded colors), Badge.types.ts (native span attrs + VariantProps + asChild?), Badge.stories.tsx (incl. a DarkMode story with both data-theme=dark and .dark, max-w-2xl). No component-token block, no atom/molecule folders.",
+      "files": [],
+      "assertions": []
+    },
+    {
+      "id": 1,
+      "name": "radix-tooltip-compound",
+      "prompt": "I need a Tooltip component for the design system. It should show a small text label on hover/focus over any trigger element, positioned above by default. Make it accessible.",
+      "expected_output": "A components/v2/Tooltip/ slice built on @radix-ui/react-tooltip (NOT hand-rolled hover/focus/positioning/aria). Named sub-component exports wrapping Radix parts (Provider/Root/Trigger/Content), each styled with cn() + semantic utilities (bg-popover text-popover-foreground etc.). asChild used so any element can be the trigger. Install command uses npm (npm install @radix-ui/react-tooltip), NOT pnpm. DarkMode story with both selectors. No hand-rolled focus/escape/positioning.",
+      "files": [],
+      "assertions": []
+    },
+    {
+      "id": 2,
+      "name": "command-palette-cmdk-recipe",
+      "prompt": "Build a command palette (Cmd+K style) that pops open, lets the user type to filter a list of actions, and navigate the results with arrow keys. Like the one in VS Code or Linear.",
+      "expected_output": "Should recognize this is the Popover + cmdk recipe and REUSE/build on the already-shipped components/v2/Command/ and components/v2/Combobox/ rather than reimplementing keyboard nav, filtering, and aria-activedescendant from scratch. Should read those existing components first. If it adds a new component, it composes Command inside a Dialog/Popover. Uses npm for any install. No hand-rolled roving-tabindex / arrow-key handling.",
+      "files": [],
+      "assertions": []
+    }
+  ]
+}

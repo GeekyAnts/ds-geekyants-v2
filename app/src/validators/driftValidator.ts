@@ -1,5 +1,5 @@
 import type { ValidatorResult } from './types'
-import type { GeeklegoTokens } from '../types'
+import type { GeeklegoTokensV2 } from '../types'
 
 interface DefaultTokenSnapshot {
   tokens: Map<string, string>
@@ -27,7 +27,7 @@ function loadDefaultSnapshot(): DefaultTokenSnapshot | null {
   return null
 }
 
-export function saveDefaultSnapshot(tokens: GeeklegoTokens): void {
+export function saveDefaultSnapshot(tokens: GeeklegoTokensV2): void {
   const tokenMap = new Map<string, string>()
 
   for (const [family, shades] of Object.entries(tokens.primitives.colors)) {
@@ -57,13 +57,9 @@ export function saveDefaultSnapshot(tokens: GeeklegoTokens): void {
     }
   }
 
-  const colorGroups = ['bg', 'surface', 'text', 'border', 'action', 'status', 'state'] as const
-  for (const group of colorGroups) {
-    if (tokens.semantics.light[group]) {
-      for (const k of Object.keys(tokens.semantics.light[group])) {
-        tokenMap.set(`--color-${group}-${k}`, tokens.semantics.light[group][k])
-      }
-    }
+  // v2 flat semantics: each key maps to the CSS variable `--<key>`.
+  for (const [k, v] of Object.entries(tokens.semantics.light)) {
+    tokenMap.set(`--${k}`, v)
   }
 
   try {
@@ -78,7 +74,7 @@ export function saveDefaultSnapshot(tokens: GeeklegoTokens): void {
 }
 
 export function checkDrift(
-  tokens: GeeklegoTokens,
+  tokens: GeeklegoTokensV2,
   currentStaged: Map<string, string>
 ): ValidatorResult[] {
   const results: ValidatorResult[] = []
@@ -112,7 +108,7 @@ export function checkDrift(
   return results
 }
 
-function getDefaultTokenValue(tokenName: string, tokens: GeeklegoTokens): string | null {
+function getDefaultTokenValue(tokenName: string, tokens: GeeklegoTokensV2): string | null {
   for (const [family, shades] of Object.entries(tokens.primitives.colors)) {
     if (typeof shades === 'object' && shades !== null && !Array.isArray(shades)) {
       for (const [shade, shadeValue] of Object.entries(shades)) {
@@ -123,14 +119,10 @@ function getDefaultTokenValue(tokenName: string, tokens: GeeklegoTokens): string
     }
   }
 
-  const colorGroups = ['bg', 'surface', 'text', 'border', 'action', 'status', 'state'] as const
-  for (const group of colorGroups) {
-    if (tokens.semantics.light[group]) {
-      for (const k of Object.keys(tokens.semantics.light[group])) {
-        if (`--color-${group}-${k}` === tokenName) {
-          return tokens.semantics.light[group][k]
-        }
-      }
+  // v2 flat semantics: each key maps to the CSS variable `--<key>`.
+  for (const [k, v] of Object.entries(tokens.semantics.light)) {
+    if (`--${k}` === tokenName) {
+      return v
     }
   }
 

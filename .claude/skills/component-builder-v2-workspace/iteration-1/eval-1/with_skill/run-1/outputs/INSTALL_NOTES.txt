@@ -1,0 +1,3 @@
+npm install @radix-ui/react-tooltip
+
+(Per the skill's radix-primitive-map.md: install the Radix package per-component when you reach it, using npm — it's what's wired in this repo despite pnpm appearing in `engines`. NOT actually run in this sandbox.)

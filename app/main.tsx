@@ -1,5 +1,5 @@
 import './src/editor-ds/editor.css'
-import '../design-system/geeklego.css'
+import '../design-system/v2/index.css'
 import './src/components/KeyboardShortcuts.css'
 import './src/components/OnboardingTour.css'
 import './src/components/ExportModal.css'

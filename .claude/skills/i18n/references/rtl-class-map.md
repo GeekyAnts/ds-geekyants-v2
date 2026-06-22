@@ -1,6 +1,12 @@
 # RTL Class Map — Logical Property Substitution Table
 
-Tailwind v4.2 ships full logical property support. Use logical equivalents so Geeklego components automatically mirror in RTL layouts (e.g. Arabic, Hebrew) when `dir="rtl"` is set on `<html>`.
+Tailwind v4 ships full logical property support. Use logical equivalents so Geeklego components automatically mirror in RTL layouts (e.g. Arabic, Hebrew) when `dir="rtl"` is set on `<html>`.
+
+> **v2 note.** Use the **standard logical utilities** (`ps-3`, `pe-4`, `ms-auto`, `start-0`), not
+> `ps-[var(--token)]` arbitraries — v2 styles with registered utilities. The `[var(--token)]`
+> forms below are stale-3-tier illustration; read the physical→logical mapping, write the
+> standard-utility form. The "Component Status" table is a historical record of the old library
+> (most listed components were deleted in the 2-tier cut).
 
 ---
 
@@ -70,7 +76,9 @@ Tailwind v4.2 ships full logical property support. Use logical equivalents so Ge
 
 The Switch component uses `translate-x-*` to animate the thumb. In RTL, the thumb should translate in the opposite direction (`-translate-x-*`). This is a CSS logic concern, not a padding/margin concern.
 
-**Recommended approach:** Use `rtl:-translate-x-[var(--switch-thumb-translate-on)]` alongside the LTR class, or use a CSS custom property to switch sign via `[dir=rtl]` override in `geeklego.css`. Document in Switch README under Accessibility > RTL.
+**Recommended approach:** Use the `rtl:` variant alongside the LTR class (e.g.
+`translate-x-5 rtl:-translate-x-5`) so the thumb mirrors direction. Document in the Switch README
+under Accessibility > RTL.
 
 This is intentionally deferred and noted here for tracking.
 
@@ -78,11 +86,12 @@ This is intentionally deferred and noted here for tracking.
 
 ## Tailwind v4 Compatibility Note
 
-All logical property utilities (`ps-*`, `pe-*`, `ms-*`, `me-*`, `start-*`, `end-*`) work with `var()` syntax in Tailwind v4.2:
+All logical property utilities (`ps-*`, `pe-*`, `ms-*`, `me-*`, `start-*`, `end-*`) are standard
+Tailwind v4 utilities:
 
 ```
-ps-[var(--input-px-md)]   →   padding-inline-start: var(--input-px-md)
-start-[var(--input-px-md)] →  inset-inline-start: var(--input-px-md)
+ps-3    →   padding-inline-start: <spacing-3>
+start-0 →   inset-inline-start: 0
 ```
 
 No `@supports` guard needed — `padding-inline-start` is baseline-supported in all modern browsers.

@@ -5,8 +5,8 @@ description: >
   the user asks to: run a security audit, check for XSS vulnerabilities, retrofit
   existing components for security, add href sanitization, enforce noopener/noreferrer
   on external links, or requests a security review of any component. Also use this skill
-  proactively when the component-builder skill generates any component that renders an
-  <a> element — step 4.8 of the component generation flow requires this security check.
+  proactively when the component-builder-v2 skill generates any component that renders an
+  <a> element — step 4.8 of that skill's generation flow requires this security check.
   Trigger on phrases like: "secure my components", "XSS protection", "sanitize href",
   "security audit", "javascript: vulnerability", "safe links", "external link protection".
 ---
@@ -16,9 +16,15 @@ description: >
 ## Foundation
 
 Before starting any security work, read:
-- `CLAUDE.md` — architecture rules (always first; security rules are 42-44 and 48)
+- `CLAUDE.md` — architecture rules (always first)
 - `components/utils/security/sanitize.ts` — the two utility functions and their contracts
 - `components/utils/security/sanitize.types.ts` — `SafeExternalLinkProps`, `UnsafeProtocol`
+
+> **v2 note.** The `components/utils/security/` module is architecture-agnostic and survives v2
+> unchanged. Two things to keep v2-correct: (1) v2 components live flat under
+> `components/v2/<Name>/`, so the relative import depth to utils is **`../../../utils/security/sanitize`**
+> (three levels up), not `../../`. (2) There are no atom/molecule/organism tiers — process
+> components in dependency order (leaves first), not by tier label.
 
 ---
 
@@ -54,7 +60,7 @@ Read `references/security-patterns.md` for the full threat model and edge cases.
 3. Determine scope:
    - **New component** — Run the security checklist in Phase 3 during generation; no separate scoping needed
    - **Single component retrofit** — Identify anchor elements, proceed to Phase 2B
-   - **Full library retrofit** — Run the per-component audit table in `references/component-security-audit.md`, list all affected components in bottom-up order (atoms before molecules before organisms)
+   - **Full library retrofit** — Run the per-component audit table in `references/component-security-audit.md`, list all affected components in dependency order (leaf components before the components that compose them)
 4. Present the work list with affected files. **Wait for approval before writing.**
 
 ---
@@ -80,13 +86,19 @@ Key constraints for `sanitize.ts`:
 
 ### Phase 2B — Per-Component Retrofit Pattern
 
-Process in bottom-up order: atoms → molecules → organisms.
+Process in dependency order: leaf components before the components that compose them.
 
-**Step 1 — Add the import (always direct, never from the barrel):**
+> v2 covers the `<a>` case two ways — a component that renders `<a>` directly, **and** a component
+> rendered as a link via `asChild` + Radix `<Slot>` (e.g. `<Button asChild><a href=…></a></Button>`).
+> When `asChild` is used the `<a>` and its `href` are consumer-supplied children, so the consumer
+> owns sanitization; sanitize here when the component itself owns the `href` prop.
+
+**Step 1 — Add the import (always direct, never from the barrel).** From a v2 component at
+`components/v2/<Name>/<Name>.tsx`, utils are three levels up:
 ```typescript
-import { sanitizeHref } from '../../utils/security/sanitize';
+import { sanitizeHref } from '../../../utils/security/sanitize';
 // or, if the component renders external links with target/rel:
-import { getSafeExternalLinkProps } from '../../utils/security/sanitize';
+import { getSafeExternalLinkProps } from '../../../utils/security/sanitize';
 ```
 
 **Step 2 — Sanitize href (all `<a>`-rendering components):**
@@ -115,17 +127,19 @@ const safeProps = getSafeExternalLinkProps(href, target, rel);
 <a {...safeProps} className={classes} {...anchorRest}>
 ```
 
-### Phase 2C — Component-Specific Notes
+### Phase 2C — Pattern Examples
 
-| Component | Fix needed | Notes |
+These rows illustrate the fix patterns by kind of link (the named components are from the old
+3-tier library and may not exist in v2 — treat them as templates, not a checklist):
+
+| Link kind | Fix needed | Notes |
 |---|---|---|
-| `Item` | `getSafeExternalLinkProps` | Destructure `target`/`rel` from `rest` cast; also add them to `ItemProps` |
-| `BreadcrumbItem` | `sanitizeHref` only | Navigation — always same-tab; add `useMemo` to React imports |
-| `NavItem` | `sanitizeHref` only | No explicit `target` prop — `target` from rest is lower risk |
-| `Quote` | `sanitizeHref` on `sourceUrl` | Citation link — same-tab |
-| `Link` | `sanitizeHref` on href only | Existing `rel` logic is correct — do NOT change it |
+| Polymorphic link (renders `<a>` with `target`/`rel` from rest) | `getSafeExternalLinkProps` | Destructure `target`/`rel` from the `rest` cast; also add them to the Props interface |
+| Navigation item / breadcrumb | `sanitizeHref` only | Always same-tab; wrap in `useMemo` |
+| Citation / source link | `sanitizeHref` on the url prop | Same-tab |
+| Link with its own `external`/`rel` logic | `sanitizeHref` on href only | Don't change the existing `rel` logic |
 
-After fixing atoms, molecules and organisms that delegate to these atoms are automatically protected.
+A leaf link component, once fixed, automatically protects any component that composes it.
 
 ---
 
@@ -167,12 +181,13 @@ Run through this checklist before presenting work as complete.
 
 ## Adding Security to a New Component (Step 4.8)
 
-When generating a new component that renders `<a>`:
+When `component-builder-v2` generates a new component that renders `<a>` (step 4.8):
 
-1. Import `sanitizeHref` from `'../../utils/security/sanitize'`
+1. Import `sanitizeHref` from `'../../../utils/security/sanitize'` (three levels up from a v2 component)
 2. Apply `sanitizeHref(href)` to every href prop before rendering, wrapped in `useMemo`
 3. If the component has an `external` or `target` prop: use `getSafeExternalLinkProps` instead
-4. Add a row to `references/component-security-audit.md`
+4. (When `asChild` is used, the `<a>` is a consumer-supplied child — the consumer owns its href.)
+5. Add a row to `references/component-security-audit.md`
 
 ---
 

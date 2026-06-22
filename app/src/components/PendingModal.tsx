@@ -2,23 +2,13 @@ import { useEffect, useCallback, useMemo } from 'react'
 import { X, ArrowRight, RotateCcw } from 'lucide-react'
 import { getAllStaged, unstage, discardAll, subscribeToPendingChanges, getStagedNewTokens, unstageNewToken } from '../state/staging'
 import { withPxAnnotation } from '../utils/colorUtils'
-import type { GeeklegoTokens, ComponentTokenGroup } from '../types'
+import type { GeeklegoTokensV2 } from '../types'
 import { useState } from 'react'
 
 function buildOriginalMap(
-  tokens: GeeklegoTokens,
-  componentGroups: ComponentTokenGroup[]
+  tokens: GeeklegoTokensV2
 ): Map<string, string> {
   const map = new Map<string, string>()
-
-  // Flatten all component tokens
-  for (const group of componentGroups) {
-    for (const section of group.sections) {
-      for (const token of section.tokens) {
-        map.set(token.name, token.value)
-      }
-    }
-  }
 
   // Flatten primitives
   const PRIMITIVE_PREFIX: Record<string, string> = {
@@ -43,24 +33,9 @@ function buildOriginalMap(
     }
   }
 
-  // Flatten semantics
-  const SEMANTIC_PREFIX: Record<string, string> = {
-    bg: 'color-bg', surface: 'color-surface', text: 'color-text',
-    border: 'color-border', action: 'color-action', status: 'color-status',
-    state: 'color-state', dataSeries: 'color-data-series', shadows: 'shadow',
-    spacingComponent: 'spacing-component', spacingLayout: 'spacing-layout',
-    sizeComponent: 'size-component', radiusComponent: 'radius-component',
-    layer: 'layer', borders: 'border',
-  }
-  const sems = tokens.semantics?.light as unknown as Record<string, unknown> | undefined
-  if (sems) {
-    for (const [cat, prefix] of Object.entries(SEMANTIC_PREFIX)) {
-      const data = sems[cat]
-      if (!data || typeof data !== 'object') continue
-      for (const [k, v] of Object.entries(data as Record<string, string>)) {
-        map.set(`--${prefix}-${k}`, v)
-      }
-    }
+  // Flatten flat v2 semantics — CSS var for a key is `--<key>`
+  for (const [k, v] of Object.entries(tokens.semantics.light)) {
+    map.set(`--${k}`, v)
   }
 
   return map
@@ -69,11 +44,10 @@ function buildOriginalMap(
 interface PendingModalProps {
   open: boolean
   onClose: () => void
-  tokens: GeeklegoTokens
-  componentGroups: ComponentTokenGroup[]
+  tokens: GeeklegoTokensV2
 }
 
-export function PendingModal({ open, onClose, tokens, componentGroups }: PendingModalProps) {
+export function PendingModal({ open, onClose, tokens }: PendingModalProps) {
   const [pendingVersion, setPendingVersion] = useState(0)
 
   // Re-render when staging changes
@@ -83,8 +57,8 @@ export function PendingModal({ open, onClose, tokens, componentGroups }: Pending
   }, [])
 
   const originalMap = useMemo(
-    () => buildOriginalMap(tokens, componentGroups),
-    [tokens, componentGroups]
+    () => buildOriginalMap(tokens),
+    [tokens]
   )
 
   const changes = useMemo(() => {

@@ -3,7 +3,12 @@
 Per-component audit of XSS protection status.
 Update this table after each retrofit or new component generation.
 
-**Last audited:** 2026-03-24
+> **v2 note.** The rows below are the historical audit of the old 3-tier library (the `Level`
+> column's L1/L2/L3 are 3-tier labels and most listed components were deleted in the 2-tier cut).
+> Kept as a record of the sanitize patterns by link kind. For v2, audit components flat under
+> `components/v2/<Name>/`; ignore the `Level` column and add new v2 rows without a tier label.
+
+**Last audited:** 2026-03-24 (3-tier library)
 
 ---
 
@@ -64,8 +69,8 @@ Update this table after each retrofit or new component generation.
 
 ## Components Added After Retrofit (Generation Checklist Applied)
 
-New components added after 2026-03-24 are checked at generation time via step 4.8 in
-`component-generation-flow.md`. Add a row here for each new component that renders `<a>`.
+New components are checked at generation time via step 4.8 of the `component-builder-v2` skill.
+Add a row here for each new v2 component that renders `<a>`.
 
 | Component | Added date | Renders `<a>`? | Security status | Notes |
 | `DropdownMenu` | 2026-03-25 | Yes (link items) | ✅ Secure | `getSafeExternalLinkProps` on all link items; `target`/`rel` from item props; sanitized href wins |

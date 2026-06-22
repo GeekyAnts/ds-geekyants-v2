@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect, useCallback, useRef } from 'react'
-import type { TokenEntry, GeeklegoTokens } from '../types'
+import type { TokenEntry, GeeklegoTokensV2 } from '../types'
 import { EdCard } from '../editor-ds/primitives/EdCard'
 import { getCategoryById, groupTokensByPattern, type CategoryMeta } from '../ia/categoryCopy'
 import ScaleView from './ScaleView'
@@ -15,7 +15,7 @@ import './CategoryPage.css'
 interface CategoryPageProps {
   category: string
   tokens: TokenEntry[]
-  geeklegoTokens?: GeeklegoTokens
+  geeklegoTokens?: GeeklegoTokensV2
   onTokenClick?: (token: TokenEntry) => void
   onAddToken?: (groupName: string, namePrefix: string) => void
 }
@@ -53,13 +53,15 @@ const categoryFilters: Record<string, (name: string) => boolean> = {
   motion: (name) => /^--(?:motion-|duration-|ease-)/.test(name),
   zIndex: (name) => /^--(?:z-|layer-)/.test(name),
   border: (name) => /^--border-/.test(name),
-  // Semantic — explicit prefixes for semantic aliases
-  surface: (name) => /^--(?:surface-|color-(?:bg|surface)-)/.test(name),
-  content: (name) => /^--(?:content-|color-text-)/.test(name),
-  interactive: (name) => /^--(?:interactive-|color-(?:action|state)-)/.test(name),
-  status: (name) => /^--(?:status-|color-status-)/.test(name),
-  layout: (name) => /^--(?:layout-|spacing-layout-|size-component-|radius-component-)/.test(name),
-  'typography-semantic': (name) => /^--typography-/.test(name),
+  // Semantic — v2 (2-tier) uses the flat standard ShadCN/Tailwind vocabulary.
+  // These match the EXACT `--<name>` semantics (+ optional `-foreground` pair),
+  // grouped identically to getSemanticCategories() in ia/classify.ts. The
+  // foundations color/border/radius filters above all require a trailing
+  // `-<segment>`/`-<digit>`, so bare `--border`/`--radius`/`--input` never collide.
+  surface: (name) => /^--(?:background|foreground|card|card-foreground|popover|popover-foreground)$/.test(name),
+  interactive: (name) => /^--(?:primary|primary-foreground|secondary|secondary-foreground|accent|accent-foreground|muted|muted-foreground|ring)$/.test(name),
+  status: (name) => /^--(?:destructive|destructive-foreground)$/.test(name),
+  layout: (name) => /^--(?:border|input|radius)$/.test(name),
 }
 
 function filterTokensForCategory(tokens: TokenEntry[], category: string): TokenEntry[] {
@@ -226,22 +228,25 @@ function resolveVar(value: string): string {
 }
 
 interface TypographyScaleViewProps {
-  geeklegoTokens: GeeklegoTokens
+  geeklegoTokens: GeeklegoTokensV2
   onTokenClick?: (token: TokenEntry) => void
 }
 
-function TypographyScaleView({ geeklegoTokens, onTokenClick }: TypographyScaleViewProps) {
-  const [tick, setTick] = useState(0)
+function TypographyScaleView({ onTokenClick }: TypographyScaleViewProps) {
+  const [, setTick] = useState(0)
   useEffect(() => subscribeToPendingChanges(() => setTick(n => n + 1)), [])
   useEffect(() => subscribeToDraftChanges(() => setTick(n => n + 1)), [])
 
-  const sem = geeklegoTokens.semantics.light.typographySemantics
+  // The flat v2 model has no nested typography semantic styles — there are no
+  // extra typography styles to render here.
+  const sem: Record<string, { size: string; weight: string; leading: string; tracking: string }> = {}
 
   const styles = useMemo(() => {
     const known = TYPO_STYLE_ORDER.filter(s => sem[s])
     const extras = Object.keys(sem).filter(s => !TYPO_STYLE_ORDER.includes(s))
     return [...known, ...extras]
-  }, [sem])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   return (
     <div className="ed-typo-scale">
@@ -336,11 +341,11 @@ function groupNameToPrefix(category: string, groupName: string): string {
   }
   if (category === 'border') return '--border-width-'
   if (category === 'zIndex') return '--z-index-'
-  if (category === 'surface') return '--color-bg-'
-  if (category === 'content') return '--color-text-'
-  if (category === 'interactive') return '--color-action-'
-  if (category === 'status') return '--color-status-'
-  if (category === 'layout') return '--spacing-component-'
+  // v2 semantics are flat standard names with no shared prefix (e.g. --primary,
+  // --background) — a new semantic is just `--<name>`, so start the add-token
+  // dialog with a bare `--` for all semantic categories.
+  if (category === 'surface' || category === 'interactive' ||
+      category === 'status' || category === 'layout') return '--'
   return '--'
 }
 

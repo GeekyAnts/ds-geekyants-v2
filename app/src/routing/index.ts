@@ -9,7 +9,6 @@ export {
   replaceRoute,
   foundationsUrl,
   semanticUrl,
-  componentUrl,
   tokenUrl,
   ROUTES,
   routeComponents,

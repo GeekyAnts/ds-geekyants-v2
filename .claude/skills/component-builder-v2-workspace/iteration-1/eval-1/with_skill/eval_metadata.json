@@ -1,0 +1,13 @@
+{
+  "eval_id": 1,
+  "eval_name": "radix-tooltip-compound",
+  "prompt": "I need a Tooltip component for the design system. It should show a small text label on hover/focus over any trigger element, positioned above by default. Make it accessible.",
+  "assertions": [
+    "Builds on @radix-ui/react-tooltip (does NOT hand-roll hover/focus/positioning)",
+    "Install command uses npm, NOT pnpm  [TARGETED FIX]",
+    "Pass-through Radix parts re-exported; only Content styled (compound pattern)",
+    "Uses popover semantic tokens (bg-popover / text-popover-foreground)",
+    "No hand-rolled focus trap / escape / click-outside hooks",
+    "side default is top (request: 'above by default')"
+  ]
+}

@@ -52,7 +52,7 @@ function ScaleView({ category, tokens }: ScaleViewProps) {
     category.includes('line-height') ||
     category.includes('letter-spacing')
 
-  let displayTokens = [...tokens]
+  const displayTokens = [...tokens]
   let shouldSort = false
 
   if (isColorScale) {

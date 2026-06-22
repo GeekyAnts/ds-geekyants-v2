@@ -1,0 +1,8 @@
+/* =============================================================================
+   geeklego v2 — design system entrypoint (2-tier)
+   Import order matters: primitives first (it pulls in Tailwind + registers the
+   @theme palette), then semantics (aliases + utility registration), then themes.
+   ============================================================================= */
+@import "./primitives.css";
+@import "./semantics.css";
+@import "./themes/dark.css";

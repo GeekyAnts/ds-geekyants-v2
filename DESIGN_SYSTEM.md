@@ -1,3 +1,5 @@
+> ⚠️ This describes the OLD 3-tier system. v2 is being rebuilt — see `PROTOTYPE-SHADCN-2TIER.md`. Ignore this file until refreshed.
+
 # Geeklego Site — Design Language Reference
 
 A living reference for the visual design language used in the Geeklego documentation site. Use this to maintain consistency across pages or port the aesthetic to other apps.
