@@ -83,3 +83,6 @@ docs/migration-guides.md
 GEEKLEGO_BLOG_DOCUMENTATION.md
 PROJECT-DOCUMENTATION.md
 geeklego-blog-post.md
+
+# Private research docs (decoupled from architecture — local-only)
+docs/

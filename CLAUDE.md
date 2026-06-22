@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 > **This is the GeekLego v2 system: 2-tier tokens (primitives → semantics) + ShadCN/Radix components.**
 > It replaces the old 3-tier (primitive → semantic → component-token) architecture. The 2-tier cut has landed and the Token Editor `app/` has been rebuilt on v2 — see "Repo state" below. The reference implementation for every v2 rule in this file is the **Button slice** at [components/v2/Button/](components/v2/Button/) — read it before building anything.
 >
-> **Governing brief:** [PROTOTYPE-SHADCN-2TIER.md](PROTOTYPE-SHADCN-2TIER.md) holds the locked decisions and step ordering. [MULTI-TARGET-ARCHITECTURE.md](MULTI-TARGET-ARCHITECTURE.md) holds the "why" (IR-as-contract, fork-per-brand). When this file and the brief disagree, the brief wins and this file should be fixed.
+> **This file is the authoritative source for v2 rules.** Read it together with the reference component above.
 
 ---
 
@@ -345,5 +345,5 @@ Build/check the v2 slice through the real pipeline before declaring done:
 *Project: GeekLego v2 — open-source, design-system-first component library*
 *Architecture: 2-tier tokens (primitives → standard ShadCN semantics) + ShadCN/Radix components*
 *Stack: React 19 + TypeScript 5.7 + Tailwind CSS v4 + Radix UI + Storybook 10 + Vite 6*
-*Reference component: `components/v2/Button/` · Governing brief: `PROTOTYPE-SHADCN-2TIER.md`*
+*Reference component: `components/v2/Button/` · This file is the authoritative source for v2 rules.*
 *Last updated: 2026-06-22*

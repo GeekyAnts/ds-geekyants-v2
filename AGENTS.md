@@ -1,4 +1,4 @@
-> ⚠️ This describes the OLD 3-tier system. v2 is being rebuilt — see `PROTOTYPE-SHADCN-2TIER.md`. Ignore this file until refreshed.
+> ⚠️ This describes the OLD 3-tier system. v2 has landed — see `CLAUDE.md` for the authoritative v2 rules. Ignore this file until refreshed.
 
 # AGENTS.md — Geeklego
 
