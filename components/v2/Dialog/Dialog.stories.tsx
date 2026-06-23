@@ -18,6 +18,7 @@ import { Button } from "../Button/Button";
 const meta: Meta<typeof Dialog> = {
   title: "v2/Dialog",
   component: Dialog,
+  tags: ["autodocs"],
   parameters: { layout: "centered" },
 };
 export default meta;

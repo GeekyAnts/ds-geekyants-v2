@@ -76,6 +76,10 @@ export function PendingModal({ open, onClose, tokens }: PendingModalProps) {
       isNew: true,
     }))
     return [...newTokens, ...edits]
+    // pendingVersion is a version counter bumped by subscribeToPendingChanges;
+    // it's the invalidation signal that re-reads the external staged store
+    // (getAllStaged/getStagedNewTokens aren't reactive values ESLint can track).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [originalMap, pendingVersion])
 
   const handleUndoOne = useCallback((name: string, isNew: boolean) => {

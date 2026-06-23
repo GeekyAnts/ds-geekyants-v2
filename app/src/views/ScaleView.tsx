@@ -53,14 +53,11 @@ function ScaleView({ category, tokens }: ScaleViewProps) {
     category.includes('letter-spacing')
 
   const displayTokens = [...tokens]
-  let shouldSort = false
 
   if (isColorScale) {
     displayTokens.sort(getSortByLightness())
-    shouldSort = true
   } else if (isSpacingScale || isRadiusScale || isFontSizeScale) {
     displayTokens.sort(getNumericSort())
-    shouldSort = true
   }
 
   if (isColorScale) {

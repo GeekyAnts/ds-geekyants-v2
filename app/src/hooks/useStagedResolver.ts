@@ -1,5 +1,5 @@
-import { useEffect, useState, useCallback, useMemo } from 'react'
-import { getStagedValue, getAllStaged } from '../state/staging'
+import { useEffect, useState, useCallback } from 'react'
+import { getAllStaged } from '../state/staging'
 
 export function useStagedResolver(originalTokens: Map<string, string>) {
   const [stagedMap, setStagedMap] = useState<Map<string, string>>(new Map())

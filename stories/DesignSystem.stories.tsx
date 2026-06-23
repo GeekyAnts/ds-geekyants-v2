@@ -51,25 +51,13 @@ function GroupLabel({ children }: { children: React.ReactNode }) {
 // ─── Color swatch ──────────────────────────────────────────────────────────
 function Swatch({ token, label, containerEl }: { token: string; label?: string; containerEl?: React.RefObject<HTMLDivElement | null> }) {
   const [value, setV] = React.useState('');
-  const [isBright, setIsBright] = React.useState(false);
   const swatchRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
     const el = containerEl ? containerEl.current : null;
     const raw = el ? tokEl(el, token) : tok(token);
     setV(raw || '—');
-
-    // Check if background is bright so we can pick text color
-    if (swatchRef.current) {
-      const bg = getComputedStyle(swatchRef.current).backgroundColor;
-      const m = bg.match(/\d+/g);
-      if (m && m.length >= 3) {
-        const [r, g, b] = m.map(Number);
-        const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-        setIsBright(luminance > 0.65);
-      }
-    }
-  });
+  }, [containerEl, token]);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', minWidth: '140px', flex: '1 1 140px', maxWidth: '180px' }}>

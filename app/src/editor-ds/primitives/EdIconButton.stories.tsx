@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { EdIconButton } from './EdIconButton'
-import { EdIconButtonProps } from './EdIconButton.types'
 import { Plus, Trash, Settings, User } from 'lucide-react'
 
 const meta: Meta<typeof EdIconButton> = {

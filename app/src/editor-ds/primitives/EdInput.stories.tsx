@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { EdInput } from './EdInput'
-import { EdInputProps } from './EdInput.types'
 
 const meta: Meta<typeof EdInput> = {
   title: 'Editor Primitives/EdInput',

@@ -51,7 +51,6 @@ export const EdSplit = ({
   useEffect(() => {
     if (!isDragging || !containerRef.current) return
 
-    const container = containerRef.current
     const handleMouseMove = (e: MouseEvent) => {
       updateSizes(e.clientX, e.clientY)
     }

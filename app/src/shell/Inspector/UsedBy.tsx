@@ -9,7 +9,7 @@ interface UsedByProps {
   onShowDependencyTree?: (tokenName: string) => void
 }
 
-export function UsedBy({ tokenName, graph, stagedValues, onShowDependencyTree }: UsedByProps) {
+export function UsedBy({ tokenName, graph, stagedValues: _stagedValues, onShowDependencyTree }: UsedByProps) {
   const usedByInfo = useMemo(() => {
     if (!graph) return null
 

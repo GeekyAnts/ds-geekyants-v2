@@ -60,6 +60,11 @@ export function validateCssTokens(css: string): {
     let m: RegExpExecArray | null
     while ((m = varRegex.exec(line)) !== null) {
       const name = m[1]
+      // Skip framework-injected runtime vars (Tailwind tw-*, Radix radix-*) —
+      // e.g. --radix-accordion-content-height is set on the element at runtime
+      // and is never a token that chains primitive → semantic.
+      if (FRAMEWORK_INTERNAL_PREFIXES.some((prefix) => name.startsWith(prefix)))
+        continue
       if (!defined.has(name) && !reported.has(name)) {
         broken.push({ name, line: i + 1 })
         reported.add(name)

@@ -8,7 +8,7 @@ const RGBA_PATTERN = /^rgba\(/
 const HSL_PATTERN = /^hsl\(/
 const HSLA_PATTERN = /^hsla\(/
 
-function isColorValue(value: string): boolean {
+function _isColorValue(value: string): boolean {
   if (!value) return false
   const trimmed = value.trim()
   return (
@@ -28,7 +28,7 @@ function isSpacingValue(value: string): boolean {
     /^\d+(\.\d+)?em$/.test(value.trim())
 }
 
-function isRadiusValue(value: string): boolean {
+function _isRadiusValue(value: string): boolean {
   if (!value) return false
   return isSpacingValue(value) ||
     /^(\d+%|auto)$/.test(value.trim())

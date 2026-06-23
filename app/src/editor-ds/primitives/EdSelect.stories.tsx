@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { EdSelect } from './EdSelect'
-import { EdSelectProps } from './EdSelect.types'
 
 const options = [
   { value: 'option1', label: 'Option One' },

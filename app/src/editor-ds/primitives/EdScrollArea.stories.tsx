@@ -1,7 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { EdScrollArea } from './EdScrollArea'
-import { EdScrollAreaProps } from './EdScrollArea.types'
-import { useRef } from 'react'
 
 const mockListItems = Array.from({ length: 50 }, (_, i) => ({
   id: i,

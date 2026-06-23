@@ -1,8 +1,7 @@
 import { useMemo, useState, useEffect, useCallback, useRef } from 'react'
 import type { TokenEntry, GeeklegoTokensV2 } from '../types'
 import { EdCard } from '../editor-ds/primitives/EdCard'
-import { getCategoryById, groupTokensByPattern, type CategoryMeta } from '../ia/categoryCopy'
-import ScaleView from './ScaleView'
+import { getCategoryById, type CategoryMeta } from '../ia/categoryCopy'
 import CategoryGroup from './CategoryGroup'
 import FilterBar from '../components/FilterBar'
 import { getAllStaged, getStagedValue, getDraft, subscribeToPendingChanges, subscribeToDraftChanges, getStagedNewTokens, stage } from '../state/staging'
@@ -512,6 +511,9 @@ function CategoryPage({ category, tokens, geeklegoTokens, onTokenClick }: Catego
       }
     }
     return withEdits
+    // tick is a version counter bumped by subscribeToPendingChanges; it re-reads the
+    // non-reactive staged store (getAllStaged/getStagedNewTokens). Keep it.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [displayTokens, tick, category])
 
   const groups = useMemo(() => splitIntoGroups(stagedTokens, category), [stagedTokens, category])
@@ -522,6 +524,8 @@ function CategoryPage({ category, tokens, geeklegoTokens, onTokenClick }: Catego
     const m = new Map<string, string>()
     for (const t of tokens) m.set(t.name, t.value)
     return m
+    // tick forces this map to rebuild when the staged store mutates. Keep it.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tokens, tick])
 
   const handleFilterChange = useCallback((filtered: TokenEntry[]) => {

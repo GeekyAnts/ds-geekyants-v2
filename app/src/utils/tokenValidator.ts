@@ -72,15 +72,6 @@ function collectPrimitiveNames(primitives: GeeklegoTokensV2['primitives']): Set<
   return names
 }
 
-/** Collect all semantic token names from a flat V2Semantics map. Each key → `--<key>`. */
-function collectSemanticNames(sem: V2Semantics): Set<string> {
-  const names = new Set<string>()
-  for (const k of Object.keys(sem)) {
-    names.add(`--${k}`)
-  }
-  return names
-}
-
 // ─── Validation checks ──────────────────────────────────────────────────────
 
 function validateSemanticValues(
@@ -88,7 +79,7 @@ function validateSemanticValues(
   mode: string,
   primitiveNames: Set<string>,
   warnings: ValidationEntry[],
-  errors: ValidationEntry[],
+  _errors: ValidationEntry[],
 ): void {
   // Flat v2 semantics: each entry should chain to a primitive via var(), not a raw value.
   for (const [k, v] of Object.entries(sem)) {
@@ -158,7 +149,6 @@ export function validateTokens(tokens: GeeklegoTokensV2): ValidationResult {
   const blockers: ValidationEntry[] = []
 
   const primitiveNames = collectPrimitiveNames(tokens.primitives)
-  const semanticNames = collectSemanticNames(tokens.semantics.light)
 
   // Validate semantic values per mode
   validateSemanticValues(tokens.semantics.light, 'light', primitiveNames, warnings, errors)

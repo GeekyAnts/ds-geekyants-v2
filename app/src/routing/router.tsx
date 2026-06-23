@@ -107,5 +107,9 @@ export function useRouteEffect(
   const { route } = useRouter()
   useEffect(() => {
     effect(route)
+    // Custom passthrough hook: the consumer controls re-runs via `deps` (mirroring
+    // useEffect's own contract), and `effect` is intentionally excluded so a fresh
+    // closure each render doesn't force a re-run. The spread is the hook's API.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [route, ...deps])
 }

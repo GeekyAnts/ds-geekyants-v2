@@ -57,8 +57,7 @@ function ComponentPreviewFrame({
         }
       })
     return () => controller.abort()
-  // Re-probe when the component changes so switching away and back re-checks.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // Re-probe when the component changes so switching away and back re-checks.
   }, [componentName, hasPreview])
 
   // Reset load state when the story URL changes (story tab switch)

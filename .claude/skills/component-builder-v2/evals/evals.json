@@ -13,7 +13,7 @@
       "id": 1,
       "name": "radix-tooltip-compound",
       "prompt": "I need a Tooltip component for the design system. It should show a small text label on hover/focus over any trigger element, positioned above by default. Make it accessible.",
-      "expected_output": "A components/v2/Tooltip/ slice built on @radix-ui/react-tooltip (NOT hand-rolled hover/focus/positioning/aria). Named sub-component exports wrapping Radix parts (Provider/Root/Trigger/Content), each styled with cn() + semantic utilities (bg-popover text-popover-foreground etc.). asChild used so any element can be the trigger. Install command uses npm (npm install @radix-ui/react-tooltip), NOT pnpm. DarkMode story with both selectors. No hand-rolled focus/escape/positioning.",
+      "expected_output": "A components/v2/Tooltip/ slice built on @radix-ui/react-tooltip (NOT hand-rolled hover/focus/positioning/aria). Named sub-component exports wrapping Radix parts (Provider/Root/Trigger/Content), each styled with cn() + semantic utilities (bg-popover text-popover-foreground etc.). asChild used so any element can be the trigger. Install command uses pnpm (pnpm add @radix-ui/react-tooltip), NOT npm install. DarkMode story with both selectors. No hand-rolled focus/escape/positioning.",
       "files": [],
       "assertions": []
     },
