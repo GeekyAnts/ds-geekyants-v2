@@ -103,3 +103,24 @@
   --color-ext-button-gamified-foreground: var(--ext-button-gamified-foreground);
   --color-ext-button-gamified-ring:       var(--ext-button-gamified-ring);
 }
+
+/* ---------------------------------------------------------------------------
+   4 · Disclosure animations — register `animate-accordion-down/up` utilities.
+       These drive the Radix Accordion open/close transition off the
+       --radix-accordion-content-height var Radix measures at runtime. Defining
+       them in @theme is what makes Tailwind v4 emit the animate-* utilities.
+       Not tokens — geeklego-level motion shared by collapsible components.
+   --------------------------------------------------------------------------- */
+@theme {
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+
+  @keyframes accordion-down {
+    from { height: 0; }
+    to { height: var(--radix-accordion-content-height); }
+  }
+  @keyframes accordion-up {
+    from { height: var(--radix-accordion-content-height); }
+    to { height: 0; }
+  }
+}

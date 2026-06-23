@@ -21,17 +21,6 @@ export function useAutoSaveBanner(onRestore: () => void, onDismiss: () => void):
     }
   }, [onRestore, onDismiss])
 
-  function handleDismiss() {
-    localStorage.setItem(DISMISSED_STORAGE_KEY, 'true')
-    setShow(false)
-    if (onDismiss) onDismiss()
-  }
-
-  function handleRestore() {
-    setShow(false)
-    if (onRestore) onRestore()
-  }
-
   return show
 }
 

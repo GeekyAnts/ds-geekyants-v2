@@ -48,7 +48,6 @@ export function useComponentI18n<K extends ComponentKey>(
           ...ctx?.formatters,
         },
       }) as NonNullable<GeeklegoI18nStrings[K]> & { formatters: GeeklegoFormatters },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [componentKey, ctx, propOverride],
   );
 }

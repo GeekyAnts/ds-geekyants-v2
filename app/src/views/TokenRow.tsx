@@ -13,7 +13,7 @@ interface TokenRowProps {
   selectionMode?: boolean
 }
 
-function TokenRow({ token, scaleView, scaleCategory, onClick, stagedValue, selected, onToggleSelect, selectionMode }: TokenRowProps) {
+function TokenRow({ token, scaleView: _scaleView, scaleCategory: _scaleCategory, onClick, stagedValue, selected, onToggleSelect, selectionMode }: TokenRowProps) {
   const handleClick = () => {
     if (selectionMode) return
     onClick?.(token)

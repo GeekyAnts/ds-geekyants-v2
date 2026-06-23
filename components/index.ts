@@ -2,11 +2,38 @@
 //
 // The old 3-tier component exports (atoms/molecules/organisms) and the
 // component catalog were removed in the v2 2-tier cut (see PROTOTYPE-SHADCN-2TIER.md
-// §7.5). v2 components live under components/v2/<Name>/ and are imported directly
-// from there — they are intentionally NOT re-exported through this barrel yet.
+// §7.5). v2 components live under components/v2/<Name>/ and are re-exported below
+// as the package's published surface.
 //
-// What remains below: the shared utility modules kept per §5 (pending a Radix
-// audit — Radix may make some of the keyboard/a11y hooks redundant as v2 grows).
+// This barrel exports two groups: the v2 components, and the shared utility
+// modules kept per §5 (pending a Radix audit — Radix may make some of the
+// keyboard/a11y hooks redundant as v2 grows).
+
+// ─── v2 components (the published surface) ──────────────────────────────────────
+// Re-exported so `pnpm build` bundles them into dist/index.js — without this a
+// consuming app cannot `import { Button } from "@scope/pkg"`. Every new component
+// built via component-builder-v2 (Phase 3.5) must be added here. `export *` picks
+// up compound sub-parts (DialogTrigger, etc.) in one line.
+export * from './v2/Accordion/Accordion';
+export type * from './v2/Accordion/Accordion.types';
+export * from './v2/Button/Button';
+export type * from './v2/Button/Button.types';
+export * from './v2/Combobox/Combobox';
+export type * from './v2/Combobox/Combobox.types';
+export * from './v2/Command/Command';
+export type * from './v2/Command/Command.types';
+export * from './v2/Dialog/Dialog';
+export type * from './v2/Dialog/Dialog.types';
+export * from './v2/DropdownMenu/DropdownMenu';
+export type * from './v2/DropdownMenu/DropdownMenu.types';
+export * from './v2/Input/Input';
+export type * from './v2/Input/Input.types';
+export * from './v2/Label/Label';
+export type * from './v2/Label/Label.types';
+export * from './v2/Popover/Popover';
+export type * from './v2/Popover/Popover.types';
+export * from './v2/Select/Select';
+export type * from './v2/Select/Select.types';
 
 // NOTE: the hand-rolled keyboard hooks (useFocusTrap/useEscapeDismiss/
 // useClickOutside/useRovingTabindex/useSingleSelectGroup) were removed in the

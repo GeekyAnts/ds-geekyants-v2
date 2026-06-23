@@ -19,10 +19,29 @@ const frameworks: ComboboxOption[] = [
 const meta: Meta<typeof Combobox> = {
   title: "v2/Combobox",
   component: Combobox,
+  tags: ["autodocs"],
   parameters: { layout: "centered" },
 };
 export default meta;
 type Story = StoryObj<typeof Combobox>;
+
+/* A real component so hooks are valid (render functions are not components). */
+const ControlledCombobox = () => {
+  const [value, setValue] = useState("remix");
+  return (
+    <div className="flex flex-col items-start gap-3">
+      <Combobox
+        options={frameworks}
+        value={value}
+        onChange={setValue}
+        placeholder="Select framework…"
+      />
+      <p className="text-sm text-muted-foreground">
+        Selected: <code className="text-foreground">{value || "—"}</code>
+      </p>
+    </div>
+  );
+};
 
 /* ── Default — uncontrolled; type to filter, arrow keys + Enter to select ───── */
 export const Default: Story = {
@@ -33,22 +52,7 @@ export const Default: Story = {
 
 /* ── Controlled — value + onChange, echoing the selection below ─────────────── */
 export const Controlled: Story = {
-  render: () => {
-    const [value, setValue] = useState("remix");
-    return (
-      <div className="flex flex-col items-start gap-3">
-        <Combobox
-          options={frameworks}
-          value={value}
-          onChange={setValue}
-          placeholder="Select framework…"
-        />
-        <p className="text-sm text-muted-foreground">
-          Selected: <code className="text-foreground">{value || "—"}</code>
-        </p>
-      </div>
-    );
-  },
+  render: () => <ControlledCombobox />,
 };
 
 /* ── Disabled control ───────────────────────────────────────────────────────── */

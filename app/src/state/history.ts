@@ -14,8 +14,6 @@ export function pushState(stagedState: Map<string, string>): void {
     return;
   }
 
-  const entry: HistoryEntry = { snapshot: new Map(stagedState) };
-
   if (currentSnapshot) {
     historyStack.push({ snapshot: new Map(currentSnapshot) });
     if (historyStack.length > MAX_HISTORY_SIZE) {

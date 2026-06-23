@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { EdSplit } from './EdSplit'
-import { EdSplitProps } from './EdSplit.types'
 
 const meta: Meta<typeof EdSplit> = {
   title: 'Editor Primitives/EdSplit',

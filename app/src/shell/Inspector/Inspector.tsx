@@ -4,9 +4,8 @@ import type { TokenGraph } from '../../graph/build'
 import type { TokenMetadata, MetadataStagedChanges } from '../../state/metadata.types'
 import { useMetadata } from '../../state/metadata'
 import { EdButton, EdScrollArea, EdEmptyState, EdColorPicker, EdInput } from '../../editor-ds/primitives'
-import { EdChip } from '../../editor-ds/primitives'
 import { isPinned, togglePin } from '../../state/pinning'
-import { subscribeToPendingChanges, subscribeToDraftChanges, getAllStaged, getStagedValue, getDraft, setDraft, unstage, getStagedNewTokens } from '../../state/staging'
+import { subscribeToPendingChanges, getAllStaged, getStagedValue, setDraft, unstage, getStagedNewTokens } from '../../state/staging'
 import { withPxAnnotation } from '../../utils/colorUtils'
 import type { GeeklegoTokensV2 } from '../../types'
 import { UsedBy } from './UsedBy'
@@ -36,13 +35,6 @@ function isFoundationColorToken(tokenName: string): boolean {
 }
 
 /** Extract the colour family name from a foundation token, e.g. "brand" from "--color-brand-50" */
-function extractColorFamily(tokenName: string): string | null {
-  if (!isFoundationColorToken(tokenName)) return null
-  // --color-{family}-{shade}  e.g. --color-brand-50, --color-accent-500
-  const match = tokenName.match(/^--color-([a-z]+(?:-[a-z]+)*?)-(\d+)$/)
-  return match ? match[1] : null
-}
-
 // Mirrors PRIMITIVE_PREFIX in EditorShell.tsx and ContextPane.tsx —
 // maps the JS primitive-object key to the CSS variable prefix.
 const PRIMITIVE_PREFIX: Record<string, string> = {
@@ -441,10 +433,9 @@ function InspectorTokenDescription({
   tokenMetadata,
   stagedChanges,
   onDescriptionChange,
-  onDescriptionClear,
+  onDescriptionClear: _onDescriptionClear,
 }: InspectorTokenDescriptionProps) {
   const description = tokenMetadata?.description ?? ''
-  const isStaged = !!stagedChanges[tokenName]?.description
   const [isOpen, setIsOpen] = useState(false)
   const [tempValue, setTempValue] = useState(description)
 
@@ -678,7 +669,7 @@ export function Inspector({
   tokens,
   graph,
   onStageEdit,
-  onClose,
+  onClose: _onClose,
 }: InspectorProps) {
   const { metadata, stagedChanges: metadataStagedChanges, setMetadataDescription, clearDescription } = useMetadata()
   const [, forceUpdate] = useState(0)

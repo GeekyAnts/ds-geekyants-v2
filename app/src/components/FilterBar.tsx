@@ -226,7 +226,7 @@ function FacetDropdown({
   )
 }
 
-function FilterBar({ allTokens, onFilterChange, category }: FilterBarProps) {
+function FilterBar({ allTokens, onFilterChange, category: _category }: FilterBarProps) {
   const [filterState, setFilterState] = useState<FilterState>({
     search: '',
     type: null,

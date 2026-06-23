@@ -1,4 +1,3 @@
-import { memo } from 'react'
 import { ArrowRight } from 'lucide-react'
 
 interface SideBySidePreviewProps {

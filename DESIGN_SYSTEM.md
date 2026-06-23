@@ -1,4 +1,8 @@
-> ⚠️ This describes the OLD 3-tier system. v2 has landed — see `CLAUDE.md` for the authoritative v2 rules. Ignore this file until refreshed.
+> # ⚠️ DEPRECATED — DO NOT FOLLOW THIS FILE
+> This describes the **OLD 3-tier system** (and a Next.js docs-site aesthetic) that no
+> longer exists in this repo. **v2 has landed.** [`CLAUDE.md`](CLAUDE.md) is the single
+> authoritative source for all current rules and commands — read it instead. Everything
+> below is kept only for historical reference and is known to be stale.
 
 # Geeklego Site — Design Language Reference
 

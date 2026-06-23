@@ -305,19 +305,6 @@ function generateThemeBlock(tokens: { primitives: Primitives }): string {
   return lines.join('\n')
 }
 
-// ─── Generic @supports block framework ───────────────────────────────────────
-// A generalized system for generating @supports blocks. Each SupportsEntry
-// represents one feature-detection block with its condition and CSS output.
-
-interface SupportsEntry {
-  /** Human-readable label for the block comment */
-  label: string
-  /** CSS @supports condition, e.g. '(text-wrap: balance)' */
-  condition: string
-  /** Raw CSS lines to output inside the @supports block */
-  cssLines: string[]
-}
-
 // ═══════════════════════════════════════════════════════════════════════════════
 //  v2 — the flat ShadCN/2-tier cockpit generators (TOKEN-EDITOR-V2-REBUILD Phase 3)
 //

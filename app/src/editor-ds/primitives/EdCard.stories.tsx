@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { EdCard } from './EdCard'
-import { EdCardProps } from './EdCard.types'
 
 const meta: Meta<typeof EdCard> = {
   title: 'Editor Primitives/EdCard',

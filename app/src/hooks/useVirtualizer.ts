@@ -22,7 +22,7 @@ export function useVirtualizer<T>({
   containerHeight: initialContainerHeight = 600,
 }: UseVirtualizerOptions<T>): UseVirtualizerReturn<T> {
   const [scrollTop, setScrollTop] = useState(0)
-  const [containerHeight, setContainerHeight] = useState(initialContainerHeight)
+  const [containerHeight, _setContainerHeight] = useState(initialContainerHeight)
   const containerRef = useRef<HTMLDivElement | null>(null)
   const rafRef = useRef<number | null>(null)
 

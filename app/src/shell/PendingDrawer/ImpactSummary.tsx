@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import type { TokenGraph } from '../../graph/build'
 import type { GeeklegoTokensV2 } from '../../types'
-import { EdButton, EdChip } from '../../editor-ds/primitives'
+import { EdChip } from '../../editor-ds/primitives'
 
 interface ImpactSummaryProps {
   tokenName: string
@@ -14,8 +14,8 @@ interface ImpactSummaryProps {
 function countAffectedTokens(
   tokenName: string,
   graph: TokenGraph,
-  tokens: GeeklegoTokensV2,
-  currentStaged: Map<string, string>
+  _tokens: GeeklegoTokensV2,
+  _currentStaged: Map<string, string>
 ): { semantic: number; component: number; instances: number } {
   const node = graph.nodes.get(tokenName)
   if (!node || node.dependents.length === 0) {
@@ -59,7 +59,7 @@ function countAffectedTokens(
 
 export function ImpactSummary({
   tokenName,
-  currentValue,
+  currentValue: _currentValue,
   graph,
   tokens,
   stagedValues,

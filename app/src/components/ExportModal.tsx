@@ -37,7 +37,7 @@ export default function ExportModal({ isOpen, onClose, onExport, onExportTarget,
   const [hasRestored, setHasRestored] = useState(false)
   const [restoreConfirm, setRestoreConfirm] = useState(false)
   const [diffHunks, setDiffHunks] = useState<DiffHunk[]>([])
-  const [selectedSnapshot, setSelectedSnapshot] = useState<TokenSnapshot | null>(null)
+  const [_selectedSnapshot, setSelectedSnapshot] = useState<TokenSnapshot | null>(null)
   const [allSnapshots, setAllSnapshots] = useState<TokenSnapshot[]>([])
   const [targetBusy, setTargetBusy] = useState<ExportTarget | null>(null)
   const [targetResults, setTargetResults] = useState<Partial<Record<ExportTarget, TargetResult>>>({})
@@ -68,8 +68,6 @@ export default function ExportModal({ isOpen, onClose, onExport, onExportTarget,
   if (!isOpen) return null
 
   const pendingCount = getPendingCount()
-  const hasValidationIssues = hasBlockers ||
-    (validationSummary && (validationSummary.warnings.length > 0 || validationSummary.notices.length > 0))
 
   const stepIndex = ['review', 'validation', 'diff', 'export'].indexOf(currentStep)
 

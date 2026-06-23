@@ -52,24 +52,25 @@ The **§7 decision gate PASSED, the §7.5 2-tier cut executed (2026-06-21), and 
 
 ## Commands
 
-Package manager is **npm** in practice (a `pnpm-lock.yaml` exists; `engines` lists both — npm scripts are what's wired). There is **no `test` script** — run Vitest directly.
+Package manager is **pnpm** (the `node_modules` tree is pnpm-built; `pnpm-lock.yaml` is the live lockfile; `package.json` pins `packageManager: pnpm@…`). **Install packages with `pnpm add <pkg>` — never `npm install`:** npm's installer crashes on this pnpm tree (`Cannot read properties of null (reading 'matches')`), and a `preinstall` guard (`only-allow pnpm`) now hard-blocks npm/yarn. Running *scripts* works under either (`npm run dev` ≡ `pnpm run dev`); the table below uses `pnpm`. There is **no `test` script** — run Vitest directly.
 
 | Task | Command |
 |---|---|
-| Token Editor cockpit (dev) | `npm run dev` (Vite, serves `app/`) |
-| Storybook (component dev) | `npm run storybook` (port 6006) |
-| Both at once | `npm run dev:all` |
+| Install a dependency | `pnpm add <pkg>` (⚠️ **never `npm install`** — see above) |
+| Token Editor cockpit (dev) | `pnpm run dev` (Vite, serves `app/`) |
+| Storybook (component dev) | `pnpm run storybook` (port 6006) |
+| Both at once | `pnpm run dev:all` |
 | Type-check | `npx tsc --noEmit` |
-| Lint (JS/TS — enforces v2 import rules) | `npm run lint` |
-| Lint CSS | `npm run lint-css` (stylelint over `design-system/v2/**`) |
+| Lint (JS/TS — enforces v2 import rules; `--max-warnings 0`) | `pnpm run lint` |
+| Lint CSS | `pnpm run lint-css` (stylelint over `design-system/v2/**`) |
 | Run all tests | `npx vitest run` (config: [vitest.config.ts](vitest.config.ts) — `app/src/**/*.test.ts` + `scripts/**/*.test.ts`) |
 | Run one test file | `npx vitest run scripts/validate-tokens.test.ts` |
 | Watch a test | `npx vitest scripts/validate-tokens.test.ts` |
-| Validate token chain | `npm run validate-tokens` (must exit 0) |
-| Build library (JS + CSS) | `npm run build` (`tsup` bundle + `build:css`) |
-| Build CSS only | `npm run build:css` (compiles `design-system/v2/index.css` → `dist/geeklego.css`) |
-| Export IR / design.md | `npm run export-ir` · `npm run export-design-md` |
-| Build Storybook | `npm run build-storybook` (⚠️ fails on stale `stories/Configure.mdx` — verify v2 with a scoped config) |
+| Validate token chain | `pnpm run validate-tokens` (must exit 0) |
+| Build library (JS + CSS) | `pnpm run build` (`tsup` bundle + `build:css`) |
+| Build CSS only | `pnpm run build:css` (compiles `design-system/v2/index.css` → `dist/geeklego.css`) |
+| Export IR / design.md | `pnpm run export-ir` · `pnpm run export-design-md` |
+| Build Storybook | `pnpm run build-storybook` (passes — `.storybook/main.ts` globs only `components/v2/**`, so the legacy `stories/**` incl. the broken `Configure.mdx` is excluded) |
 
 ---
 
@@ -289,11 +290,11 @@ Brand-specific variants (e.g. Button's `gamified`) are the one place v2 departs 
 Build/check the v2 slice through the real pipeline before declaring done:
 - `npx tsc --noEmit` — type-check.
 - Build the v2 story via Storybook/Vite to confirm the full Tailwind pipeline resolves the chain (`--color-brand-900 → --primary → bg-primary`), the `--ext-*` utilities emit, and the dark override fires for both `[data-theme="dark"]` and `.dark`.
-- `npm run lint` (ESLint flat config) — also enforces v2 import discipline.
+- `pnpm run lint` (ESLint flat config, `--max-warnings 0`) — also enforces v2 import discipline. The repo baseline is **0 warnings**; any new warning fails the gate.
 
-> Known unrelated issue: full-repo `storybook build` fails on pre-existing boilerplate `stories/Configure.mdx` (missing asset) — not a v2 problem; verify v2 with a scoped config.
+> **Storybook HMR caveat (new-file gotcha):** Tailwind v4's `@tailwindcss/vite` content scan under the Storybook dev server does **not** reliably pick up classes in a *brand-new* component file — a page reload won't fix it either. If a utility you just wrote appears "missing" in the running Storybook (e.g. a rule absent from the live stylesheet), **restart Storybook** (stop + start) before concluding the code is wrong; the standalone `pnpm run build:css` and `pnpm run build-storybook` always emit it correctly. Also note: Tailwind v4 `rotate-180` sets the CSS `rotate` property, **not** `transform` — verify rotation via `getComputedStyle(el).rotate`, not `.transform`.
 
-`npm run validate-tokens` runs [scripts/validate-tokens.ts](scripts/validate-tokens.ts), now adapted to 2-tier (primitive→semantic chain checks; no component-tier passes). It must exit 0.
+`pnpm run validate-tokens` runs [scripts/validate-tokens.ts](scripts/validate-tokens.ts), now adapted to 2-tier (primitive→semantic chain checks; no component-tier passes). It **must exit 0**. Both broken-ref passes (CSS-chain and component-TSX) allowlist framework-injected runtime vars (`tw-*`, `radix-*`, e.g. `--radix-accordion-content-height`), so Radix runtime vars used in keyframes/inline styles don't trip the chain check.
 
 ---
 

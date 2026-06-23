@@ -88,7 +88,6 @@ export function checkDrift(
 
   snapshot.tokens.forEach((originalValue, tokenName) => {
     const currentValue = currentStaged.get(tokenName)
-    const defaultValue = getDefaultTokenValue(tokenName, tokens)
 
     if (originalValue && currentValue && originalValue !== currentValue) {
       driftedCount++
@@ -108,23 +107,3 @@ export function checkDrift(
   return results
 }
 
-function getDefaultTokenValue(tokenName: string, tokens: GeeklegoTokensV2): string | null {
-  for (const [family, shades] of Object.entries(tokens.primitives.colors)) {
-    if (typeof shades === 'object' && shades !== null && !Array.isArray(shades)) {
-      for (const [shade, shadeValue] of Object.entries(shades)) {
-        if (`--color-${family}-${shade}` === tokenName) {
-          return shadeValue
-        }
-      }
-    }
-  }
-
-  // v2 flat semantics: each key maps to the CSS variable `--<key>`.
-  for (const [k, v] of Object.entries(tokens.semantics.light)) {
-    if (`--${k}` === tokenName) {
-      return v
-    }
-  }
-
-  return null
-}

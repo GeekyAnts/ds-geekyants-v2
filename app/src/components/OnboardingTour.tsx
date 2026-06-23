@@ -127,17 +127,17 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
     [onClose, onComplete],
   )
 
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     if (currentStep < TOUR_STEPS.length - 1) {
       setCurrentStep(prev => prev + 1)
     } else {
       dismiss(true)
     }
-  }
+  }, [currentStep, dismiss])
 
-  const handleBack = () => {
+  const handleBack = useCallback(() => {
     if (currentStep > 0) setCurrentStep(prev => prev - 1)
-  }
+  }, [currentStep])
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -147,7 +147,7 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
     }
     if (isOpen) document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
-  }, [isOpen, currentStep, dismiss])
+  }, [isOpen, dismiss, handleNext, handleBack])
 
   if (!isOpen && !exiting) return null
 

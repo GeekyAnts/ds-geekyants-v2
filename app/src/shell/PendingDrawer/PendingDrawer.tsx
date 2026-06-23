@@ -81,10 +81,15 @@ export function PendingDrawer({
       changes.push({ tokenName, originalValue, stagedValue })
     }
     return changes
+    // pendingVersion is a version counter bumped on staged-store changes; it's the
+    // invalidation signal to re-read the non-reactive staged store. Keep it.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tokenMap, pendingVersion])
 
   const newTokens = useMemo(() => {
     return Array.from(getStagedNewTokens().values()).sort((a, b) => a.addedAt - b.addedAt)
+    // pendingVersion re-reads getStagedNewTokens() (non-reactive) when staged changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pendingVersion])
 
   const handleReset = useCallback((tokenName: string) => {
@@ -112,10 +117,6 @@ export function PendingDrawer({
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [handleKeyDown])
-
-  const handleSelectToken = useCallback((tokenName: string) => {
-    setSelectedToken(tokenName)
-  }, [])
 
   const handleBackToList = useCallback(() => {
     setSelectedToken(null)
