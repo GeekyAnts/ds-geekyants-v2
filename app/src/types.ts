@@ -109,6 +109,25 @@ export interface GeeklegoTokensV2 {
   ext: V2ExtBlock
 }
 
+/**
+ * One place a token is used inside a component source file. Produced by the
+ * scan-token-usage scanner (Node-side) and surfaced in the Inspector's References panel.
+ *  - kind 'var'     → a direct `var(--token)` reference (high confidence).
+ *  - kind 'utility' → a Tailwind utility class inferred to map to the token (e.g. bg-primary).
+ */
+export interface UsageHit {
+  /** Repo-relative path, e.g. "components/v2/Button/button-variants.ts". */
+  file: string
+  /** 1-based line number. */
+  line: number
+  /** Trimmed source line (truncated) for display. */
+  snippet: string
+  kind: 'var' | 'utility'
+}
+
+/** token CSS name (e.g. "--primary") → the component-source places it's used. */
+export type TokenUsageMap = Record<string, UsageHit[]>
+
 // ─── UI state ─────────────────────────────────────────────────────────────────
 
 export type TabId = 'primitives' | 'semantics' | 'responsive' | 'export'

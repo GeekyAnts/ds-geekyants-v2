@@ -61,8 +61,9 @@ Atomic design survives here as a **composition discipline**, not a taxonomy. Pla
 
 There is **no component-token tier**. Most components need zero token work — they consume standard semantics directly. Touch `design-system/v2/` only when:
 
-- **A genuinely new core semantic is justified** (e.g. status/info, chart data-series that ShadCN doesn't define). Add it to *both* the `:root` block and the `@theme inline` block of `semantics.css`, and treat it as "geeklego extends ShadCN" — document the addition. Don't invent core semantics casually.
+- **A genuinely new core semantic is justified** (e.g. status/info, chart data-series that ShadCN doesn't define). Add it to *both* the `:root` block and the `@theme inline` block of `semantics.css`, and treat it as "geeklego extends ShadCN" — document the addition. Don't invent core semantics casually. **`semantics.css` is the single source of truth — the Token Editor auto-absorbs any new core semantic (grouped under the standard "Status" category), so you do *not* edit `app/src/types.ts` / `V2_SEMANTIC_KEYS`.** After adding one, reload the cockpit (or click **Update DS** in the Export modal) to see it.
 - **A brand-custom variant exists** (like Button's `gamified`). Add `--ext-<component>-<variant>-<property>` tokens to the **separate `--ext-*` block** of `semantics.css` (its own `:root` + `@theme inline`), each chained to a *primitive* (never a raw value). Override per-theme in `themes/dark.css` only if needed.
+- **A genuinely new text size/weight/leading is needed** (rare — the existing scale covers `text-2xs…9xl`). Typography primitives use Tailwind's namespaces: `--text-*` (sizes → `text-*`), `--font-weight-*` (→ `font-medium` etc.), `--leading-*`, `--tracking-*`, `--font-sans/mono/display`. Add the new primitive to **`primitives.css`** (both the `@theme` block and the `:root` mirror) — the component then just uses the standard utility (`text-sm`), no semantic tier and no `--ext-*` needed. The Token Editor auto-absorbs it on reload / **Update DS** (the parser reads these prefixes from disk). Don't invent numbered names like `--font-size-14` — that scale is gone.
 
 The token chain is always `primitive → semantic` (→ `--ext-*`). Never hardcode, never reference a primitive from a component.
 
@@ -123,6 +124,20 @@ Because semantics are registered as real utilities via `@theme inline`, write `b
 
 Mirror `Button.stories.tsx`. Import the v2 stylesheet so the slice is self-contained:
 `import "../../../design-system/v2/index.css";`. Cover: Default, Variants (core/standard only), Sizes, each custom `--ext-*` variant, Disabled/states, `asChild` (if applicable), and **DarkMode** — wrap in `<div data-theme="dark" className="dark max-w-2xl …">` (set *both* selectors; keep `max-w-2xl`). Title is `v2/<Name>`.
+
+**Portalled components (Dialog, Popover, Select, DropdownMenu, Combobox — anything whose `Content` renders into `<body>`):** the dark wrapper `<div>` does NOT theme the portalled surface, because the portal escapes it. Flag the theme on the document root too — but do this with the shared **`withDarkPortalRoot`** decorator from [`components/v2/lib/dark-portal-decorator.tsx`](../../../components/v2/lib/dark-portal-decorator.tsx):
+
+```tsx
+import { withDarkPortalRoot } from "../lib/dark-portal-decorator";
+export const DarkMode: Story = {
+  render: () => (/* wrap trigger in <div data-theme="dark" className="dark …"> as usual */),
+  decorators: [withDarkPortalRoot],
+};
+```
+
+**NEVER mutate `document.documentElement` (`setAttribute`/`classList.add`) inline in a decorator body or render function.** That runs the DOM write on *every* render; under Strict Mode + Radix re-renders (popper reposition, cmdk re-filter per keystroke) it forces a full-document style recalc on each interaction and freezes the Storybook renderer — and it leaks the `dark` flag onto every other story. `withDarkPortalRoot` does the toggle in a `useEffect` with cleanup (once per mount, restored on unmount), which is the only correct pattern. A render-time `document.*` mutation is a hard review failure.
+
+**NEVER put a raw HTML tag in a `parameters.docs.description.story` (or `.component`) string.** Those strings are rendered as **markdown** on the autodocs page. A literal `<body>`, `<div>`, `<Dialog>`, etc. is parsed as a real HTML element and nested inside the description's `<p>` — invalid HTML (`<body> cannot be a child of <p>`) that triggers a React hydration error and **freezes the entire docs page** (and every interactive story on it). Always wrap tag/attribute references in inline code: write `` "…portalled to `<body>`, so it sets `data-theme=\"dark\"`…" `` — never `"…portalled to <body>…"`. Backtick-escaping renders correctly AND avoids the freeze. (Raw `<tag>` text inside JS `//` comments is fine — only the description *strings* reach the markdown renderer.)
 
 ### Phase 3.5 — Export from the package barrel (always)
 

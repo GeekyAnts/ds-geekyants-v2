@@ -3,6 +3,7 @@ import { forwardRef } from "react";
 import * as RadixDialog from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
 import { cn } from "../lib/cn";
+import { useComponentI18n } from "../../utils/i18n/useGeeklegoI18n";
 import type {
   DialogOverlayProps,
   DialogContentProps,
@@ -53,7 +54,10 @@ DialogOverlay.displayName = "DialogOverlay";
 /* Content — portalled, focus-trapped, escape-dismissable BY RADIX.
    `showClose` lets a consumer suppress the built-in close affordance. */
 export const DialogContent = forwardRef<HTMLDivElement, DialogContentProps>(
-  ({ className, children, showClose = true, ...props }, ref) => (
+  ({ className, children, showClose = true, i18nStrings, ...props }, ref) => {
+    // Resolve the close-button label: prop override → provider context → "Close".
+    const t = useComponentI18n("dialog", i18nStrings);
+    return (
     <DialogPortal>
       <DialogOverlay />
       <RadixDialog.Content
@@ -78,14 +82,15 @@ export const DialogContent = forwardRef<HTMLDivElement, DialogContentProps>(
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-popover",
               "disabled:pointer-events-none",
             )}
-            aria-label="Close"
+            aria-label={t.closeLabel}
           >
             <X className="size-4" />
           </RadixDialog.Close>
         )}
       </RadixDialog.Content>
     </DialogPortal>
-  ),
+    );
+  },
 );
 DialogContent.displayName = "DialogContent";
 

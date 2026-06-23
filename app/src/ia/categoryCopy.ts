@@ -122,7 +122,7 @@ export const CATEGORY_META: CategoryMeta[] = [
     name: 'Font Size',
     statement:
       'Font size tokens establish typographic scale and hierarchy. They maintain readability while creating visual distinction between content levels.',
-    pattern: ['--font-size-*', '--font-*'],
+    pattern: ['--text-*', '--font-*'],
     appliesToScale: true,
   },
   {
@@ -130,7 +130,7 @@ export const CATEGORY_META: CategoryMeta[] = [
     name: 'Line Height',
     statement:
       'Line height values ensure comfortable reading across all type sizes. They work with font size tokens to create optimal text density.',
-    pattern: ['--line-height-*'],
+    pattern: ['--leading-*'],
     appliesToScale: true,
   },
   {
@@ -138,7 +138,7 @@ export const CATEGORY_META: CategoryMeta[] = [
     name: 'Letter Spacing',
     statement:
       'Letter spacing fine-tunes text density and readability. Adjustments are subtle but impact text appearance at scale.',
-    pattern: ['--letter-spacing-*'],
+    pattern: ['--tracking-*'],
     appliesToScale: true,
   },
   {

@@ -41,9 +41,10 @@ function getTokenType(tokenName: string): string {
     color: 'color',
     spacing: 'spacing',
     radius: 'radius',
-    'font-size': 'font-size',
-    'line-height': 'font-size',
-    'letter-spacing': 'font-size',
+    text: 'font-size',
+    leading: 'font-size',
+    tracking: 'font-size',
+    font: 'font-size',
     shadow: 'shadow',
     motion: 'motion',
     z: 'z-index',
@@ -176,7 +177,7 @@ function ClearButton({ onClick, count }: { onClick: () => void; count: number })
         border: '1px solid var(--ed-border)',
         color: 'var(--ed-text-secondary)',
         borderRadius: 'var(--ed-radius-button)',
-        fontSize: 'var(--font-size-xs)',
+        fontSize: 'var(--ed-text-xs)',
         cursor: 'pointer',
         transition: 'all 0.15s ease',
       }}
@@ -201,7 +202,7 @@ function FacetDropdown({
 
   return (
     <div className="ed-filter-facet" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-      <label style={{ fontSize: 'var(--font-size-xs)', color: 'var(--ed-text-muted)' }}>{title}</label>
+      <label style={{ fontSize: 'var(--ed-text-xs)', color: 'var(--ed-text-muted)' }}>{title}</label>
       <select
         value={selected || ''}
         onChange={(e) => onSelect(e.target.value)}
@@ -210,7 +211,7 @@ function FacetDropdown({
           background: 'var(--ed-surface)',
           border: '1px solid var(--ed-border)',
           borderRadius: 'var(--ed-radius-button)',
-          fontSize: 'var(--font-size-xs)',
+          fontSize: 'var(--ed-text-xs)',
           color: 'var(--ed-text-secondary)',
           cursor: 'pointer',
         }}
@@ -295,7 +296,7 @@ function FilterBar({ allTokens, onFilterChange, category: _category }: FilterBar
           background: 'var(--ed-surface)',
           border: '1px solid var(--ed-border)',
           borderRadius: 'var(--ed-radius-button)',
-          fontSize: 'var(--font-size-sm)',
+          fontSize: 'var(--ed-text-sm)',
           color: 'var(--ed-text-primary)',
         }}
       />

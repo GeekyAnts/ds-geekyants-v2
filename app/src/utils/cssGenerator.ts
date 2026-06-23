@@ -30,12 +30,12 @@ function generateThemeBlock(tokens: { primitives: Primitives }): string {
   lines.push(`     =========================================================================== */`)
   lines.push(``)
   for (const [k, v] of Object.entries(p.fontFamily)) {
-    lines.push(`  ${pad(`--font-family-${k}:`, 28)} ${v};`)
+    lines.push(`  ${pad(`--font-${k}:`, 28)} ${v};`)
   }
   lines.push(``)
   lines.push(`  /* Font sizes */`)
   for (const [k, v] of Object.entries(p.fontSize)) {
-    lines.push(`  ${pad(`--font-size-${k}:`, 24)} ${v};`)
+    lines.push(`  ${pad(`--text-${k}:`, 24)} ${v};`)
   }
   lines.push(``)
   lines.push(`  /* Font weights */`)
@@ -45,12 +45,12 @@ function generateThemeBlock(tokens: { primitives: Primitives }): string {
   lines.push(``)
   lines.push(`  /* Line heights */`)
   for (const [k, v] of Object.entries(p.lineHeight)) {
-    lines.push(`  ${pad(`--line-height-${k}:`, 28)} ${v};`)
+    lines.push(`  ${pad(`--leading-${k}:`, 28)} ${v};`)
   }
   lines.push(``)
   lines.push(`  /* Letter spacing */`)
   for (const [k, v] of Object.entries(p.letterSpacing)) {
-    lines.push(`  ${pad(`--letter-spacing-${k}:`, 32)} ${v};`)
+    lines.push(`  ${pad(`--tracking-${k}:`, 32)} ${v};`)
   }
 
   lines.push(``)
@@ -206,11 +206,11 @@ function generateThemeBlock(tokens: { primitives: Primitives }): string {
   lines.push(``)
   lines.push(`  /* Fonts */`)
   for (const [k, v] of Object.entries(p.fontFamily)) {
-    lines.push(`  ${pad(`--font-family-${k}:`, 28)} ${v};`)
+    lines.push(`  ${pad(`--font-${k}:`, 28)} ${v};`)
   }
   lines.push(``)
   for (const [k, v] of Object.entries(p.fontSize)) {
-    lines.push(`  ${pad(`--font-size-${k}:`, 24)} ${v};`)
+    lines.push(`  ${pad(`--text-${k}:`, 24)} ${v};`)
   }
   lines.push(``)
   for (const [k, v] of Object.entries(p.fontWeight)) {
@@ -218,11 +218,11 @@ function generateThemeBlock(tokens: { primitives: Primitives }): string {
   }
   lines.push(``)
   for (const [k, v] of Object.entries(p.lineHeight)) {
-    lines.push(`  ${pad(`--line-height-${k}:`, 28)} ${v};`)
+    lines.push(`  ${pad(`--leading-${k}:`, 28)} ${v};`)
   }
   lines.push(``)
   for (const [k, v] of Object.entries(p.letterSpacing)) {
-    lines.push(`  ${pad(`--letter-spacing-${k}:`, 32)} ${v};`)
+    lines.push(`  ${pad(`--tracking-${k}:`, 32)} ${v};`)
   }
   lines.push(``)
   lines.push(`  /* Spacing */`)

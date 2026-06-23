@@ -8,6 +8,14 @@ interface DefaultTokenSnapshot {
 
 const STORAGE_KEY = 'geeklego.editor.default.snapshot.v1'
 
+// Typography keys follow Tailwind namespaces, not a plain camelCase→kebab conversion.
+const PREFIX_OVERRIDES: Record<string, string> = {
+  fontSize: 'text', lineHeight: 'leading', letterSpacing: 'tracking', fontFamily: 'font',
+}
+function cssPrefixForKey(key: string): string {
+  return PREFIX_OVERRIDES[key] ?? key.replace(/([A-Z])/g, '-$1').toLowerCase()
+}
+
 function loadDefaultSnapshot(): DefaultTokenSnapshot | null {
   try {
     const stored = localStorage.getItem(STORAGE_KEY)
@@ -51,7 +59,7 @@ export function saveDefaultSnapshot(tokens: GeeklegoTokensV2): void {
       for (const k of Object.keys(data)) {
         const value = (data as Record<string, string>)[k]
         if (value) {
-          tokenMap.set(`--${key.replace(/([A-Z])/g, '-$1').toLowerCase()}-${k}`, value)
+          tokenMap.set(`--${cssPrefixForKey(key)}-${k}`, value)
         }
       }
     }

@@ -48,9 +48,10 @@ function ScaleView({ category, tokens }: ScaleViewProps) {
   const isSpacingScale = category.includes('spacing')
   const isRadiusScale = category.includes('radius')
   const isFontSizeScale =
-    category.includes('font-size') ||
-    category.includes('line-height') ||
-    category.includes('letter-spacing')
+    category.includes('typography') ||
+    category.includes('text') ||
+    category.includes('leading') ||
+    category.includes('tracking')
 
   const displayTokens = [...tokens]
 

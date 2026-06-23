@@ -140,7 +140,7 @@ function SideBySidePreview({
     )
   }
 
-  const isFontSize = tokenName.includes('font-size') || tokenName.startsWith('--font-')
+  const isFontSize = tokenName.startsWith('--text-') || tokenName.startsWith('--font-')
 
   if (isFontSize) {
     const originalSize = parseFloat(originalValue.match(/([\d.]+)/)?.[1] || '16')

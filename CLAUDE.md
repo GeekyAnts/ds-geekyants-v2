@@ -36,7 +36,7 @@ The **§7 decision gate PASSED, the §7.5 2-tier cut executed (2026-06-21), and 
 | `design-system/geeklego.css` | **DELETED** in the cut. | v2 imports `design-system/v2/index.css` only — there is no `geeklego.css` to fall back to. |
 | `design-system/v2-defaults/` | **factory-reset baseline** — pristine copies of `primitives.css`, `semantics.css`, `themes/dark.css` | Source of truth for "reset to defaults" / export diffs. Don't edit by hand as part of normal token work — edit `design-system/v2/`. |
 | `components/utils/` | shared helpers (keyboard/accessibility/security/i18n/StructuredData) | **Kept** per brief §5 — pending a Radix-redundancy audit. Survivors of that audit stay. |
-| `components/index.ts` | package barrel | Repointed to export only `utils/*` (old-component + catalog re-exports removed). |
+| `components/index.ts` | package barrel | Re-exports all `v2/*` components (the published surface) + the kept `utils/*`. **Every new v2 component must be added here** so `pnpm build` bundles it. Old 3-tier + catalog re-exports were removed in the cut. |
 | `components/{atoms,molecules,organisms}/`, `components/catalog.ts`, `scripts/catalog.ts` | old 3-tier components + catalog | **DELETED** in the cut. (Backups in the session scratchpad.) |
 | `.claude/skills/component-builder/` | old 3-tier skill | **DELETED.** Use `component-builder-v2`. |
 | `app/` (Token Editor cockpit) | **v2 — rebuilt** | **Active.** Flat `GeeklegoTokensV2` model; reads/writes `design-system/v2/` via a live inline plugin in `vite.config.mts` (not a standalone token-api). Run with `npm run dev`. |
@@ -45,7 +45,7 @@ The **§7 decision gate PASSED, the §7.5 2-tier cut executed (2026-06-21), and 
 - Build all new components under `components/v2/<Name>/`. The old atom/molecule/organism dirs are gone — there is nothing to import from them.
 - v2 imports `design-system/v2/index.css` only — never `design-system/geeklego.css`.
 - **ESLint now enforces v2 import discipline** via `no-restricted-imports` in [eslint.config.mjs](eslint.config.mjs) (bans `**/{atoms,molecules,organisms}/**` and direct `geeklego.css` imports). `npm run lint` is a real gate.
-- `AGENTS.md` / `DESIGN_SYSTEM.md` still describe 3-tier — ignore them until refreshed.
+- `AGENTS.md` is refreshed for v2 (operational supplement to this file). `DESIGN_SYSTEM.md` was deleted; the gitignored `docs/` notes still describe 3-tier — ignore them.
 - Shipped v2 components (verify with `ls components/v2/` — the list moves as work lands): **Button** (the reference leaf), **Input** (a styled leaf), **Dialog** & **Popover** (compound, on Radix primitives), and **Combobox** + **Command** (the `Popover` + `cmdk` recipe), plus shared helpers in `components/v2/lib/` (`cn.ts`). Radix deps in use: `@radix-ui/react-slot` (powers `asChild`), `@radix-ui/react-dialog`, `@radix-ui/react-popover`, and `cmdk`. The cockpit's own UI lives in `app/src/editor-ds/` and is separate from the published `components/v2/` library.
 
 ---
@@ -78,7 +78,7 @@ Package manager is **pnpm** (the `node_modules` tree is pnpm-built; `pnpm-lock.y
 
 ```
 Tier 1 — PRIMITIVES   geeklego's own brand palette/scales, UNCHANGED (the @theme block + :root mirror)
-                      --color-brand-900   --color-accent-500   --spacing-4   --radius-lg   --font-size-16
+                      --color-brand-900   --color-accent-500   --spacing-4   --radius-lg   --text-base
                           ↓ aliased by
 Tier 2 — SEMANTICS    ShadCN / Tailwind STANDARD vocabulary (the interface components consume)
                       --primary / --primary-foreground   --background / --foreground

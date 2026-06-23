@@ -67,7 +67,7 @@ function getTokenType(name: string): string {
   if (['shadow'].includes(prefix)) return 'shadow'
   if (['motion'].includes(prefix)) return 'motion'
   if (['border'].includes(prefix)) return 'border'
-  if (['font-size', 'line-height', 'letter-spacing'].includes(prefix)) return 'typo'
+  if (['text', 'font', 'leading', 'tracking'].includes(prefix)) return 'typo'
   return prefix
 }
 

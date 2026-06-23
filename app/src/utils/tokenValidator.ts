@@ -37,11 +37,11 @@ function collectPrimitiveNames(primitives: GeeklegoTokensV2['primitives']): Set<
       names.add(`--color-${family}-${shade}`)
     }
   }
-  for (const k of Object.keys(primitives.fontSize)) names.add(`--font-size-${k}`)
+  for (const k of Object.keys(primitives.fontSize)) names.add(`--text-${k}`)
   for (const k of Object.keys(primitives.fontWeight)) names.add(`--font-weight-${k}`)
-  for (const k of Object.keys(primitives.fontFamily)) names.add(`--font-family-${k}`)
-  for (const k of Object.keys(primitives.lineHeight)) names.add(`--line-height-${k}`)
-  for (const k of Object.keys(primitives.letterSpacing)) names.add(`--letter-spacing-${k}`)
+  for (const k of Object.keys(primitives.fontFamily)) names.add(`--font-${k}`)
+  for (const k of Object.keys(primitives.lineHeight)) names.add(`--leading-${k}`)
+  for (const k of Object.keys(primitives.letterSpacing)) names.add(`--tracking-${k}`)
   for (const k of Object.keys(primitives.spacing)) names.add(`--spacing-${k}`)
   for (const k of Object.keys(primitives.radius)) names.add(`--radius-${k}`)
   for (const k of Object.keys(primitives.borderWidth)) names.add(`--border-width-${k}`)

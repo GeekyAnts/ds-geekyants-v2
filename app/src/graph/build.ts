@@ -17,6 +17,20 @@ export interface DependencyResult {
 
 const VAR_REF = /var\(--([\w-]+)/g
 
+// Maps a primitives model key to its CSS variable prefix. Most keys are a plain
+// camelCase→kebab conversion (fontWeight → font-weight), but the typography keys
+// follow Tailwind's namespaces (fontSize → text, lineHeight → leading,
+// letterSpacing → tracking, fontFamily → font), so they're overridden explicitly.
+const PREFIX_OVERRIDES: Record<string, string> = {
+  fontSize: 'text',
+  lineHeight: 'leading',
+  letterSpacing: 'tracking',
+  fontFamily: 'font',
+}
+function cssPrefixForKey(key: string): string {
+  return PREFIX_OVERRIDES[key] ?? key.replace(/([A-Z])/g, '-$1').toLowerCase()
+}
+
 function extractVarReferences(value: string): string[] {
   const refs: string[] = []
   let match: RegExpExecArray | null
@@ -47,11 +61,7 @@ function collectAllTokenNames(tokens: GeeklegoTokensV2): Set<string> {
     const data = tokens.primitives[key]
     if (data && typeof data === 'object') {
       for (const k of Object.keys(data)) {
-        if (key === 'contentFlexibility' || key === 'colorShadowNeutral' || key === 'breakpoints') {
-          names.add(`--${key.replace(/([A-Z])/g, '-$1').toLowerCase()}-${k}`)
-        } else {
-          names.add(`--${key.replace(/([A-Z])/g, '-$1').toLowerCase()}-${k}`)
-        }
+        names.add(`--${cssPrefixForKey(key)}-${k}`)
       }
     }
   }
@@ -88,11 +98,7 @@ export function buildTokenGraph(tokens: GeeklegoTokensV2): TokenGraph {
       for (const k of Object.keys(data)) {
         const value = (data as Record<string, unknown>)[k] as string
         if (value) {
-          if (key === 'contentFlexibility' || key === 'colorShadowNeutral' || key === 'breakpoints') {
-            tokenValues.set(`--${key.replace(/([A-Z])/g, '-$1').toLowerCase()}-${k}`, value)
-          } else {
-            tokenValues.set(`--${key.replace(/([A-Z])/g, '-$1').toLowerCase()}-${k}`, value)
-          }
+          tokenValues.set(`--${cssPrefixForKey(key)}-${k}`, value)
         }
       }
     }

@@ -126,7 +126,7 @@
 
 .ed-value-label {
   font-size: 11px;
-  font-family: var(--font-mono, monospace);
+  font-family: var(--ed-font-mono, monospace);
   color: var(--ed-text-secondary);
 }
 
@@ -215,7 +215,7 @@
   background-color: var(--ed-surface-elevated);
   border: 1px solid var(--ed-border);
   border-radius: var(--ed-radius-button);
-  font-family: var(--font-mono, monospace);
+  font-family: var(--ed-font-mono, monospace);
   font-size: 13px;
   color: var(--ed-accent);
 }

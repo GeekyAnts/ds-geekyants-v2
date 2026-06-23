@@ -142,7 +142,6 @@
   --ed-font-size-sm:    var(--ed-text-sm);
   --ed-font-size-md:    var(--ed-text-md);
   --ed-font-size-lg:    var(--ed-text-lg);
-  --font-family-mono:   var(--ed-font-mono);
 
   /* Spacing aliases used by some components */
   --spacing-1:          var(--ed-space-1);
@@ -152,9 +151,6 @@
   --spacing-6:          var(--ed-space-5);
   --spacing-8:          var(--ed-space-7);
   --spacing-24:         var(--ed-space-9);
-  --font-size-xs:       var(--ed-text-xs);
-  --font-size-sm:       var(--ed-text-sm);
-  --font-size-2xl:      var(--ed-text-2xl);
 }
 
 /* ─── Dark theme ────────────────────────────────────────────────────────── */
