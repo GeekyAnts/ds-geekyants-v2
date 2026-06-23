@@ -59,7 +59,7 @@ Components              Tailwind utilities (bg-primary, text-foreground, border-
 
 **Governing docs:** [`CLAUDE.md`](CLAUDE.md) · [`PROTOTYPE-SHADCN-2TIER.md`](PROTOTYPE-SHADCN-2TIER.md)
 
-> **Note:** `AGENTS.md`, `DESIGN_SYSTEM.md`, and `docs/` still describe the old 3-tier system. Ignore them until refreshed.
+> **Note:** `docs/` (gitignored research notes) still describes the old 3-tier system — ignore it. `AGENTS.md` is refreshed for v2.
 
 ### Shipped v2 components
 

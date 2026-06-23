@@ -85,10 +85,12 @@ export function generateMergedTokens(
           break
         }
       }
-    } else if (tokenName.startsWith('--font-size-') || tokenName.startsWith('--font-weight-') ||
-               tokenName.startsWith('--line-height-') || tokenName.startsWith('--letter-spacing-')) {
-      if (tokenName.startsWith('--font-size-')) {
-        const key = parts.slice(2).join('-')
+    } else if (tokenName.startsWith('--text-') || tokenName.startsWith('--font-weight-') ||
+               tokenName.startsWith('--font-') ||
+               tokenName.startsWith('--leading-') || tokenName.startsWith('--tracking-')) {
+      // Tailwind typography namespaces. --font-weight-* checked BEFORE bare --font-* (family).
+      if (tokenName.startsWith('--text-')) {
+        const key = parts.slice(1).join('-')
         if (key in modifiedTokens.primitives.fontSize) {
           modifiedTokens.primitives.fontSize[key] = stagedValue
         }
@@ -97,13 +99,18 @@ export function generateMergedTokens(
         if (key in modifiedTokens.primitives.fontWeight) {
           modifiedTokens.primitives.fontWeight[key] = parseInt(stagedValue, 10) || 0
         }
-      } else if (tokenName.startsWith('--line-height-')) {
-        const key = parts.slice(2).join('-')
+      } else if (tokenName.startsWith('--font-')) {
+        const key = parts.slice(1).join('-')
+        if (key in modifiedTokens.primitives.fontFamily) {
+          modifiedTokens.primitives.fontFamily[key] = stagedValue
+        }
+      } else if (tokenName.startsWith('--leading-')) {
+        const key = parts.slice(1).join('-')
         if (key in modifiedTokens.primitives.lineHeight) {
           modifiedTokens.primitives.lineHeight[key] = stagedValue
         }
-      } else if (tokenName.startsWith('--letter-spacing-')) {
-        const key = parts.slice(2).join('-')
+      } else if (tokenName.startsWith('--tracking-')) {
+        const key = parts.slice(1).join('-')
         if (key in modifiedTokens.primitives.letterSpacing) {
           modifiedTokens.primitives.letterSpacing[key] = stagedValue
         }

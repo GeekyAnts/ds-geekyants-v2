@@ -23,9 +23,9 @@ export function InlinePreview({
   const isSpacing = tokenName.startsWith('--spacing-')
   const isRadius = tokenName.startsWith('--radius-')
   const isFontSize =
-    tokenName.includes('font-size') ||
+    tokenName.startsWith('--text-') ||
     tokenName.startsWith('--font-') ||
-    tokenName.startsWith('--line-height-')
+    tokenName.startsWith('--leading-')
 
   if (isColor) {
     const hexValue =

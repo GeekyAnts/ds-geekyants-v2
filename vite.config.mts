@@ -16,6 +16,8 @@ const V2_PRIMITIVES = path.join(V2_DIR, 'primitives.css');
 const V2_SEMANTICS = path.join(V2_DIR, 'semantics.css');
 const V2_DARK = path.join(V2_DIR, 'themes', 'dark.css');
 const V2_DEFAULTS_DIR = path.join(DESIGN_SYSTEM_DIR, 'v2-defaults');
+// Published v2 component sources — scanned for token usage by /api/token-usage.
+const V2_COMPONENTS_DIR = path.join(dirname, 'components', 'v2');
 // Token metadata (descriptions/categories/tags) — committed by /api/merge-metadata.
 const METADATA_FILE = path.join(DESIGN_SYSTEM_DIR, 'tokens.metadata.json');
 
@@ -49,6 +51,32 @@ function tokenApiPlugin(): Plugin {
             const tokens = parseGeeklegoV2(primCss, semCss, darkCss);
             res.setHeader('Content-Type', 'application/json');
             res.end(JSON.stringify({ success: true, tokens }));
+          } catch (e: any) {
+            res.setHeader('Content-Type', 'application/json');
+            res.statusCode = 500;
+            res.end(JSON.stringify({ success: false, error: e.message }));
+          }
+          return;
+        }
+
+        // Scan the v2 component sources for where each token is used (var() refs + Tailwind
+        // utilities), so the Inspector's References panel reflects real component usage. Reads
+        // the three CSS files to derive the known token set, then scans components/v2.
+        if (url === '/api/token-usage' && req.method === 'GET') {
+          try {
+            const { scanTokenUsage } = await import('./scripts/scan-token-usage');
+            const [primCss, semCss, darkCss] = await Promise.all([
+              fs.readFile(V2_PRIMITIVES, 'utf-8'),
+              fs.readFile(V2_SEMANTICS, 'utf-8'),
+              fs.readFile(V2_DARK, 'utf-8'),
+            ]);
+            const usage = await scanTokenUsage({
+              css: [primCss, semCss, darkCss].join('\n'),
+              componentsDir: V2_COMPONENTS_DIR,
+              repoRoot: dirname,
+            });
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({ success: true, usage }));
           } catch (e: any) {
             res.setHeader('Content-Type', 'application/json');
             res.statusCode = 500;

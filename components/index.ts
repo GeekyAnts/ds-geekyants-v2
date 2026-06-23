@@ -26,6 +26,8 @@ export * from './v2/Dialog/Dialog';
 export type * from './v2/Dialog/Dialog.types';
 export * from './v2/DropdownMenu/DropdownMenu';
 export type * from './v2/DropdownMenu/DropdownMenu.types';
+export * from './v2/Field/Field';
+export type * from './v2/Field/Field.types';
 export * from './v2/Input/Input';
 export type * from './v2/Input/Input.types';
 export * from './v2/Label/Label';
@@ -63,37 +65,16 @@ export { GeeklegoI18nProvider } from './utils/i18n/GeeklegoI18nProvider';
 export type { GeeklegoI18nProviderProps } from './utils/i18n/GeeklegoI18nProvider';
 export type {
   GeeklegoI18nStrings,
-  NavbarI18nStrings,
-  FooterI18nStrings,
   GeeklegoFormatters,
   GeeklegoI18nContextValue,
   LabelI18nStrings,
-  AvatarI18nStrings,
-  RatingI18nStrings,
-  BreadcrumbI18nStrings,
-  SidebarI18nStrings,
-  BarChartI18nStrings,
-  AreaChartI18nStrings,
-  FileInputI18nStrings,
-  SearchBarI18nStrings,
-  AlertBannerI18nStrings,
-  TooltipI18nStrings,
-  PaginationI18nStrings,
-  ToastI18nStrings,
+  DialogI18nStrings,
   PopoverI18nStrings,
+  DropdownMenuI18nStrings,
   ComboboxI18nStrings,
-  ChipI18nStrings,
-  FieldsetI18nStrings,
-  StepperI18nStrings,
-  HeaderI18nStrings,
-  ModalI18nStrings,
-  DrawerI18nStrings,
+  CommandI18nStrings,
   AccordionI18nStrings,
-  TabsI18nStrings,
-  DataTableI18nStrings,
-  ColorPickerI18nStrings,
-  CarouselI18nStrings,
-  CalendarI18nStrings,
+  SelectI18nStrings,
 } from './utils/i18n/GeeklegoI18nProvider.types';
 
 // StructuredData

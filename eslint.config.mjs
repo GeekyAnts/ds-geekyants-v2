@@ -24,7 +24,9 @@ export default tseslint.config(
   {
     // `.claude/` holds skill definitions and skill-eval scratch outputs (e.g.
     // component-builder-v2-workspace/**), not shipped source — never lint it.
-    ignores: ["dist", "node_modules", ".next", ".claude/**"],
+    // `storybook-static` is the Storybook build artifact (gitignored, like dist) —
+    // minified output, never lint it.
+    ignores: ["dist", "storybook-static", "node_modules", ".next", ".claude/**"],
   },
 
   // Base JS recommended (applies to .js/.mjs/.cjs). `no-undef` is disabled
@@ -68,6 +70,24 @@ export default tseslint.config(
     files: ["**/*.stories.{ts,tsx}"],
     rules: {
       "react-hooks/rules-of-hooks": "warn",
+      // Ban render-time document-root mutation in stories. A decorator that does
+      // `document.documentElement.setAttribute(...)` / `.classList.add(...)` in
+      // its body (rather than a useEffect) re-runs the DOM write on every render;
+      // under Strict Mode + Radix re-renders (popper reposition, cmdk per-keystroke
+      // filtering) this forces a full-document style recalc per interaction and
+      // FREEZES the Storybook renderer — plus it leaks the theme onto other stories.
+      // Portalled dark-mode stories must use the withDarkPortalRoot decorator
+      // (components/v2/lib/dark-portal-decorator.tsx), which toggles in a useEffect
+      // with cleanup. This rule makes the freeze-causing pattern un-introducible.
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector:
+            "MemberExpression[object.object.name='document'][object.property.name='documentElement']",
+          message:
+            "Don't mutate document.documentElement in a story/decorator render path — it re-runs every render and freezes the Storybook renderer. Use the withDarkPortalRoot decorator (components/v2/lib/dark-portal-decorator.tsx) for portalled dark-mode stories.",
+        },
+      ],
     },
   },
 

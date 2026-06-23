@@ -16,7 +16,7 @@ import { getPendingCount, subscribeToPendingChanges, stage, getAllStaged, discar
 import { generateMergedTokens } from './utils/exportFormatter'
 import { buildTokenGraph, type TokenGraph } from './graph/build'
 import { classifyTokens } from './ia'
-import type { GeeklegoTokensV2 } from './types'
+import type { GeeklegoTokensV2, TokenUsageMap } from './types'
 import './EditorShell.css'
 
 interface TokenEntry {
@@ -28,11 +28,11 @@ interface TokenEntry {
 // Mirrors emission rules in utils/cssGenerator.ts.
 const PRIMITIVE_PREFIX: Record<string, string> = {
   colors: 'color',
-  fontFamily: 'font-family',
-  fontSize: 'font-size',
+  fontFamily: 'font',
+  fontSize: 'text',
   fontWeight: 'font-weight',
-  lineHeight: 'line-height',
-  letterSpacing: 'letter-spacing',
+  lineHeight: 'leading',
+  letterSpacing: 'tracking',
   spacing: 'spacing',
   radius: 'radius',
   borderWidth: 'border-width',
@@ -115,6 +115,7 @@ function EditorShellContent() {
   const { route, navigate } = useRouter()
 
   const [tokens, setTokens] = useState<GeeklegoTokensV2 | null>(null)
+  const [usage, setUsage] = useState<TokenUsageMap>({})
   const [selectedTokenName, setSelectedTokenName] = useState<string | null>(null)
   const [previewTheme, setPreviewTheme] = useState<'light' | 'dark'>('dark')
   const [commandOpen, setCommandOpen] = useState(false)
@@ -126,6 +127,19 @@ function EditorShellContent() {
   const [showOnboarding, setShowOnboarding] = useState(() => {
     return !localStorage.getItem('geeklego.editor.onboarding.completed')
   })
+
+  // Scan component sources for real token usage (References panel). Cheap (~24 files),
+  // so we refetch whenever the token set could have changed (load / Update DS / save) and
+  // on demand via "Rescan usage".
+  const fetchUsage = useCallback(async () => {
+    try {
+      const res = await fetch('/api/token-usage')
+      const json = await res.json()
+      if (json.success) setUsage(json.usage as TokenUsageMap)
+    } catch {
+      // non-fatal — the panel just shows no component usage
+    }
+  }, [])
 
   // Load tokens from disk
   useEffect(() => {
@@ -142,8 +156,9 @@ function EditorShellContent() {
       }
     }
     load()
+    fetchUsage()
     return () => { cancelled = true }
-  }, [])
+  }, [fetchUsage])
 
   // HMR listener for token updates
   useEffect(() => {
@@ -155,11 +170,12 @@ function EditorShellContent() {
           .then((tokenData) => {
             if (tokenData.success && tokenData.tokens) setTokens(tokenData.tokens)
           })
+        fetchUsage()
       }
       hot.on('geeklego:tokens-updated', handler)
       return () => { hot.off('geeklego:tokens-updated', handler) }
     }
-  }, [])
+  }, [fetchUsage])
 
   // Subscribe to pending changes
   useEffect(() => {
@@ -233,6 +249,22 @@ function EditorShellContent() {
     })
   }, [])
 
+  // Update DS — re-scan design-system/v2 from disk and absorb any new tokens (e.g. a core
+  // semantic a component just introduced) into the model. Unlike Restore Default this is
+  // NON-destructive: it does NOT discardAll(), so in-flight staged edits survive (they live
+  // in the separate staging store and are overlaid onto `tokens` at render time).
+  const handleUpdateDs = useCallback(async () => {
+    const res = await fetch('/api/load-tokens')
+    const json = await res.json()
+    if (!json.success) throw new Error(json.error ?? 'Update DS failed')
+    setTokens(json.tokens)
+    fetchUsage()
+  }, [fetchUsage])
+
+  // Re-scan component sources for token usage on demand (e.g. after editing a .tsx while
+  // the cockpit is open). The References panel reflects the fresh scan.
+  const handleRescanUsage = useCallback(() => fetchUsage(), [fetchUsage])
+
   const handleExport = useCallback(async () => {
     if (!tokens) return
     const staged = getAllStaged()
@@ -276,6 +308,7 @@ function EditorShellContent() {
       const loadRes = await fetch('/api/load-tokens')
       const loadJson = await loadRes.json()
       if (loadJson.success) setTokens(loadJson.tokens)
+      fetchUsage()
 
       // Rebuild dist CSS for consuming packages
       fetch('/api/sync-build', { method: 'POST' }).catch(err => {
@@ -285,7 +318,7 @@ function EditorShellContent() {
       console.error('Export failed:', err)
       throw err
     }
-  }, [tokens])
+  }, [tokens, fetchUsage])
 
   // Multi-target export: trigger the IR / design.md generators (Node scripts behind the
   // dev API) and return the generated file's contents + on-disk path so the modal can offer
@@ -344,6 +377,8 @@ function EditorShellContent() {
         selectedTokenName={selectedTokenName}
         tokens={tokens}
         graph={graph}
+        usage={usage}
+        onRescanUsage={handleRescanUsage}
         onStageEdit={handleStageEdit}
         onClose={() => setSelectedTokenName(null)}
       />
@@ -377,6 +412,7 @@ function EditorShellContent() {
           onExport={handleExport}
           onExportTarget={handleExportTarget}
           onRestoreDefault={handleRestoreDefault}
+          onUpdateDs={handleUpdateDs}
           tokens={tokens}
           hasBlockers={false}
         />

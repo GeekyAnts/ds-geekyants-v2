@@ -2,7 +2,6 @@ import type {
   GeeklegoTokensV2,
   V2Semantics,
 } from '../types.ts'
-import { V2_SEMANTIC_KEYS } from '../types.ts'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -103,36 +102,37 @@ function applyThemeToken(
     return
   }
 
-  // Font family: --font-family-{id}
-  const fontFamilyMatch = name.match(/^font-family-(.+)$/)
-  if (fontFamilyMatch) {
-    primitives.fontFamily[fontFamilyMatch[1]] = value
-    return
-  }
-
-  // Font size: --font-size-{n}
-  const fontSizeMatch = name.match(/^font-size-(.+)$/)
-  if (fontSizeMatch) {
-    primitives.fontSize[fontSizeMatch[1]] = value
-    return
-  }
-
-  // Font weight: --font-weight-{name}
+  // Font weight: --font-weight-{name}  (MUST precede the bare --font-{id} family match)
   const fontWeightMatch = name.match(/^font-weight-(.+)$/)
   if (fontWeightMatch) {
     primitives.fontWeight[fontWeightMatch[1]] = parseNumeric(value)
     return
   }
 
-  // Line height: --line-height-{name}
-  const lineHeightMatch = name.match(/^line-height-(.+)$/)
+  // Font family: Tailwind --font-{sans|mono|display|...} namespace.
+  // Anchored to known family keys so it never swallows --font-weight-* (handled above).
+  const fontFamilyMatch = name.match(/^font-(sans|mono|display|serif|[a-z]+)$/)
+  if (fontFamilyMatch) {
+    primitives.fontFamily[fontFamilyMatch[1]] = value
+    return
+  }
+
+  // Font size: Tailwind --text-{name} namespace
+  const fontSizeMatch = name.match(/^text-(.+)$/)
+  if (fontSizeMatch) {
+    primitives.fontSize[fontSizeMatch[1]] = value
+    return
+  }
+
+  // Line height: Tailwind --leading-{name} namespace
+  const lineHeightMatch = name.match(/^leading-(.+)$/)
   if (lineHeightMatch) {
     primitives.lineHeight[lineHeightMatch[1]] = value
     return
   }
 
-  // Letter spacing: --letter-spacing-{name}
-  const letterSpacingMatch = name.match(/^letter-spacing-(.+)$/)
+  // Letter spacing: Tailwind --tracking-{name} namespace
+  const letterSpacingMatch = name.match(/^tracking-(.+)$/)
   if (letterSpacingMatch) {
     primitives.letterSpacing[letterSpacingMatch[1]] = value
     return
@@ -249,11 +249,12 @@ function applyThemeToken(
 //  ⚠ Two OPPOSITE canonical polarities (the central trap):
 //    - primitives.css: @theme is canonical, the :root mirror is IGNORED here.
 //    - semantics.css:  :root is canonical, @theme inline is IGNORED (it's regenerated).
-//  applyV2SemanticToken is allowlisted to V2_SEMANTIC_KEYS so it can NEVER pick up a
-//  primitive mirror name even if the wrong block is fed to it.
+//  semantics.css is the SINGLE SOURCE OF TRUTH for core semantics: applyV2SemanticToken
+//  absorbs every alias it finds in the core :root (denylist, not allowlist) so a brand-new
+//  semantic added to the CSS (e.g. --info) round-trips instead of being silently dropped.
+//  It is safe to absorb everything here because the only non-semantic names that could
+//  appear are pre-filtered out before this runs (see applyV2SemanticToken).
 // ═══════════════════════════════════════════════════════════════════════════════
-
-const V2_KEY_SET: ReadonlySet<string> = new Set(V2_SEMANTIC_KEYS)
 
 /** Marker text on the section-3 header comment that begins the --ext-* block in semantics.css. */
 const V2_EXT_HEADER_MARKER = 'CUSTOM VARIANTS'
@@ -288,15 +289,22 @@ function emptyV2Primitives(): GeeklegoTokensV2['primitives'] {
 }
 
 /**
- * Apply a single semantic alias into a flat V2Semantics map — STRICTLY allowlisted.
- * Anything not in V2_SEMANTIC_KEYS is a no-op (so primitive mirror names, --color-*
- * registrations, and --ext-* tokens are all silently ignored). This is the guard that
- * makes feeding any :root block safe.
+ * Apply a single semantic alias into a flat V2Semantics map.
+ *
+ * semantics.css's core :root is canonical, so we ABSORB EVERY alias found there — this is
+ * what lets a newly-authored core semantic (e.g. --info / --info-foreground) survive the
+ * load→save round-trip instead of being dropped by a hardcoded allowlist. A blanket absorb
+ * is safe because the core :root only ever contains semantic aliases:
+ *   - the --ext-* block is sliced off (splitV2SemanticsExt) BEFORE this runs;
+ *   - primitives (--color-*, --spacing-*, …) live in primitives.css, a separate file/arg;
+ *   - @theme inline (which holds --color-* registrations) is a separate at-rule never entered.
+ * We still defensively skip the only two name shapes that could leak in if the wrong block
+ * were ever fed here: --ext-* (opaque variant tokens) and --color-* (@theme inline regs).
  */
 function applyV2SemanticToken(name: string, value: string, sem: V2Semantics): void {
-  if (V2_KEY_SET.has(name)) {
-    sem[name] = value
-  }
+  if (name.startsWith('ext-')) return    // belongs to the opaque --ext-* block
+  if (name.startsWith('color-')) return  // an @theme inline registration, not a semantic
+  sem[name] = value
 }
 
 /**

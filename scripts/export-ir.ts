@@ -128,26 +128,26 @@ function buildPrimitiveIndex(p: Primitives): {
     push('color-shadow-neutral', ['shadowColor', 'neutral'], p.colorShadowNeutral, 'color')
   }
 
-  // Font family: --font-family-{id}
+  // Font family: --font-{id}  (Tailwind --font-* namespace)
   for (const id of Object.keys(p.fontFamily)) {
-    push(`font-family-${id}`, ['fontFamily', id], p.fontFamily[id], 'fontFamily')
+    push(`font-${id}`, ['fontFamily', id], p.fontFamily[id], 'fontFamily')
   }
-  // Font size: --font-size-{n} (dimension)
+  // Font size: --text-{n} (dimension)  (Tailwind --text-* namespace)
   for (const n of Object.keys(p.fontSize)) {
-    push(`font-size-${n}`, ['fontSize', n], p.fontSize[n], 'dimension')
+    push(`text-${n}`, ['fontSize', n], p.fontSize[n], 'dimension')
   }
   // Font weight: --font-weight-{name} (number → fontWeight)
   for (const name of Object.keys(p.fontWeight)) {
     push(`font-weight-${name}`, ['fontWeight', name], String(p.fontWeight[name]), 'fontWeight')
   }
-  // Line height: --line-height-{name} (unitless → number, else dimension)
+  // Line height: --leading-{name} (unitless → number, else dimension)  (Tailwind --leading-*)
   for (const name of Object.keys(p.lineHeight)) {
     const v = p.lineHeight[name]
-    push(`line-height-${name}`, ['lineHeight', name], v, hasUnit(v) ? 'dimension' : 'number')
+    push(`leading-${name}`, ['lineHeight', name], v, hasUnit(v) ? 'dimension' : 'number')
   }
-  // Letter spacing: --letter-spacing-{name} (dimension)
+  // Letter spacing: --tracking-{name} (dimension)  (Tailwind --tracking-* namespace)
   for (const name of Object.keys(p.letterSpacing)) {
-    push(`letter-spacing-${name}`, ['letterSpacing', name], p.letterSpacing[name], 'dimension')
+    push(`tracking-${name}`, ['letterSpacing', name], p.letterSpacing[name], 'dimension')
   }
   // Spacing: --spacing-{n} and --spacing-raw-{n} (dimension)
   for (const n of Object.keys(p.spacing)) {

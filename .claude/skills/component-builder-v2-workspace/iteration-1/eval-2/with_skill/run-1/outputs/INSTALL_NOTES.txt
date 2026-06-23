@@ -1,7 +1,0 @@
-No install required — every dependency is already in package.json:
-  - cmdk@^1.1.1                  (the filter + arrow-key listbox engine, via components/v2/Command)
-  - @radix-ui/react-dialog@^1.1.17 (the pop-open modal, via components/v2/Dialog)
-  - lucide-react                 (icons, used only in the stories)
-
-If they were NOT already present, the exact command (npm is what's wired here) would be:
-  npm install cmdk @radix-ui/react-dialog

@@ -134,7 +134,7 @@
 }
 
 .ed-health-panel__issue-token {
-  font-family: var(--font-family-mono);
+  font-family: var(--ed-font-mono);
   font-size: var(--ed-font-size-xs);
   font-weight: 500;
   color: var(--ed-text-primary);

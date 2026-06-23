@@ -1,5 +1,5 @@
 .diff-view {
-  font-family: var(--font-mono), monospace;
+  font-family: var(--ed-font-mono), monospace;
   background: var(--ed-surface);
   border-radius: var(--ed-radius-card);
   border: 1px solid var(--ed-border);

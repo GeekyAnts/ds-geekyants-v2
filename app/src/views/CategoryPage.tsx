@@ -47,7 +47,7 @@ const categoryFilters: Record<string, (name: string) => boolean> = {
   color: (name) => /^--color-[a-z][a-z0-9]*(?:-[a-z][a-z0-9]*)*-\d+$/.test(name),
   spacing: (name) => /^--spacing-/.test(name),
   radius: (name) => /^--radius-/.test(name),
-  typography: (name) => /^--(?:font-|line-height-|letter-spacing-)/.test(name),
+  typography: (name) => /^--(?:font-|text-|leading-|tracking-)/.test(name),
   shadow: (name) => /^--shadow-/.test(name),
   motion: (name) => /^--(?:motion-|duration-|ease-)/.test(name),
   zIndex: (name) => /^--(?:z-|layer-)/.test(name),
@@ -59,7 +59,18 @@ const categoryFilters: Record<string, (name: string) => boolean> = {
   // `-<segment>`/`-<digit>`, so bare `--border`/`--radius`/`--input` never collide.
   surface: (name) => /^--(?:background|foreground|card|card-foreground|popover|popover-foreground)$/.test(name),
   interactive: (name) => /^--(?:primary|primary-foreground|secondary|secondary-foreground|accent|accent-foreground|muted|muted-foreground|ring)$/.test(name),
-  status: (name) => /^--(?:destructive|destructive-foreground)$/.test(name),
+  // Status — feedback colors. Holds the standard `destructive` pair PLUS, as the semantic
+  // catch-all, any newly-authored semantic semantics.css introduces beyond the standard ShadCN
+  // set (e.g. --info, --success). This keeps the UI vocabulary 100% ShadCN-standard (no invented
+  // category). It must match a bare `--<name>` while EXCLUDING primitives (which always carry a
+  // trailing `-<segment>`/`-<digit>` after a known foundation prefix) and the surface/
+  // interactive/layout buckets above.
+  status: (name) =>
+    /^--[a-z][a-z0-9-]*$/.test(name) &&
+    !/^--(?:color|spacing|radius|font|line-height|letter-spacing|shadow|duration|ease|motion|z-index|z-|border-width|border-|icon-size|size|breakpoint|opacity)\b/.test(name) &&
+    !/^--(?:background|foreground|card|card-foreground|popover|popover-foreground)$/.test(name) &&
+    !/^--(?:primary|primary-foreground|secondary|secondary-foreground|accent|accent-foreground|muted|muted-foreground|ring)$/.test(name) &&
+    !/^--(?:border|input|radius)$/.test(name),
   layout: (name) => /^--(?:border|input|radius)$/.test(name),
 }
 
@@ -126,11 +137,13 @@ function splitIntoGroups(tokens: TokenEntry[], category: string): Record<string,
   }
 
   if (category === 'typography') {
-    const fontFamily = tokens.filter((t) => t.name.startsWith('--font-family-'))
-    const fontSize = tokens.filter((t) => t.name.startsWith('--font-size-'))
     const fontWeight = tokens.filter((t) => t.name.startsWith('--font-weight-'))
-    const lineHeight = tokens.filter((t) => t.name.startsWith('--line-height-'))
-    const letterSpacing = tokens.filter((t) => t.name.startsWith('--letter-spacing-'))
+    const fontFamily = tokens.filter(
+      (t) => t.name.startsWith('--font-') && !t.name.startsWith('--font-weight-'),
+    )
+    const fontSize = tokens.filter((t) => t.name.startsWith('--text-'))
+    const lineHeight = tokens.filter((t) => t.name.startsWith('--leading-'))
+    const letterSpacing = tokens.filter((t) => t.name.startsWith('--tracking-'))
 
     if (fontFamily.length > 0) groups['Font Family'] = fontFamily
     if (fontSize.length > 0) groups['Font Size'] = fontSize
@@ -326,11 +339,11 @@ function groupNameToPrefix(category: string, groupName: string): string {
     return '--radius-'
   }
   if (category === 'typography') {
-    if (groupName === 'Font Size') return '--font-size-'
+    if (groupName === 'Font Size') return '--text-'
     if (groupName === 'Font Weight') return '--font-weight-'
-    if (groupName === 'Font Family') return '--font-family-'
-    if (groupName === 'Line Height') return '--line-height-'
-    if (groupName === 'Letter Spacing') return '--letter-spacing-'
+    if (groupName === 'Font Family') return '--font-'
+    if (groupName === 'Line Height') return '--leading-'
+    if (groupName === 'Letter Spacing') return '--tracking-'
     return '--font-'
   }
   if (category === 'shadow') return '--shadow-'

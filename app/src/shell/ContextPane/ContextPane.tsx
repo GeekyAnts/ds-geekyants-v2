@@ -13,11 +13,11 @@ interface ContextPaneProps {
 // Maps a primitives top-level key to the CSS variable prefix used in the v2 design system.
 const PRIMITIVE_PREFIX: Record<string, string> = {
   colors: 'color',
-  fontFamily: 'font-family',
-  fontSize: 'font-size',
+  fontFamily: 'font',
+  fontSize: 'text',
   fontWeight: 'font-weight',
-  lineHeight: 'line-height',
-  letterSpacing: 'letter-spacing',
+  lineHeight: 'leading',
+  letterSpacing: 'tracking',
   spacing: 'spacing',
   radius: 'radius',
   borderWidth: 'border-width',

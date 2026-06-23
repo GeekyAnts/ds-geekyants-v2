@@ -32,7 +32,7 @@ export default function DiffView({ hunks, originalLineCount, mergedLineCount }: 
           <div className="diff-hunk-header">
             @@ -{hunk.oldStart},{hunk.oldLines} +{hunk.newStart},{hunk.newLines} @@
           </div>
-          <div className="diff-lines" style={{ font: '12px/1.6 var(--font-mono), monospace' }}>
+          <div className="diff-lines" style={{ font: '12px/1.6 var(--ed-font-mono), monospace' }}>
             {hunk.lines.map((line, lineIndex) => (
               <div
                 key={`${hunkIndex}-${lineIndex}`}

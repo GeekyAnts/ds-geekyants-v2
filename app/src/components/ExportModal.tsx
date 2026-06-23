@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Check, Download, Trash2, RotateCcw, FileCode, FileJson, FileText, Smartphone, Loader2 } from 'lucide-react'
+import { Check, Download, Trash2, RotateCcw, RefreshCw, FileCode, FileJson, FileText, Smartphone, Loader2 } from 'lucide-react'
 import { createSnapshot, getAllSnapshots, deleteSnapshot, restoreSnapshot, downloadSnapshotAsJSON, type TokenSnapshot } from '../utils/snapshotManager'
 import { getAllStaged, stage, unstage, discardAll, hasPendingChanges, getPendingCount, getStagedNewTokens } from '../state/staging'
 import { generateOriginalCss, generateMergedCss, getDiffHunks } from '../utils/exportFormatter'
@@ -15,6 +15,7 @@ interface ExportModalProps {
   onExport: () => Promise<void>
   onExportTarget: (target: 'ir' | 'design-md') => Promise<{ content: string; path: string }>
   onRestoreDefault: () => Promise<void>
+  onUpdateDs: () => Promise<void>
   tokens: GeeklegoTokensV2
   validationSummary?: ValidationSummary
   hasBlockers: boolean
@@ -29,13 +30,15 @@ interface TargetResult {
 
 type ModalStep = 'review' | 'validation' | 'diff' | 'export'
 
-export default function ExportModal({ isOpen, onClose, onExport, onExportTarget, onRestoreDefault, tokens, validationSummary, hasBlockers }: ExportModalProps) {
+export default function ExportModal({ isOpen, onClose, onExport, onExportTarget, onRestoreDefault, onUpdateDs, tokens, validationSummary, hasBlockers }: ExportModalProps) {
   const [currentStep, setCurrentStep] = useState<ModalStep>('review')
   const [isExporting, setIsExporting] = useState(false)
   const [hasExported, setHasExported] = useState(false)
   const [isRestoring, setIsRestoring] = useState(false)
   const [hasRestored, setHasRestored] = useState(false)
   const [restoreConfirm, setRestoreConfirm] = useState(false)
+  const [isUpdatingDs, setIsUpdatingDs] = useState(false)
+  const [hasUpdatedDs, setHasUpdatedDs] = useState(false)
   const [diffHunks, setDiffHunks] = useState<DiffHunk[]>([])
   const [_selectedSnapshot, setSelectedSnapshot] = useState<TokenSnapshot | null>(null)
   const [allSnapshots, setAllSnapshots] = useState<TokenSnapshot[]>([])
@@ -109,8 +112,23 @@ export default function ExportModal({ isOpen, onClose, onExport, onExportTarget,
     setIsRestoring(false)
     setHasRestored(false)
     setRestoreConfirm(false)
+    setIsUpdatingDs(false)
+    setHasUpdatedDs(false)
     setSelectedSnapshot(null)
     onClose()
+  }
+
+  async function handleUpdateDs() {
+    setIsUpdatingDs(true)
+    setHasUpdatedDs(false)
+    try {
+      await onUpdateDs()
+      setHasUpdatedDs(true)
+    } catch {
+      // error logged upstream
+    } finally {
+      setIsUpdatingDs(false)
+    }
   }
 
   async function handleRestoreDefault() {
@@ -419,6 +437,32 @@ export default function ExportModal({ isOpen, onClose, onExport, onExportTarget,
                   </button>
                 </div>
               )}
+
+              <div className="ed-export-restore-section">
+                <div className="ed-export-restore-header">
+                  <RefreshCw size={14} aria-hidden="true" />
+                  <span>Update Design System</span>
+                </div>
+                {hasUpdatedDs ? (
+                  <div className="ed-export-success ed-export-restore-success">
+                    <div className="ed-export-check-icon"><Check size={16} aria-hidden="true" /></div>
+                    <p>Re-scanned <code>design-system/v2/</code> — any new tokens are now loaded.</p>
+                  </div>
+                ) : (
+                  <>
+                    <p className="ed-export-restore-description">
+                      Re-scan <code>design-system/v2/</code> from disk and pull in any tokens added outside the editor (e.g. a new core semantic a component introduced). Your unsaved edits are preserved.
+                    </p>
+                    <button
+                      className="ed-export-btn-restore"
+                      onClick={handleUpdateDs}
+                      disabled={isUpdatingDs || isExporting || isRestoring}
+                    >
+                      {isUpdatingDs ? 'Updating…' : 'Update DS'}
+                    </button>
+                  </>
+                )}
+              </div>
 
               <div className="ed-export-restore-section">
                 <div className="ed-export-restore-header">

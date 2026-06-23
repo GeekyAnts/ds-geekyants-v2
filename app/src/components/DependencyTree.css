@@ -62,7 +62,7 @@
 }
 
 .ed-dependency-tree__path {
-  font-family: var(--font-family-mono);
+  font-family: var(--ed-font-mono);
   color: var(--ed-text-tertiary);
   font-size: var(--ed-font-size-xs);
 }

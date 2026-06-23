@@ -12,8 +12,8 @@ function buildOriginalMap(
 
   // Flatten primitives
   const PRIMITIVE_PREFIX: Record<string, string> = {
-    colors: 'color', fontFamily: 'font-family', fontSize: 'font-size',
-    fontWeight: 'font-weight', lineHeight: 'line-height', letterSpacing: 'letter-spacing',
+    colors: 'color', fontFamily: 'font', fontSize: 'text',
+    fontWeight: 'font-weight', lineHeight: 'leading', letterSpacing: 'tracking',
     spacing: 'spacing', radius: 'radius', borderWidth: 'border-width',
     opacity: 'opacity', zIndex: 'z-index', duration: 'duration',
     easing: 'ease', sizeScale: 'size', iconSize: 'icon-size',

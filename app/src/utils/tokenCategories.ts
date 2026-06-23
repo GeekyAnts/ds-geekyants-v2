@@ -53,7 +53,8 @@ const RULES: Array<{ category: TokenCategory; patterns: RegExp[] }> = [
   {
     category: 'Typography',
     patterns: [
-      /\b(font|text-size|line-height|letter-spacing|leading|tracking|weight|typeface|font-family|font-size|font-weight|whitespace)\b/,
+      /\b(font|text|text-size|line-height|letter-spacing|leading|tracking|weight|typeface|font-family|font-size|font-weight|whitespace)\b/,
+      /^(text|leading|tracking)-/,
       /-(weight|leading|tracking|family|line|letter|whitespace)(-|$)/,
       /\btypo\b/,
     ],

@@ -1,6 +1,6 @@
 import { useState } from "react";
-import type { ReactElement } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { withDarkPortalRoot } from "../lib/dark-portal-decorator";
 // v2 prototype uses its own 2-tier stylesheet, imported here so the slice is
 // self-contained and independent of the stale 3-tier geeklego.css.
 import "../../../design-system/v2/index.css";
@@ -87,16 +87,9 @@ export const DarkMode: Story = {
     docs: {
       description: {
         story:
-          "The Popover panel is portalled to <body>, so this story also sets data-theme=\"dark\" and .dark on the documentElement (decorator) so the portalled listbox surface re-themes from the same Tier-2 semantic overrides.",
+          "The Popover panel is portalled to `<body>`, so this story also sets `data-theme=\"dark\"` and `.dark` on the document root (decorator) so the portalled listbox surface re-themes from the same Tier-2 semantic overrides.",
       },
     },
   },
-  decorators: [
-    (StoryFn: () => ReactElement) => {
-      const root = document.documentElement;
-      root.setAttribute("data-theme", "dark");
-      root.classList.add("dark");
-      return <StoryFn />;
-    },
-  ],
+  decorators: [withDarkPortalRoot],
 };

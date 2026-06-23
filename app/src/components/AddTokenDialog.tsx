@@ -2,7 +2,6 @@ import { useState, useEffect, useRef, useMemo } from 'react'
 import { EdDialog } from '../editor-ds/primitives/EdDialog'
 import { EdColorPicker } from '../editor-ds/primitives/EdColorPicker'
 import type { GeeklegoTokensV2 } from '../types'
-import { V2_SEMANTIC_KEYS } from '../types'
 import { stageNewToken, getStagedNewTokens, getAllStaged, getStagedValue, type TokenTreePath } from '../state/staging'
 import { withPxAnnotation } from '../utils/colorUtils'
 
@@ -21,18 +20,14 @@ function deriveTreePath(name: string): TokenTreePath | null {
   if (colorPrimMatch) {
     return { kind: 'primitiveColor', family: colorPrimMatch[1], shade: colorPrimMatch[2] }
   }
-  // Flat v2 semantics — CSS var for a key is `--<key>`. A semantic token maps to a
-  // single flat 'semantic' tree path keyed by the bare key (no group nesting).
-  const bareKey = name.replace(/^--/, '')
-  if ((V2_SEMANTIC_KEYS as readonly string[]).includes(bareKey)) {
-    return { kind: 'semanticFlat', group: 'semantic', key: bareKey }
-  }
+  // Primitive scales — checked BEFORE the semantic fall-through so prefixed names
+  // (--spacing-4, --radius-lg, …) route to their primitive category, not to semantics.
   const primitivePrefixes: Array<[string, string]> = [
-    ['--font-size-', 'fontSize'],
+    ['--text-', 'fontSize'],
     ['--font-weight-', 'fontWeight'],
-    ['--font-family-', 'fontFamily'],
-    ['--line-height-', 'lineHeight'],
-    ['--letter-spacing-', 'letterSpacing'],
+    ['--font-', 'fontFamily'],
+    ['--leading-', 'lineHeight'],
+    ['--tracking-', 'letterSpacing'],
     ['--border-width-', 'borderWidth'],
     ['--icon-size-', 'iconSize'],
     ['--duration-', 'duration'],
@@ -48,6 +43,21 @@ function deriveTreePath(name: string): TokenTreePath | null {
       const key = name.slice(prefix.length)
       if (key) return { kind: 'primitiveFlat', category, key }
     }
+  }
+  // Flat v2 semantics — CSS var for a key is `--<key>`. semantics.css is canonical, so
+  // ANY bare name that isn't a primitive scale (handled above) and isn't an --ext-* token
+  // is treated as a core semantic — including brand-new ones beyond the standard ShadCN set
+  // (V2_SEMANTIC_KEYS is now a default/ordering set, not a gate). The editor absorbs these
+  // under the standard "Status" category. `--color-…` / `--ext-…` are excluded so they never
+  // mis-route to a semantic alias.
+  const bareKey = name.replace(/^--/, '')
+  if (
+    bareKey &&
+    /^[a-z][a-z0-9-]*$/.test(bareKey) &&
+    !bareKey.startsWith('ext-') &&
+    !bareKey.startsWith('color-')
+  ) {
+    return { kind: 'semanticFlat', group: 'semantic', key: bareKey }
   }
   return null
 }
@@ -86,8 +96,8 @@ function getPrimitiveScopePrefix(path: TokenTreePath): string | null {
 function getAllTokenNames(geeklegoTokens: GeeklegoTokensV2): Set<string> {
   const names = new Set<string>()
   const PRIM_PREFIX: Record<string, string> = {
-    colors: 'color', fontFamily: 'font-family', fontSize: 'font-size',
-    fontWeight: 'font-weight', lineHeight: 'line-height', letterSpacing: 'letter-spacing',
+    colors: 'color', fontFamily: 'font', fontSize: 'text',
+    fontWeight: 'font-weight', lineHeight: 'leading', letterSpacing: 'tracking',
     spacing: 'spacing', radius: 'radius', borderWidth: 'border-width',
     opacity: 'opacity', zIndex: 'z-index', duration: 'duration', easing: 'ease',
     sizeScale: 'size', iconSize: 'icon-size',
@@ -130,8 +140,8 @@ interface Candidate { name: string; value: string }
 function buildCandidates(geeklegoTokens: GeeklegoTokensV2, scopePrefix: string): Candidate[] {
   const result: Candidate[] = []
   const PRIM_PREFIX: Record<string, string> = {
-    colors: 'color', fontFamily: 'font-family', fontSize: 'font-size',
-    fontWeight: 'font-weight', lineHeight: 'line-height', letterSpacing: 'letter-spacing',
+    colors: 'color', fontFamily: 'font', fontSize: 'text',
+    fontWeight: 'font-weight', lineHeight: 'leading', letterSpacing: 'tracking',
     spacing: 'spacing', radius: 'radius', borderWidth: 'border-width',
     opacity: 'opacity', zIndex: 'z-index', duration: 'duration', easing: 'ease',
     sizeScale: 'size', iconSize: 'icon-size',

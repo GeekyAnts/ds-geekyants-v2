@@ -23,7 +23,7 @@ function tokEl(el: HTMLElement | null, name: string): string {
 // ─── Shared: page shell ────────────────────────────────────────────────────
 function Page({ children }: { children: React.ReactNode }) {
   return (
-    <div className="bg-secondary text-primary" style={{ minHeight: '100vh', padding: '48px 64px', fontFamily: 'var(--font-family-sans)' }}>
+    <div className="bg-secondary text-primary" style={{ minHeight: '100vh', padding: '48px 64px', fontFamily: 'var(--font-sans)' }}>
       {children}
     </div>
   );

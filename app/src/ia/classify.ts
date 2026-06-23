@@ -33,7 +33,7 @@ function getFoundationsCategories(): {
     { pattern: /^color-/, categoryId: 'color', label: 'Colors', icon: 'Palette' },
     { pattern: /^spacing-/, categoryId: 'spacing', label: 'Spacing', icon: 'Ruler' },
     { pattern: /^radius-/, categoryId: 'radius', label: 'Radius', icon: 'Box' },
-    { pattern: /^font-/, categoryId: 'typography', label: 'Fonts', icon: 'Type' },
+    { pattern: /^(font|text|leading|tracking)-/, categoryId: 'typography', label: 'Fonts', icon: 'Type' },
     { pattern: /^shadow-/, categoryId: 'shadow', label: 'Shadows', icon: 'Layers' },
     { pattern: /^motion-/, categoryId: 'motion', label: 'Motion', icon: 'Zap' },
     { pattern: /^z-/, categoryId: 'zIndex', label: 'Z-Index', icon: 'Layers' },
@@ -69,12 +69,21 @@ function getSemanticCategories(): {
       categoryId: 'interactive', label: 'Interactive', icon: 'Zap',
     },
     {
-      pattern: /^(destructive|destructive-foreground)$/,
-      categoryId: 'status', label: 'Status', icon: 'CircleAlert',
-    },
-    {
       pattern: /^(border|input|radius)$/,
       categoryId: 'layout', label: 'Layout', icon: 'Maximize2',
+    },
+    // Status — feedback colors. Holds the standard `destructive` pair AND, as the catch-all,
+    // any newly-authored semantic that semantics.css introduces beyond the standard ShadCN set
+    // (e.g. info/success/warning status colors). This keeps the UI vocabulary 100%
+    // ShadCN-standard — there is no invented category; a discovered semantic is treated as a
+    // status color (its most common purpose) rather than getting a non-standard bucket name.
+    // MUST be last: first-match keeps surface/interactive/layout above intact. Names arrive
+    // WITHOUT the leading `--`; the negative lookahead excludes known primitive prefixes so a
+    // primitive lacking a Foundations pattern (breakpoint-*, opacity-*) falls through to
+    // `uncategorized` as before, rather than masquerading as a semantic.
+    {
+      pattern: /^(?!(?:color|spacing|radius|font|text|leading|tracking|shadow|duration|ease|motion|z-index|z-|border-width|border-|icon-size|size|breakpoint|opacity)\b).+/,
+      categoryId: 'status', label: 'Status', icon: 'CircleAlert',
     },
   ]
 }

@@ -7,10 +7,25 @@ import { EdButton, EdScrollArea, EdEmptyState, EdColorPicker, EdInput } from '..
 import { isPinned, togglePin } from '../../state/pinning'
 import { subscribeToPendingChanges, getAllStaged, getStagedValue, setDraft, unstage, getStagedNewTokens } from '../../state/staging'
 import { withPxAnnotation } from '../../utils/colorUtils'
-import type { GeeklegoTokensV2 } from '../../types'
+import type { GeeklegoTokensV2, TokenUsageMap } from '../../types'
 import { UsedBy } from './UsedBy'
+import { UsedInComponents } from './UsedInComponents'
 import './Inspector.css'
 import './UsedBy.css'
+
+// In v2's 2-tier model, only PRIMITIVES are aliased by other tokens (a primitive →
+// a semantic, e.g. --color-brand-900 → --primary). Semantics are the top token layer —
+// nothing aliases them (they're consumed by components, shown in "Used in components").
+// So the token→token "Used by" graph block is only meaningful for primitives; for
+// semantics/ext it would always say "not used by any other tokens" — misleading noise.
+const PRIMITIVE_TOKEN_PREFIXES = [
+  '--color-', '--spacing-', '--radius-', '--font-', '--text-', '--leading-', '--tracking-',
+  '--border-', '--shadow-', '--motion-', '--duration-', '--ease-', '--z-', '--z-index-',
+  '--icon-size-', '--size-', '--opacity-', '--breakpoint-',
+]
+function isPrimitiveToken(tokenName: string): boolean {
+  return PRIMITIVE_TOKEN_PREFIXES.some(p => tokenName.startsWith(p))
+}
 
 function deriveBreadcrumb(tokenName: string): string {
   if (tokenName.startsWith('--color-')) return 'Foundations / Color'
@@ -39,11 +54,11 @@ function isFoundationColorToken(tokenName: string): boolean {
 // maps the JS primitive-object key to the CSS variable prefix.
 const PRIMITIVE_PREFIX: Record<string, string> = {
   colors: 'color',
-  fontFamily: 'font-family',
-  fontSize: 'font-size',
+  fontFamily: 'font',
+  fontSize: 'text',
   fontWeight: 'font-weight',
-  lineHeight: 'line-height',
-  letterSpacing: 'letter-spacing',
+  lineHeight: 'leading',
+  letterSpacing: 'tracking',
   spacing: 'spacing',
   radius: 'radius',
   borderWidth: 'border-width',
@@ -128,11 +143,11 @@ function getTokenFamily(tokenName: string): string {
   if (tokenName.startsWith('--color-')) return 'color'
   if (tokenName.startsWith('--spacing-')) return 'spacing'
   if (tokenName.startsWith('--radius-')) return 'radius'
-  if (tokenName.startsWith('--font-size-')) return 'font-size'
-  if (tokenName.startsWith('--font-family-')) return 'font-family'
+  if (tokenName.startsWith('--text-')) return 'font-size'
   if (tokenName.startsWith('--font-weight-')) return 'font-weight'
-  if (tokenName.startsWith('--line-height-')) return 'line-height'
-  if (tokenName.startsWith('--letter-spacing-')) return 'letter-spacing'
+  if (tokenName.startsWith('--font-')) return 'font-family'
+  if (tokenName.startsWith('--leading-')) return 'line-height'
+  if (tokenName.startsWith('--tracking-')) return 'letter-spacing'
   if (tokenName.startsWith('--border-width-')) return 'border-width'
   if (tokenName.startsWith('--opacity-')) return 'opacity'
   if (tokenName.startsWith('--size-')) return 'size'
@@ -660,6 +675,8 @@ interface InspectorProps {
   selectedTokenName: string | null
   tokens: GeeklegoTokensV2
   graph: TokenGraph | null
+  usage: TokenUsageMap
+  onRescanUsage: () => void
   onStageEdit: (tokenName: string, newValue: string) => void
   onClose?: () => void
 }
@@ -668,6 +685,8 @@ export function Inspector({
   selectedTokenName,
   tokens,
   graph,
+  usage,
+  onRescanUsage,
   onStageEdit,
   onClose: _onClose,
 }: InspectorProps) {
@@ -826,16 +845,24 @@ export function Inspector({
           onDescriptionClear={clearDescription}
         />
 
-        {graph && (
-          <div className="ed-inspector__section">
-            <h3 className="ed-inspector__section-title">References</h3>
+        <div className="ed-inspector__section">
+          <h3 className="ed-inspector__section-title">References</h3>
+          {/* Token→token "Used by" only applies to primitives (semantics are the top token
+              layer — nothing aliases them). Show it just for primitives; everything gets the
+              component-usage block below. */}
+          {graph && isPrimitiveToken(selectedTokenName) && (
             <UsedBy
               tokenName={selectedTokenName}
               graph={graph}
               stagedValues={staged}
             />
-          </div>
-        )}
+          )}
+          <UsedInComponents
+            tokenName={selectedTokenName}
+            usage={usage}
+            onRescan={onRescanUsage}
+          />
+        </div>
 
         <div className="ed-inspector__value-actions">
           <EdButton
