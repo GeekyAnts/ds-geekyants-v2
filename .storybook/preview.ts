@@ -41,6 +41,13 @@ const preview: Preview = {
   },
   initialGlobals: { theme: 'light' },
   parameters: {
+    // Stop Storybook's manager-level keyboard shortcuts (single keys like
+    // '/', 'A', 'D', arrows, …) from swallowing keystrokes meant for the
+    // component under test — otherwise Radix keyboard nav (DropdownMenu arrow
+    // nav, typeahead, Esc) appears "broken" inside the canvas.
+    options: {
+      enableShortcuts: false,
+    },
     a11y: {
       // 'todo' - show a11y violations in the test UI only
       // 'error' - fail CI on a11y violations
