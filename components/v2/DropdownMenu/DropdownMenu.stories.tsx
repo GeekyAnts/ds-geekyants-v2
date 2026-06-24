@@ -217,7 +217,7 @@ export const DarkMode: Story = {
   render: () => (
     <div
       data-theme="dark"
-      className="dark max-w-2xl rounded-lg bg-background p-8"
+      className="dark max-w-2xl rounded-lg bg-background p-8 text-foreground"
     >
       <DropdownMenu>
         <DropdownMenuTrigger asChild>

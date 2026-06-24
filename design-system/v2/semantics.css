@@ -32,6 +32,17 @@
 
   /* ShadCN expects a single --radius; component utilities derive sm/md/lg from it. */
   --radius:                var(--radius-lg);
+
+  /* Chart data-series — geeklego EXTENDS the standard ShadCN set (which defines
+     --chart-1..5 but leaves the values theme-specific). Five visually distinct
+     brand hues for chart series; each chains to a primitive, never a raw value.
+     Consumed by recharts via var() in SVG fill/stroke props (no className path
+     exists for SVG paint), which is the documented arbitrary-value exception. */
+  --chart-1:               var(--color-brand-500);
+  --chart-2:               var(--color-accent-500);
+  --chart-3:               var(--color-success-500);
+  --chart-4:               var(--color-warning-500);
+  --chart-5:               var(--color-info-500);
 }
 
 /* ---------------------------------------------------------------------------
@@ -63,6 +74,14 @@
   --radius-md:                   calc(var(--radius) - 2px);
   --radius-lg:                   var(--radius);
   --radius-xl:                   calc(var(--radius) + 4px);
+
+  /* Register chart series as color tokens so the color-chart utilities resolve
+     (recharts reads them in SVG fill/stroke; also gives bg-chart utilities). */
+  --color-chart-1:               var(--chart-1);
+  --color-chart-2:               var(--chart-2);
+  --color-chart-3:               var(--chart-3);
+  --color-chart-4:               var(--chart-4);
+  --color-chart-5:               var(--chart-5);
 }
 
 /* ---------------------------------------------------------------------------
@@ -105,6 +124,20 @@
   }
   @keyframes accordion-up {
     from { height: var(--radix-accordion-content-height); }
+    to { height: 0; }
+  }
+
+  /* Collapsible — same technique as accordion, off Radix's
+     --radix-collapsible-content-height measurement. */
+  --animate-collapsible-down: collapsible-down 0.2s ease-out;
+  --animate-collapsible-up: collapsible-up 0.2s ease-out;
+
+  @keyframes collapsible-down {
+    from { height: 0; }
+    to { height: var(--radix-collapsible-content-height); }
+  }
+  @keyframes collapsible-up {
+    from { height: var(--radix-collapsible-content-height); }
     to { height: 0; }
   }
 }

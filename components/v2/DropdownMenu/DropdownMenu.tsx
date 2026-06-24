@@ -185,23 +185,27 @@ export const DropdownMenuSubTrigger = forwardRef<
 ));
 DropdownMenuSubTrigger.displayName = "DropdownMenuSubTrigger";
 
-/* SubContent — the portalled submenu surface; same look as Content. */
+/* SubContent — the submenu surface. MUST be portalled: Radix renders SubContent
+   inside the parent Content's DOM, and Content has overflow-hidden, so without a
+   Portal the submenu is clipped by its parent. The Portal lifts it to <body>. */
 export const DropdownMenuSubContent = forwardRef<
   HTMLDivElement,
   DropdownMenuSubContentProps
 >(({ className, ...props }, ref) => (
-  <RadixDropdownMenu.SubContent
-    ref={ref}
-    className={cn(
-      "z-50 min-w-32 overflow-hidden rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-lg",
-      "origin-[var(--radix-dropdown-menu-content-transform-origin)]",
-      "transition-all duration-150 ease-out",
-      "data-[state=closed]:scale-95 data-[state=closed]:opacity-0",
-      "data-[state=open]:scale-100 data-[state=open]:opacity-100",
-      className,
-    )}
-    {...props}
-  />
+  <DropdownMenuPortal>
+    <RadixDropdownMenu.SubContent
+      ref={ref}
+      className={cn(
+        "z-50 min-w-32 overflow-hidden rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-lg",
+        "origin-[var(--radix-dropdown-menu-content-transform-origin)]",
+        "transition-all duration-150 ease-out",
+        "data-[state=closed]:scale-95 data-[state=closed]:opacity-0",
+        "data-[state=open]:scale-100 data-[state=open]:opacity-100",
+        className,
+      )}
+      {...props}
+    />
+  </DropdownMenuPortal>
 ));
 DropdownMenuSubContent.displayName = "DropdownMenuSubContent";
 

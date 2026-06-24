@@ -122,10 +122,14 @@ Because semantics are registered as real utilities via `@theme inline`, write `b
 
 **Compound components** (slots + context): use the ShadCN sub-component-export pattern — separate named exports (`Dialog`, `DialogTrigger`, `DialogContent`), each typically wrapping a Radix primitive part. Prefer the Radix primitive's built-in context over a hand-rolled `createContext`. See `references/composition-example.md`.
 
+**Menu submenus MUST be portalled.** For any menu-style Radix primitive (`DropdownMenu`, `ContextMenu`, `Menubar`), the `Content` carries `overflow-hidden` (to clip its own rounded corners), and Radix renders `SubContent` **inside that `Content`'s DOM subtree** — so an un-portalled submenu is clipped by its parent's `overflow-hidden` and appears cut off / invisible. **Wrap `SubContent` in the matching `Portal`** (`<DropdownMenuPortal><RadixDropdownMenu.SubContent …/></DropdownMenuPortal>`) so it lifts to `<body>` and escapes the clip. This is *not* optional and *not* the same as the root `Content` portal — both need their own Portal wrapper. (Same root cause as the dark-portal theming issue: portalled surfaces escape their ancestor's box.) The shipped Dialog/Popover don't have submenus, so the canonical reference for this is the menu trio specifically — verify SubContent is portalled before shipping any menu component.
+
 ### Phase 3 — Stories
 
 Mirror `Button.stories.tsx`. Import the v2 stylesheet so the slice is self-contained:
-`import "../../../design-system/v2/index.css";`. Cover: Default, Variants (core/standard only), Sizes, each custom `--ext-*` variant, Disabled/states, `asChild` (if applicable), and **DarkMode** — wrap in `<div data-theme="dark" className="dark max-w-2xl …">` (set *both* selectors; keep `max-w-2xl`). Title is `v2/<Name>`.
+`import "../../../design-system/v2/index.css";`. Cover: Default, Variants (core/standard only), Sizes, each custom `--ext-*` variant, Disabled/states, `asChild` (if applicable), and **DarkMode** — wrap in `<div data-theme="dark" className="dark max-w-2xl … bg-background text-foreground">` (set *both* selectors; keep `max-w-2xl`). Title is `v2/<Name>`.
+
+**The dark wrapper MUST set `text-foreground` alongside `bg-background`** (`className="dark max-w-2xl rounded-lg bg-background p-8 text-foreground"`). A dark surface establishes BOTH the background and the inherited text color. If you set only `bg-background`, any element that relies on *inherited* `foreground` (a Table cell, a plain `<div>` row, bare text with no `text-*` class) falls back to Storybook's default dark text → **dark-on-dark, invisible**. Components that always set an explicit text color (`text-primary-foreground`, `text-muted-foreground`) won't show the bug, which is exactly why it slips through — so make `text-foreground` non-negotiable on every dark wrapper. (The component is correct in relying on inherited `foreground`, the ShadCN way; it's the *wrapper* that must establish it.)
 
 **Portalled components (Dialog, Popover, Select, DropdownMenu, Combobox — anything whose `Content` renders into `<body>`):** the dark wrapper `<div>` does NOT theme the portalled surface, because the portal escapes it. Flag the theme on the document root too — but do this with the shared **`withDarkPortalRoot`** decorator from [`components/v2/lib/dark-portal-decorator.tsx`](../../../components/v2/lib/dark-portal-decorator.tsx):
 
@@ -200,3 +204,5 @@ Rules:
 9. Invent new core semantic vocabulary casually — extend deliberately and document.
 10. Use package import paths between v2 files — relative imports only.
 11. Finish a component without re-exporting it from `components/index.ts` (Phase 3.5) — an unexported component ships nothing in `dist/index.js`.
+12. Write a dark-mode story wrapper with `bg-background` but no `text-foreground` — inherited-color content goes dark-on-dark. Always pair them.
+13. Leave a menu `SubContent` (DropdownMenu/ContextMenu/Menubar) un-portalled — the parent `Content`'s `overflow-hidden` clips it. Wrap SubContent in its `Portal`.

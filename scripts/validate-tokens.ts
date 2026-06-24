@@ -135,7 +135,12 @@ const FRAMEWORK_INTERNAL_PREFIXES = ['tw-', 'radix-']
 // (e.g. style={{ '--x': value }} consumed by a className). These are computed
 // per-render and so are intentionally absent from the design-system CSS.
 // Add a v2 component's runtime-injected var name here if it consumes one.
-const INLINE_STYLE_VARS = new Set<string>([])
+//
+// Chart: ChartContainer injects one `--color-<seriesKey>` var per config series
+// from `config[key].color` (which itself chains to a --chart-N semantic). The
+// series keys are consumer-defined (demo uses desktop/mobile), so these are
+// runtime, not static tokens — recharts reads them in SVG fill/stroke.
+const INLINE_STYLE_VARS = new Set<string>(['color-desktop', 'color-mobile'])
 
 export function validateNoDuplicateDeclarations(css: string): Array<{ prop: string; firstLine: number; dupLine: number; firstValue: string; dupValue: string; selector: string }> {
   const duplicates: Array<{ prop: string; firstLine: number; dupLine: number; firstValue: string; dupValue: string; selector: string }> = []

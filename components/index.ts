@@ -18,26 +18,64 @@ export * from './v2/Accordion/Accordion';
 export type * from './v2/Accordion/Accordion.types';
 export * from './v2/Alert/Alert';
 export type * from './v2/Alert/Alert.types';
+export * from './v2/AlertDialog/AlertDialog';
+export type * from './v2/AlertDialog/AlertDialog.types';
+export * from './v2/AspectRatio/AspectRatio';
+export type * from './v2/AspectRatio/AspectRatio.types';
+export * from './v2/Avatar/Avatar';
+export type * from './v2/Avatar/Avatar.types';
+export * from './v2/Badge/Badge';
+export type * from './v2/Badge/Badge.types';
+export * from './v2/Breadcrumb/Breadcrumb';
+export type * from './v2/Breadcrumb/Breadcrumb.types';
 export * from './v2/Button/Button';
 export type * from './v2/Button/Button.types';
+export * from './v2/Calendar/Calendar';
+export type * from './v2/Calendar/Calendar.types';
+export * from './v2/Card/Card';
+export type * from './v2/Card/Card.types';
+export * from './v2/Carousel/Carousel';
+export type * from './v2/Carousel/Carousel.types';
+export * from './v2/Chart/Chart';
+export type * from './v2/Chart/Chart.types';
+export * from './v2/Checkbox/Checkbox';
+export type * from './v2/Checkbox/Checkbox.types';
+export * from './v2/Collapsible/Collapsible';
+export type * from './v2/Collapsible/Collapsible.types';
 export * from './v2/Combobox/Combobox';
 export type * from './v2/Combobox/Combobox.types';
 export * from './v2/Command/Command';
 export type * from './v2/Command/Command.types';
+export * from './v2/ContextMenu/ContextMenu';
+export type * from './v2/ContextMenu/ContextMenu.types';
+export * from './v2/DataTable/DataTable';
+export type * from './v2/DataTable/DataTable.types';
+export * from './v2/DatePicker/DatePicker';
+export type * from './v2/DatePicker/DatePicker.types';
 export * from './v2/Dialog/Dialog';
 export type * from './v2/Dialog/Dialog.types';
+export * from './v2/Drawer/Drawer';
+export type * from './v2/Drawer/Drawer.types';
 export * from './v2/DropdownMenu/DropdownMenu';
 export type * from './v2/DropdownMenu/DropdownMenu.types';
-export * from './v2/Field/Field';
-export type * from './v2/Field/Field.types';
+// Form is the canonical import path for the ShadCN Form recipe; its single
+// implementation lives in Field/Field and is re-exported by Form/Form. We export
+// the recipe's names from Form/Form ONLY (not also from Field/Field) to avoid a
+// duplicate-export collision — the Field directory remains the implementation.
+export * from './v2/Form/Form';
+export type * from './v2/Form/Form.types';
 export * from './v2/Input/Input';
 export type * from './v2/Input/Input.types';
 export * from './v2/Label/Label';
 export type * from './v2/Label/Label.types';
+export * from './v2/Pagination/Pagination';
+export type * from './v2/Pagination/Pagination.types';
 export * from './v2/Popover/Popover';
 export type * from './v2/Popover/Popover.types';
 export * from './v2/Select/Select';
 export type * from './v2/Select/Select.types';
+export * from './v2/Table/Table';
+export type * from './v2/Table/Table.types';
 
 // NOTE: the hand-rolled keyboard hooks (useFocusTrap/useEscapeDismiss/
 // useClickOutside/useRovingTabindex/useSingleSelectGroup) were removed in the

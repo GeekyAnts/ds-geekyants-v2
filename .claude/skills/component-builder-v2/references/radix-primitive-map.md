@@ -69,3 +69,5 @@ The trap to avoid: a component with a real state/behavior surface but **no Radix
 ## How to build on a Radix primitive
 
 Wrap the Radix parts as named sub-component exports, styling each with `cn()` + semantic utilities. You add the *look* (semantic classes); Radix owns the *behavior*. Never override Radix's keyboard/focus behavior — restyle, don't rebuild. See `composition-example.md` for the full shape.
+
+**Menu submenus must be portalled.** When building a menu primitive (`DropdownMenu`, `ContextMenu`, `Menubar`), the `Content` has `overflow-hidden` and Radix renders `SubContent` inside `Content`'s DOM — so wrap `SubContent` in the matching `*Portal` or it gets clipped by the parent and appears cut off. This is separate from (and in addition to) the root `Content` portal.

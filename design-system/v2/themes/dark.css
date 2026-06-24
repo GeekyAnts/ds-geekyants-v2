@@ -29,6 +29,14 @@
   --popover:               var(--color-neutral-900);
   --popover-foreground:    var(--color-neutral-50);
 
+  /* Chart series — re-point at lighter primitive steps so the hues stay
+     legible against the dark surface. */
+  --chart-1:               var(--color-brand-400);
+  --chart-2:               var(--color-accent-400);
+  --chart-3:               var(--color-success-400);
+  --chart-4:               var(--color-warning-400);
+  --chart-5:               var(--color-info-400);
+
   /* --ext-* overrides for dark (opaque passthrough). */
   --ext-button-gamified-shadow: 0 2px 0 0 var(--color-accent-800);
 }
