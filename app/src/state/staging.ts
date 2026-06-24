@@ -3,6 +3,14 @@ import { recordEdit } from './recentlyEdited.ts'
 const STORAGE_KEY = "geeklego.editor.pending.v1";
 const STORAGE_KEY_NEW = "geeklego.editor.new-tokens.v1";
 
+/**
+ * Staged-edit key prefix for a font LOADER (--font-loader-<slot>). These entries carry a JSON
+ * {family,axes} that the merge folds into fontLoaders → fonts.css; they are NOT user-facing
+ * tokens. Defined here (the foundational store) so the count + display filters can exclude
+ * them without a circular import; exportFormatter re-exports it for the merge logic.
+ */
+export const FONT_LOADER_EDIT_PREFIX = '--font-loader-';
+
 const stagedEdits: Map<string, string> = new Map();
 
 // ─── New token store ──────────────────────────────────────────────────────────
@@ -153,7 +161,13 @@ export function hasPendingChanges(): boolean {
 }
 
 export function getPendingCount(): number {
-  return stagedEdits.size + stagedNewTokens.size;
+  // Exclude internal --font-loader-* entries: each is paired with a visible --font-* family
+  // edit, so counting it would double-count one user action.
+  let editCount = 0;
+  for (const key of stagedEdits.keys()) {
+    if (!key.startsWith(FONT_LOADER_EDIT_PREFIX)) editCount++;
+  }
+  return editCount + stagedNewTokens.size;
 }
 
 export function getAllStaged(): Map<string, string> {

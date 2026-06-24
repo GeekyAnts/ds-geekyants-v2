@@ -1,4 +1,5 @@
 import type {
+  FontLoader,
   GeeklegoTokensV2,
   V2Semantics,
 } from '../types.ts'
@@ -441,19 +442,46 @@ export function parseV2Dark(css: string): { dark: V2Semantics; darkOverride: str
 }
 
 /**
- * Orchestrator — parse the three v2 files into one GeeklegoTokensV2.
+ * Parse design-system/v2/fonts.css → FontLoader[]. Reads the `@import url("…googleapis.com
+ * /css2?family=<Family>:<axes>&display=swap")` lines back into structured loaders (inverse of
+ * generateV2Fonts). The family slug's `+` is restored to spaces; the `:axes` segment is
+ * optional. A header-only / empty file yields []. Non-Google `@import`s are ignored (the
+ * picker only writes Google loaders today).
+ */
+export function parseV2Fonts(css: string): FontLoader[] {
+  const loaders: FontLoader[] = []
+  // Match the css2 family query: family=<slug>[:<axes>] up to `&` or the closing quote.
+  const re = /@import\s+url\(\s*["']?https:\/\/fonts\.googleapis\.com\/css2\?family=([^"'&)]+)/g
+  let m: RegExpExecArray | null
+  while ((m = re.exec(css)) !== null) {
+    const raw = m[1]
+    const [familyPart, axesPart] = raw.split(':')
+    const family = decodeURIComponent(familyPart).replace(/\+/g, ' ').trim()
+    if (!family) continue
+    const axes = axesPart ? axesPart.trim() : undefined
+    loaders.push(axes ? { family, axes, source: 'google' } : { family, source: 'google' })
+  }
+  return loaders
+}
+
+/**
+ * Orchestrator — parse the v2 files into one GeeklegoTokensV2. `fontsCss` is optional so
+ * 3-arg callers (export-ir, older tests) still work — they get an empty fontLoaders list.
  */
 export function parseGeeklegoV2(
   primCss: string,
   semCss: string,
   darkCss: string,
+  fontsCss = '',
 ): GeeklegoTokensV2 {
   const primitives = parseV2Primitives(primCss)
   const { light, extBlock } = parseV2Semantics(semCss)
   const { dark, darkOverride } = parseV2Dark(darkCss)
+  const fontLoaders = parseV2Fonts(fontsCss)
   return {
     primitives,
     semantics: { light, dark },
     ext: { rawBlock: extBlock, darkOverride },
+    fontLoaders,
   }
 }

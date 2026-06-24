@@ -1,8 +1,13 @@
 /* =============================================================================
    geeklego v2 — design system entrypoint (2-tier)
-   Import order matters: primitives first (it pulls in Tailwind + registers the
-   @theme palette), then semantics (aliases + utility registration), then themes.
+   Import order matters:
+     - fonts FIRST: its remote @import(s) must precede @import "tailwindcss" (pulled in
+       by primitives.css) or the Tailwind v4 build strips them from dist/geeklego.css.
+     - then primitives (pulls in Tailwind + registers the @theme palette),
+     - then semantics (aliases + utility registration), then themes.
+   Do NOT move fonts.css below primitives.css — webfonts would silently stop shipping.
    ============================================================================= */
+@import "./fonts.css";
 @import "./primitives.css";
 @import "./semantics.css";
 @import "./themes/dark.css";

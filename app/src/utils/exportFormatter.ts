@@ -1,12 +1,40 @@
 import { structuredPatch } from 'diff'
 import type { GeeklegoTokensV2 } from '../types'
 import { generateGeeklegoV2 } from './cssGenerator'
-import type { StagedNewToken } from '../state/staging'
+import { FONT_LOADER_EDIT_PREFIX, type StagedNewToken } from '../state/staging'
 
-/** Concatenate the three v2 file strings into one combined CSS string for diffing/export. */
+// Re-export so existing importers (the picker, display filters) keep their import site.
+export { FONT_LOADER_EDIT_PREFIX }
+
+/** Concatenate the v2 file strings into one combined CSS string for diffing/export. */
 function combineV2Css(tokens: GeeklegoTokensV2): string {
-  const { primitives, semantics, dark } = generateGeeklegoV2(tokens)
-  return [primitives, semantics, dark].join('\n\n')
+  const { primitives, semantics, dark, fonts } = generateGeeklegoV2(tokens)
+  return [fonts, primitives, semantics, dark].join('\n\n')
+}
+
+/** Apply a single staged font-loader edit onto modifiedTokens.fontLoaders (replace-by-slot). */
+function applyFontLoaderEdit(
+  modifiedTokens: GeeklegoTokensV2,
+  slot: string,
+  rawValue: string,
+): void {
+  if (!Array.isArray(modifiedTokens.fontLoaders)) modifiedTokens.fontLoaders = []
+  const loaders = modifiedTokens.fontLoaders
+  // Parse the staged JSON; empty/invalid → treat as "remove this slot's loader".
+  let parsed: { family?: string; axes?: string } | null = null
+  if (rawValue && rawValue.trim()) {
+    try { parsed = JSON.parse(rawValue) } catch { parsed = null }
+  }
+  // De-dupe: a loader is identified by its family. Re-picking for a slot may change the
+  // family, so drop any existing loader whose family matches EITHER the old or new value,
+  // then add the new one. To keep it simple and slot-stable we de-dupe purely by family.
+  if (!parsed || !parsed.family || !parsed.family.trim()) return // nothing to add (removal handled below)
+  const family = parsed.family.trim()
+  const axes = parsed.axes && parsed.axes.trim() ? parsed.axes.trim() : undefined
+  const next = loaders.filter((l) => l.family !== family)
+  next.push(axes ? { family, axes, source: 'google' } : { family, source: 'google' })
+  modifiedTokens.fontLoaders = next
+  void slot
 }
 
 /**
@@ -62,6 +90,15 @@ export function generateMergedTokens(
   const modifiedTokens = structuredClone(tokens)
 
   for (const [tokenName, stagedValue] of stagedEdits) {
+    // Font-loader edits (--font-loader-<slot>) are handled first: they carry a JSON value
+    // into fontLoaders, NOT a primitive string. Must precede the --font-* family matcher
+    // below, which would otherwise mis-read this key as a family token.
+    if (tokenName.startsWith(FONT_LOADER_EDIT_PREFIX)) {
+      const slot = tokenName.slice(FONT_LOADER_EDIT_PREFIX.length)
+      applyFontLoaderEdit(modifiedTokens, slot, stagedValue)
+      continue
+    }
+
     const parts = tokenName.replace(/^--/, '').split('-')
     if (parts.length < 2) continue
 

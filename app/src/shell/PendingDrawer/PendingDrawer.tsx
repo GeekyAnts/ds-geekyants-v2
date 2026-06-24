@@ -5,6 +5,7 @@ import { useEffect, useMemo, useCallback, useState } from 'react'
 import { X, ArrowLeft, ArrowRight } from 'lucide-react'
 import './PendingDrawer.css'
 import { getAllStaged, unstage, discardAll, subscribeToPendingChanges, getStagedNewTokens, unstageNewToken } from '../../state/staging'
+import { FONT_LOADER_EDIT_PREFIX } from '../../utils/exportFormatter'
 import { withPxAnnotation } from '../../utils/colorUtils'
 import { buildTokenGraph, type TokenGraph } from '../../graph/build'
 import { ImpactSummary } from './ImpactSummary'
@@ -77,6 +78,9 @@ export function PendingDrawer({
     const staged = getAllStaged()
     const changes = []
     for (const [tokenName, stagedValue] of staged) {
+      // --font-loader-* are internal staging entries paired with their --font-* family edit
+      // (which shows below as a normal change). Hide the raw loader JSON from the drawer.
+      if (tokenName.startsWith(FONT_LOADER_EDIT_PREFIX)) continue
       const originalValue = tokenMap.get(tokenName) ?? '(unknown)'
       changes.push({ tokenName, originalValue, stagedValue })
     }

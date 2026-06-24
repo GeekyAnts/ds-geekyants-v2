@@ -68,6 +68,7 @@ function modelFrom(
     primitives: {} as GeeklegoTokensV2['primitives'],
     semantics: { light, dark },
     ext: { rawBlock: extBlock, darkOverride },
+    fontLoaders: [],
   }
 }
 

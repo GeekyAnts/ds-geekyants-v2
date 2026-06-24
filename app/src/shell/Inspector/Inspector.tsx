@@ -10,8 +10,20 @@ import { withPxAnnotation } from '../../utils/colorUtils'
 import type { GeeklegoTokensV2, TokenUsageMap } from '../../types'
 import { UsedBy } from './UsedBy'
 import { UsedInComponents } from './UsedInComponents'
+import { GoogleFontPicker } from './GoogleFontPicker'
 import './Inspector.css'
 import './UsedBy.css'
+import './GoogleFontPicker.css'
+
+/**
+ * A font-FAMILY token (--font-sans/mono/display) — gets the Google Font picker. Matches the
+ * three family slots exactly so --font-weight-* (a weight, parsed differently) never qualifies.
+ * Returns the slot ('sans'|'mono'|'display') or null.
+ */
+function fontFamilySlot(tokenName: string): string | null {
+  const m = tokenName.match(/^--font-(sans|mono|display)$/)
+  return m ? m[1] : null
+}
 
 // In v2's 2-tier model, only PRIMITIVES are aliased by other tokens (a primitive →
 // a semantic, e.g. --color-brand-900 → --primary). Semantics are the top token layer —
@@ -791,7 +803,24 @@ export function Inspector({
         <div className="ed-inspector__section">
           <h3 className="ed-inspector__section-title">Value</h3>
           <div className="ed-inspector__value-editor">
-            {isFoundationColorToken(selectedTokenName) ? (
+            {fontFamilySlot(selectedTokenName) ? (
+              <>
+                <GoogleFontPicker
+                  slot={fontFamilySlot(selectedTokenName)!}
+                  currentValue={displayValue}
+                  onStageEdit={onStageEdit}
+                />
+                {/* Free-text fallback — advanced/non-Google or system fonts. Editing here
+                    sets only the family token (no loader); Save commits it as usual. */}
+                <input
+                  value={displayValue}
+                  onChange={handleValueChange}
+                  className="ed-input ed-inspector__value-input ed-font-picker__freetext"
+                  spellCheck={false}
+                  aria-label="Font family value (advanced)"
+                />
+              </>
+            ) : isFoundationColorToken(selectedTokenName) ? (
               <EdColorPicker
                 value={displayValue || '#000000'}
                 onChange={(color) => setDraftValue(color)}

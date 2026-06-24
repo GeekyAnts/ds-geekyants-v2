@@ -8,6 +8,7 @@ import { getAllStaged, getStagedValue, getDraft, subscribeToPendingChanges, subs
 import { AddTokenDialog } from '../components/AddTokenDialog'
 import { EdColorPicker } from '../editor-ds/primitives/EdColorPicker'
 import { generateOklchScale } from '../utils/colorUtils'
+import { FONT_LOADER_EDIT_PREFIX } from '../utils/exportFormatter'
 import { EdDialog } from '../editor-ds/primitives/EdDialog'
 import './CategoryPage.css'
 
@@ -509,8 +510,11 @@ function CategoryPage({ category, tokens, geeklegoTokens, onTokenClick }: Catego
     })
     const existingNames = new Set(withEdits.map(t => t.name))
     const filter = categoryFilters[category]
-    // Append brand-new tokens staged via stage() that don't exist in the original list
+    // Append brand-new tokens staged via stage() that don't exist in the original list.
+    // Skip --font-loader-* keys: they're internal staging entries (a JSON {family,axes} that
+    // drives fonts.css), NOT user-facing tokens — they must never render as rows.
     for (const [cssName, value] of staged) {
+      if (cssName.startsWith(FONT_LOADER_EDIT_PREFIX)) continue
       if (!existingNames.has(cssName) && (!filter || filter(cssName))) {
         withEdits.push({ name: cssName, value })
         existingNames.add(cssName)

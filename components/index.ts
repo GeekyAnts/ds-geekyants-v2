@@ -16,6 +16,8 @@
 // up compound sub-parts (DialogTrigger, etc.) in one line.
 export * from './v2/Accordion/Accordion';
 export type * from './v2/Accordion/Accordion.types';
+export * from './v2/Alert/Alert';
+export type * from './v2/Alert/Alert.types';
 export * from './v2/Button/Button';
 export type * from './v2/Button/Button.types';
 export * from './v2/Combobox/Combobox';

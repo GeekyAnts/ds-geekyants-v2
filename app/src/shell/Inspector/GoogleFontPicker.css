@@ -1,0 +1,86 @@
+/* GoogleFontPicker — value editor for --font-{sans|mono|display} family tokens. */
+
+.ed-font-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ed-font-picker__note {
+  margin: 0;
+  font-size: 11px;
+  color: var(--ed-text-muted);
+  line-height: 1.4;
+}
+
+.ed-font-picker__note code {
+  font-family: var(--ed-font-mono);
+  font-size: 10px;
+}
+
+.ed-font-picker__list {
+  list-style: none;
+  margin: 0;
+  padding: 4px;
+  max-height: 280px;
+  overflow-y: auto;
+  border: 1px solid var(--ed-border);
+  border-radius: 8px;
+  background: var(--ed-surface);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ed-font-picker__item {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 10px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  text-align: left;
+  color: var(--ed-text);
+  transition: background 0.12s, border-color 0.12s;
+}
+
+.ed-font-picker__item:hover {
+  background: var(--ed-surface-hover, rgba(0, 0, 0, 0.04));
+}
+
+.ed-font-picker__item:focus-visible {
+  outline: none;
+  border-color: var(--ed-accent, #f97316);
+}
+
+.ed-font-picker__item--current {
+  border-color: var(--ed-accent, #f97316);
+  background: var(--ed-surface-hover, rgba(0, 0, 0, 0.04));
+}
+
+.ed-font-picker__family {
+  font-size: 15px;
+  line-height: 1.2;
+}
+
+.ed-font-picker__category {
+  font-family: var(--ed-font-sans);
+  font-size: 10px;
+  color: var(--ed-text-muted);
+  text-transform: lowercase;
+  flex-shrink: 0;
+}
+
+.ed-font-picker__empty {
+  padding: 12px 10px;
+  font-size: 12px;
+  color: var(--ed-text-muted);
+}
+
+.ed-font-picker__freetext {
+  margin-top: 2px;
+}
