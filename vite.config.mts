@@ -314,7 +314,8 @@ export default defineConfig({
   ],
   css: {},
   server: {
-    port: 5176
+    port: process.env.PORT ? Number(process.env.PORT) : 5176,
+    strictPort: false
   },
   test: {
     projects: [

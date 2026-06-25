@@ -14,16 +14,19 @@
   --foreground:            var(--color-neutral-900);
   --primary:               var(--color-brand-900);
   --primary-foreground:    var(--color-neutral-0);
-  --secondary:             var(--color-brand-100);
-  --secondary-foreground:  var(--color-brand-900);
-  --muted:                 var(--color-brand-100);
-  --muted-foreground:      var(--color-brand-500);
+  /* secondary/muted = NEUTRAL structure (never the brand ramp). */
+  --secondary:             var(--color-neutral-100);
+  --secondary-foreground:  var(--color-neutral-900);
+  --muted:                 var(--color-neutral-100);
+  --muted-foreground:      var(--color-neutral-500);
+  /* accent = the one neutral surface intentionally brand-tinted (hover/active). */
   --accent:                var(--color-brand-100);
   --accent-foreground:     var(--color-brand-900);
   --destructive:           var(--color-error-500);
   --destructive-foreground: var(--color-neutral-0);
-  --border:                var(--color-brand-200);
-  --input:                 var(--color-brand-200);
+  /* borders/inputs = NEUTRAL gray, so changing the brand never repaints structure. */
+  --border:                var(--color-neutral-200);
+  --input:                 var(--color-neutral-200);
   --ring:                  var(--color-brand-900);
   --card:                  var(--color-neutral-0);
   --card-foreground:       var(--color-neutral-900);

@@ -39,6 +39,8 @@ const config: StorybookConfig = {
         "@radix-ui/react-accordion",
         "@radix-ui/react-label",
         "cmdk",
+        "input-otp",
+        "recharts",
         "class-variance-authority",
         "clsx",
         "tailwind-merge",

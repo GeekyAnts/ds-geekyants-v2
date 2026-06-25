@@ -35,4 +35,24 @@ export interface ChartTooltipContentProps
   label?: ReactNode;
   /** Hide the leading color swatch. */
   hideIndicator?: boolean;
+  /** Hide the top label row (e.g. donut/pie tooltips that show only the value). */
+  hideLabel?: boolean;
+  /** Look up the per-item label from this chart config (keyed by name/dataKey). */
+  config?: ChartConfig;
+}
+
+export interface ChartLegendContentProps extends HTMLAttributes<HTMLDivElement> {
+  /** recharts passes its computed legend payload here. */
+  payload?: Array<{
+    value?: string;
+    color?: string;
+    dataKey?: string | number;
+    payload?: Record<string, unknown>;
+  }>;
+  /** Field on each payload item that keys into `config` for the label. */
+  nameKey?: string;
+  /** Chart config supplying human-readable labels per series key. */
+  config?: ChartConfig;
+  /** Hide the leading color swatch. */
+  hideIcon?: boolean;
 }

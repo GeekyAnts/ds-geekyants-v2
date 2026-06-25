@@ -1,10 +1,11 @@
 "use client";
 import { forwardRef } from "react";
-import { ResponsiveContainer, Tooltip } from "recharts";
+import { Legend, ResponsiveContainer, Tooltip } from "recharts";
 import { cn } from "../lib/cn";
 import type {
   ChartContainerProps,
   ChartTooltipContentProps,
+  ChartLegendContentProps,
   ChartConfig,
 } from "./Chart.types";
 
@@ -68,42 +69,103 @@ export const ChartTooltip = Tooltip;
 export const ChartTooltipContent = forwardRef<
   HTMLDivElement,
   ChartTooltipContentProps
->(({ active, payload, label, hideIndicator, className, ...props }, ref) => {
-  if (!active || !payload?.length) return null;
+>(
+  (
+    { active, payload, label, hideIndicator, hideLabel, config, className },
+    ref,
+  ) => {
+    // recharts clones the tooltip `content` with its own internal props
+    // (coordinate, accessibilityLayer, viewBox, …); consume only our own props
+    // plus className so none of those leak onto the DOM <div>.
+    if (!active || !payload?.length) return null;
+    return (
+      <div
+        ref={ref}
+        className={cn(
+          "grid min-w-32 gap-1.5 rounded-lg border border-border bg-popover px-2.5 py-1.5 text-xs text-popover-foreground shadow-md",
+          className,
+        )}
+      >
+        {!hideLabel && label != null && (
+          <div className="font-medium">{label}</div>
+        )}
+        <div className="grid gap-1.5">
+          {payload.map((item, i) => {
+            const key = String(item.name ?? item.dataKey ?? i);
+            const seriesLabel = config?.[key]?.label ?? item.name ?? item.dataKey;
+            return (
+              <div
+                key={item.dataKey ?? i}
+                className="flex items-center justify-between gap-4"
+              >
+                <div className="flex items-center gap-1.5">
+                  {!hideIndicator && (
+                    <span
+                      className="size-2.5 shrink-0 rounded-sm"
+                      style={{ backgroundColor: item.color }}
+                    />
+                  )}
+                  <span className="text-muted-foreground">{seriesLabel}</span>
+                </div>
+                <span className="font-mono font-medium tabular-nums text-foreground">
+                  {item.value}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  },
+);
+ChartTooltipContent.displayName = "ChartTooltipContent";
+
+/** Re-export recharts' Legend as ChartLegend (use with ChartLegendContent). */
+export const ChartLegend = Legend;
+
+/**
+ * ChartLegendContent — a themed legend row. Pass as `content` to ChartLegend:
+ * `<ChartLegend content={<ChartLegendContent nameKey="browser" config={…} />} />`.
+ * Each item reads its label from `config` (keyed by `nameKey`) and its swatch
+ * from the recharts-computed `color`.
+ */
+export const ChartLegendContent = forwardRef<
+  HTMLDivElement,
+  ChartLegendContentProps
+>(({ payload, nameKey, config, hideIcon, className }, ref) => {
+  // Note: recharts clones the `content` element with its own internal props
+  // (chartWidth, chartHeight, margin, layout, align, …), so we deliberately do
+  // NOT spread the rest onto the DOM — that's what leaked `chartHeight` to the
+  // <div> and tripped React's unknown-prop warning. We consume only our own
+  // props plus className.
+  if (!payload?.length) return null;
   return (
     <div
       ref={ref}
-      className={cn(
-        "grid min-w-32 gap-1.5 rounded-lg border border-border bg-popover px-2.5 py-1.5 text-xs text-popover-foreground shadow-md",
-        className,
-      )}
-      {...props}
+      className={cn("flex flex-wrap items-center justify-center gap-4", className)}
     >
-      {label != null && <div className="font-medium">{label}</div>}
-      <div className="grid gap-1.5">
-        {payload.map((item, i) => (
+      {payload.map((item, i) => {
+        const raw = nameKey
+          ? (item.payload?.[nameKey] as string | undefined)
+          : item.value;
+        const key = String(raw ?? item.value ?? i);
+        const seriesLabel = config?.[key]?.label ?? key;
+        return (
           <div
-            key={item.dataKey ?? i}
-            className="flex items-center justify-between gap-4"
+            key={key}
+            className="flex items-center gap-1.5 text-xs text-muted-foreground"
           >
-            <div className="flex items-center gap-1.5">
-              {!hideIndicator && (
-                <span
-                  className="size-2.5 shrink-0 rounded-sm"
-                  style={{ backgroundColor: item.color }}
-                />
-              )}
-              <span className="text-muted-foreground">
-                {item.name ?? item.dataKey}
-              </span>
-            </div>
-            <span className="font-mono font-medium tabular-nums text-foreground">
-              {item.value}
-            </span>
+            {!hideIcon && (
+              <span
+                className="size-2.5 shrink-0 rounded-sm"
+                style={{ backgroundColor: item.color }}
+              />
+            )}
+            {seriesLabel}
           </div>
-        ))}
-      </div>
+        );
+      })}
     </div>
   );
 });
-ChartTooltipContent.displayName = "ChartTooltipContent";
+ChartLegendContent.displayName = "ChartLegendContent";
