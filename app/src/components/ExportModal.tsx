@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Check, Download, Trash2, RotateCcw, RefreshCw, FileCode, FileJson, FileText, Smartphone, Loader2 } from 'lucide-react'
 import { createSnapshot, getAllSnapshots, deleteSnapshot, restoreSnapshot, downloadSnapshotAsJSON, type TokenSnapshot } from '../utils/snapshotManager'
-import { getAllStaged, stage, unstage, discardAll, hasPendingChanges, getPendingCount, getStagedNewTokens } from '../state/staging'
+import { getAllStaged, stage, unstage, discardAll, hasPendingChanges, getPendingCount, getStagedNewTokens, DARK_EDIT_PREFIX } from '../state/staging'
 import { generateOriginalCss, generateMergedCss, getDiffHunks } from '../utils/exportFormatter'
 import type { GeeklegoTokensV2 } from '../types'
 import type { ValidationSummary } from '../validators/validateAll'
@@ -231,17 +231,25 @@ export default function ExportModal({ isOpen, onClose, onExport, onExportTarget,
                     </button>
                   </div>
                   <div className="ed-export-pending-list">
-                    {Array.from(stagedEdits.keys()).map((tokenName) => (
-                      <div key={tokenName} className="ed-export-pending-item">
-                        <span className="ed-export-token-name">{tokenName}</span>
-                        <div className="ed-export-change-preview">
-                          <span className="ed-export-old-value">→ {stagedEdits.get(tokenName) || '...'}</span>
+                    {Array.from(stagedEdits.keys()).map((stagedKey) => {
+                      // Dark edits are keyed `dark:--<key>`; strip for display + flag.
+                      const isDark = stagedKey.startsWith(DARK_EDIT_PREFIX)
+                      const displayName = isDark ? stagedKey.slice(DARK_EDIT_PREFIX.length) : stagedKey
+                      return (
+                        <div key={stagedKey} className="ed-export-pending-item">
+                          <span className="ed-export-token-name">
+                            {displayName}
+                            {isDark && <span className="ed-export-theme-badge">Dark</span>}
+                          </span>
+                          <div className="ed-export-change-preview">
+                            <span className="ed-export-old-value">→ {stagedEdits.get(stagedKey) || '...'}</span>
+                          </div>
+                          <button className="ed-export-reset-btn" onClick={() => unstage(stagedKey)}>
+                            Unstage
+                          </button>
                         </div>
-                        <button className="ed-export-reset-btn" onClick={() => unstage(tokenName)}>
-                          Unstage
-                        </button>
-                      </div>
-                    ))}
+                      )
+                    })}
                   </div>
                 </>
               )}

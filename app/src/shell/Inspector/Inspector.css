@@ -569,3 +569,101 @@
   text-align: right;
   word-break: break-all;
 }
+
+/* ── Brand-aware auto-pick (Suggest from brand) ─────────────────────────────── */
+.ed-brand-suggest {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+/* ── Light | Dark edit tabs (Value section) ─────────────────────────────────── */
+.ed-theme-tabs {
+  display: inline-flex;
+  gap: 2px;
+  padding: 2px;
+  margin-bottom: 10px;
+  background: var(--ed-bg-subtle, var(--ed-surface));
+  border: 1px solid var(--ed-border);
+  border-radius: 8px;
+}
+
+.ed-theme-tabs__tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-family: var(--ed-font-sans);
+  color: var(--ed-text-muted);
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.ed-theme-tabs__tab:hover { color: var(--ed-text); }
+.ed-theme-tabs__tab--active {
+  color: var(--ed-text);
+  background: var(--ed-bg-panel, var(--ed-bg));
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.ed-theme-tabs__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ed-accent, #3b82f6);
+}
+
+.ed-brand-suggest__lock-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.ed-brand-suggest__lock-label {
+  font-size: 11px;
+  color: var(--ed-text-muted);
+}
+
+.ed-brand-suggest__card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--ed-border);
+  border-radius: 8px;
+  background: var(--ed-surface-2, var(--ed-surface));
+}
+
+.ed-brand-suggest__line {
+  font-size: 12px;
+  color: var(--ed-text);
+}
+
+.ed-brand-suggest__from {
+  color: var(--ed-text-muted);
+}
+
+.ed-brand-suggest__badge {
+  font-size: 10px;
+  font-family: var(--ed-font-mono);
+  padding: 1px 6px;
+  border-radius: 999px;
+}
+.ed-brand-suggest__badge--pass {
+  color: var(--ed-success, #1a7f37);
+  background: color-mix(in srgb, var(--ed-success, #1a7f37) 14%, transparent);
+}
+.ed-brand-suggest__badge--fail {
+  color: var(--ed-danger, #cf222e);
+  background: color-mix(in srgb, var(--ed-danger, #cf222e) 14%, transparent);
+}
+
+.ed-brand-suggest__warn {
+  font-size: 11px;
+  color: var(--ed-danger, #cf222e);
+  line-height: 1.4;
+}

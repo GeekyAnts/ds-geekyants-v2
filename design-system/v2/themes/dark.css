@@ -13,21 +13,26 @@
   --foreground:            var(--color-neutral-50);
   --primary:               var(--color-neutral-50);
   --primary-foreground:    var(--color-brand-900);
-  --secondary:             var(--color-brand-800);
+  --secondary:             var(--color-neutral-800);
   --secondary-foreground:  var(--color-neutral-50);
-  --muted:                 var(--color-brand-800);
-  --muted-foreground:      var(--color-brand-400);
-  --accent:                var(--color-brand-800);
+  --muted:                 var(--color-neutral-800);
+  --muted-foreground:      var(--color-neutral-400);
+  --accent:                var(--color-neutral-800);
   --accent-foreground:     var(--color-neutral-50);
   --destructive:           var(--color-error-600);
   --destructive-foreground: var(--color-neutral-50);
-  --border:                var(--color-brand-700);
-  --input:                 var(--color-brand-700);
+  --border:                var(--color-neutral-700);
+  --input:                 var(--color-neutral-700);
   --ring:                  var(--color-brand-300);
   --card:                  var(--color-neutral-900);
   --card-foreground:       var(--color-neutral-50);
   --popover:               var(--color-neutral-900);
   --popover-foreground:    var(--color-neutral-50);
+  --chart-1:               var(--color-brand-400);
+  --chart-2:               var(--color-accent-400);
+  --chart-3:               var(--color-success-400);
+  --chart-4:               var(--color-warning-400);
+  --chart-5:               var(--color-info-400);
 
   /* --ext-* overrides for dark (opaque passthrough). */
   --ext-button-gamified-shadow: 0 2px 0 0 var(--color-accent-800);

@@ -99,7 +99,23 @@ export interface V2ExtBlock {
   darkOverride: string
 }
 
-/** The v2 cockpit's root token model: primitives (reused shape) + flat light/dark semantics + opaque ext blob. */
+/**
+ * A Google Fonts loader entry — one webfont the design system pulls in at runtime.
+ * Generated into design-system/v2/fonts.css as an `@import url("…googleapis.com/css2?…")`,
+ * which the Token Editor's font picker writes alongside the matching --font-* family token.
+ * Structured (not raw CSS) so the URL is generated deterministically and the picker can
+ * read back the current selection.
+ *  - family: the font family name as it appears in the token, e.g. "Figtree".
+ *  - axes:   the css2 axis spec, e.g. "wght@300..900" (omitted → no `:axes` segment).
+ *  - source: only 'google' today; reserved for future delivery mechanisms.
+ */
+export interface FontLoader {
+  family: string
+  axes?: string
+  source: 'google'
+}
+
+/** The v2 cockpit's root token model: primitives (reused shape) + flat light/dark semantics + opaque ext blob + font loaders. */
 export interface GeeklegoTokensV2 {
   primitives: Primitives
   semantics: {
@@ -107,6 +123,8 @@ export interface GeeklegoTokensV2 {
     dark: V2Semantics
   }
   ext: V2ExtBlock
+  /** Google Fonts loaders → design-system/v2/fonts.css. Empty when none are configured. */
+  fontLoaders: FontLoader[]
 }
 
 /**

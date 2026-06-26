@@ -4,7 +4,8 @@
 import { useEffect, useMemo, useCallback, useState } from 'react'
 import { X, ArrowLeft, ArrowRight } from 'lucide-react'
 import './PendingDrawer.css'
-import { getAllStaged, unstage, discardAll, subscribeToPendingChanges, getStagedNewTokens, unstageNewToken } from '../../state/staging'
+import { getAllStaged, unstage, discardAll, subscribeToPendingChanges, getStagedNewTokens, unstageNewToken, DARK_EDIT_PREFIX } from '../../state/staging'
+import { FONT_LOADER_EDIT_PREFIX } from '../../utils/exportFormatter'
 import { withPxAnnotation } from '../../utils/colorUtils'
 import { buildTokenGraph, type TokenGraph } from '../../graph/build'
 import { ImpactSummary } from './ImpactSummary'
@@ -76,9 +77,18 @@ export function PendingDrawer({
   const pendingChanges = useMemo(() => {
     const staged = getAllStaged()
     const changes = []
-    for (const [tokenName, stagedValue] of staged) {
-      const originalValue = tokenMap.get(tokenName) ?? '(unknown)'
-      changes.push({ tokenName, originalValue, stagedValue })
+    for (const [stagedKey, stagedValue] of staged) {
+      // --font-loader-* are internal staging entries paired with their --font-* family edit
+      // (which shows below as a normal change). Hide the raw loader JSON from the drawer.
+      if (stagedKey.startsWith(FONT_LOADER_EDIT_PREFIX)) continue
+      // Dark-theme edits are staged under `dark:--<key>`. Strip the prefix for display,
+      // flag them with a "Dark" badge, and resolve their original from semantics.dark.
+      const isDark = stagedKey.startsWith(DARK_EDIT_PREFIX)
+      const tokenName = isDark ? stagedKey.slice(DARK_EDIT_PREFIX.length) : stagedKey
+      const originalValue = isDark
+        ? (tokens.semantics.dark[tokenName.replace(/^--/, '')] ?? '(inherits light)')
+        : (tokenMap.get(tokenName) ?? '(unknown)')
+      changes.push({ stagedKey, tokenName, originalValue, stagedValue, isDark })
     }
     return changes
     // pendingVersion is a version counter bumped on staged-store changes; it's the
@@ -220,14 +230,17 @@ export function PendingDrawer({
                             </div>
                           </div>
                         ))}
-                        {pendingChanges.map(({ tokenName, originalValue, stagedValue }) => (
-                          <div key={tokenName} className="ed-pending-drawer__change-item">
+                        {pendingChanges.map(({ stagedKey, tokenName, originalValue, stagedValue, isDark }) => (
+                          <div key={stagedKey} className="ed-pending-drawer__change-item">
                             <div
                               className="ed-pending-drawer__change-content"
-                              onClick={() => setSelectedToken(tokenName)}
+                              onClick={() => setSelectedToken(stagedKey)}
                               style={{ cursor: 'pointer' }}
                             >
-                              <div className="ed-pending-drawer__token-name">{tokenName}</div>
+                              <div className="ed-pending-drawer__token-name">
+                                {tokenName}
+                                {isDark && <span className="ed-pending-drawer__theme-badge">Dark</span>}
+                              </div>
                               <div className="ed-pending-drawer__value-change">
                                 <EdChip variant="default" className="ed-pending-drawer__old-value">
                                   {withPxAnnotation(originalValue)}
@@ -239,7 +252,7 @@ export function PendingDrawer({
                               </div>
                             </div>
                             <div className="ed-pending-drawer__change-actions">
-                              <EdButton variant="secondary" size="sm" onClick={() => handleReset(tokenName)}>
+                              <EdButton variant="secondary" size="sm" onClick={() => handleReset(stagedKey)}>
                                 Reset
                               </EdButton>
                             </div>

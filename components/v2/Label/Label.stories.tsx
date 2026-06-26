@@ -45,7 +45,7 @@ export const DarkMode: Story = {
   render: (): ReactElement => (
     <div
       data-theme="dark"
-      className="dark max-w-2xl rounded-lg bg-background p-8"
+      className="dark max-w-2xl rounded-lg bg-background p-8 text-foreground"
     >
       <div className="grid w-72 gap-2">
         <Label htmlFor="email-dark">Email address</Label>

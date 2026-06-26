@@ -721,3 +721,17 @@
 .ed-export-restore-success {
   padding: 12px 0;
 }
+
+/* Dark-theme edit marker in the export pending list */
+.ed-export-theme-badge {
+  margin-left: 6px;
+  padding: 1px 6px;
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  opacity: 0.7;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  vertical-align: middle;
+}

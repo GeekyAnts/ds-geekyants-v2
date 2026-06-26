@@ -12,19 +12,19 @@
 :root {
   --background:            var(--color-neutral-0);
   --foreground:            var(--color-neutral-900);
-  --primary:               var(--color-brand-900);
+  --primary:               var(--color-brand-600);
   --primary-foreground:    var(--color-neutral-0);
-  --secondary:             var(--color-brand-100);
-  --secondary-foreground:  var(--color-brand-900);
-  --muted:                 var(--color-brand-100);
-  --muted-foreground:      var(--color-brand-500);
-  --accent:                var(--color-brand-100);
-  --accent-foreground:     var(--color-brand-900);
+  --secondary:             var(--color-neutral-100);
+  --secondary-foreground:  var(--color-neutral-900);
+  --muted:                 var(--color-neutral-100);
+  --muted-foreground:      var(--color-neutral-900);
+  --accent:                var(--color-neutral-100);
+  --accent-foreground:     var(--color-neutral-900);
   --destructive:           var(--color-error-500);
   --destructive-foreground: var(--color-neutral-0);
-  --border:                var(--color-brand-200);
-  --input:                 var(--color-brand-200);
-  --ring:                  var(--color-brand-900);
+  --border:                var(--color-neutral-200);
+  --input:                 var(--color-neutral-200);
+  --ring:                  var(--color-brand-600);
   --card:                  var(--color-neutral-0);
   --card-foreground:       var(--color-neutral-900);
   --popover:               var(--color-neutral-0);
@@ -32,6 +32,11 @@
 
   /* ShadCN expects a single --radius; component utilities derive sm/md/lg from it. */
   --radius:                var(--radius-lg);
+  --chart-1:               var(--color-brand-500);
+  --chart-2:               var(--color-accent-500);
+  --chart-3:               var(--color-success-500);
+  --chart-4:               var(--color-warning-500);
+  --chart-5:               var(--color-info-500);
 }
 
 /* ---------------------------------------------------------------------------
@@ -58,12 +63,24 @@
   --color-card-foreground:       var(--card-foreground);
   --color-popover:               var(--popover);
   --color-popover-foreground:    var(--popover-foreground);
+  --color-chart-1:               var(--chart-1);
+  --color-chart-2:               var(--chart-2);
+  --color-chart-3:               var(--chart-3);
+  --color-chart-4:               var(--chart-4);
+  --color-chart-5:               var(--chart-5);
 
   --radius-sm:                   calc(var(--radius) - 4px);
   --radius-md:                   calc(var(--radius) - 2px);
   --radius-lg:                   var(--radius);
   --radius-xl:                   calc(var(--radius) + 4px);
 }
+
+/* ---------------------------------------------------------------------------
+   2b · Safelist — always generate the semantic color utilities (see note above).
+   --------------------------------------------------------------------------- */
+@source inline("{hover:,focus:,}{bg,text}-{background,foreground,primary,primary-foreground,secondary,secondary-foreground,muted,muted-foreground,accent,accent-foreground,destructive,destructive-foreground,card,card-foreground,popover,popover-foreground}");
+@source inline("border-{border,input}");
+@source inline("ring-ring");
 
 /* ---------------------------------------------------------------------------
    3 · CUSTOM VARIANTS — namespaced --ext-<component>-<variant>-* tokens.
@@ -106,5 +123,29 @@
   @keyframes accordion-up {
     from { height: var(--radix-accordion-content-height); }
     to { height: 0; }
+  }
+
+  /* Collapsible — same technique as accordion, off Radix's
+     --radix-collapsible-content-height measurement. */
+  --animate-collapsible-down: collapsible-down 0.2s ease-out;
+  --animate-collapsible-up: collapsible-up 0.2s ease-out;
+
+  @keyframes collapsible-down {
+    from { height: 0; }
+    to { height: var(--radix-collapsible-content-height); }
+  }
+  @keyframes collapsible-up {
+    from { height: var(--radix-collapsible-content-height); }
+    to { height: 0; }
+  }
+
+  /* Caret blink — the fake cursor in InputOTP slots (input-otp drives a single
+     hidden input, so each slot paints its own blinking caret). Not a token —
+     geeklego-level motion shared by the OTP field. */
+  --animate-caret-blink: caret-blink 1s ease-out infinite;
+
+  @keyframes caret-blink {
+    0%, 70%, 100% { opacity: 1; }
+    20%, 50% { opacity: 0; }
   }
 }
