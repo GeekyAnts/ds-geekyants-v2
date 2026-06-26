@@ -48,15 +48,36 @@ export function hsvToHex(h: number, s: number, v: number): string {
 
 // ─── Contrast ─────────────────────────────────────────────────────────────────
 
-export function getContrastColor(hex: string): 'black' | 'white' {
+/**
+ * WCAG 2.x relative luminance of a hex color (0 = black, 1 = white).
+ * Linearizes each sRGB channel, then applies the Rec.709 luma weights.
+ * Returns 0 for non-hex input.
+ */
+export function relativeLuminance(hex: string): number {
   const rgb = hexToRgb(hex)
-  if (!rgb) return 'white'
+  if (!rgb) return 0
   const [r, g, b] = [rgb.r, rgb.g, rgb.b].map(v => {
     const c = v / 255
     return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4)
   })
-  const lum = 0.2126 * r + 0.7152 * g + 0.0722 * b
-  return lum > 0.179 ? 'black' : 'white'
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b
+}
+
+/**
+ * WCAG 2.x contrast ratio between two hex colors: (Llighter + 0.05) / (Ldarker + 0.05).
+ * Ranges 1 (identical) → 21 (black vs white). Order-independent.
+ */
+export function contrastRatio(hexA: string, hexB: string): number {
+  const la = relativeLuminance(hexA)
+  const lb = relativeLuminance(hexB)
+  const lighter = Math.max(la, lb)
+  const darker = Math.min(la, lb)
+  return (lighter + 0.05) / (darker + 0.05)
+}
+
+export function getContrastColor(hex: string): 'black' | 'white' {
+  if (!hexToRgb(hex)) return 'white'
+  return relativeLuminance(hex) > 0.179 ? 'black' : 'white'
 }
 
 // ─── OKLCH ────────────────────────────────────────────────────────────────────
@@ -279,4 +300,176 @@ export function parseColorRef(ref: string): { family: string; shade: string } | 
 
 export function makeColorRef(family: string, shade: string): string {
   return `var(--color-${family}-${shade})`
+}
+
+// ─── Brand-aware semantic auto-pick ─────────────────────────────────────────────
+// Given a brand ramp, pick the --primary step + matching foreground so the result
+// reads as the hue AND meets WCAG 2 AA (4.5:1). Mirrors what ShadCN hand-tunes per
+// preset. Pure + headless: reads resolved color values, returns alias strings.
+
+/** AA threshold for normal text (WCAG 2.x). */
+export const WCAG_AA_NORMAL = 4.5
+
+/** Order we try --primary steps in: vivid-but-text-safe first, then fall outward. */
+const PRIMARY_STEP_CANDIDATES = ['600', '700', '500', '800'] as const
+
+/**
+ * Resolve a step's stored value (hex OR `oklch(...)`) to a hex string for contrast
+ * math. Returns null if neither form parses.
+ */
+function stepValueToHex(value: string | undefined): string | null {
+  if (!value) return null
+  const v = value.trim()
+  if (/^#[0-9a-f]{6}$/i.test(v)) return v
+  if (/^#[0-9a-f]{3}$/i.test(v)) {
+    // expand shorthand
+    const c = v.slice(1)
+    return `#${c[0]}${c[0]}${c[1]}${c[1]}${c[2]}${c[2]}`
+  }
+  return oklchStringToHex(v)
+}
+
+export interface PrimaryPick {
+  /** Chosen brand-ramp step, e.g. "600". */
+  step: string
+  /** Which neutral foreground clears AA against the chosen step. */
+  foreground: 'neutral-0' | 'neutral-900'
+  /** The achieved contrast ratio of step vs the chosen foreground. */
+  contrast: number
+  /** True when no candidate reached AA in-gamut — caller must warn, not hide. */
+  belowAA: boolean
+}
+
+/**
+ * Pick the best --primary step for a brand ramp against the given neutral extremes.
+ * Tries PRIMARY_STEP_CANDIDATES in order; returns the first whose better foreground
+ * (white = neutral-0 vs near-black = neutral-900) clears 4.5:1. If none do, returns
+ * the candidate with the highest achievable contrast and flags belowAA.
+ *
+ *  - scale:        the brand ColorScale ({ "500": "<hex|oklch>", … }).
+ *  - neutral0Hex:  resolved --color-neutral-0  (the light/white foreground).
+ *  - neutral900Hex:resolved --color-neutral-900 (the dark foreground).
+ */
+export function pickPrimaryStep(
+  scale: Record<string, string>,
+  neutral0Hex: string,
+  neutral900Hex: string,
+): PrimaryPick {
+  let best: PrimaryPick | null = null
+
+  for (const step of PRIMARY_STEP_CANDIDATES) {
+    const stepHex = stepValueToHex(scale[step])
+    if (!stepHex) continue
+
+    const cWhite = contrastRatio(stepHex, neutral0Hex)
+    const cDark = contrastRatio(stepHex, neutral900Hex)
+    const useWhite = cWhite >= cDark
+    const contrast = useWhite ? cWhite : cDark
+    const foreground: PrimaryPick['foreground'] = useWhite ? 'neutral-0' : 'neutral-900'
+
+    if (contrast >= WCAG_AA_NORMAL) {
+      return { step, foreground, contrast, belowAA: false }
+    }
+    if (!best || contrast > best.contrast) {
+      best = { step, foreground, contrast, belowAA: true }
+    }
+  }
+
+  // Fallback: nothing parsed at all → safe default (darkest step, white text, flagged).
+  return best ?? { step: '900', foreground: 'neutral-0', contrast: 0, belowAA: true }
+}
+
+// ─── Neutral-structure semantics (accent / secondary / muted) ───────────────────
+// These are NOT brand-driven: the surface is a quiet neutral step, the foreground
+// is whichever neutral extreme reads on it. Reuses the same contrast logic so the
+// foreground is AA-safe even if someone points the surface at a dark neutral step.
+
+/** The neutral surface step each role defaults to (matches the shipped semantics). */
+const NEUTRAL_SURFACE_DEFAULTS: Record<string, string> = {
+  accent: '100',
+  secondary: '100',
+  muted: '100',
+}
+
+export interface NeutralPairSuggestion {
+  /** Alias for the surface, e.g. "var(--color-neutral-100)". */
+  surface: string
+  /** Alias for the foreground (neutral-0 or neutral-900). */
+  foreground: string
+  /** Achieved contrast of surface vs chosen foreground. */
+  contrast: number
+  /** True when neither neutral foreground clears AA (a mid-gray surface). */
+  belowAA: boolean
+  /** The surface step chosen, e.g. "100". */
+  step: string
+}
+
+/**
+ * Suggest a neutral surface + AA-safe foreground for a neutral-structure semantic
+ * (accent / secondary / muted). The surface step comes from NEUTRAL_SURFACE_DEFAULTS
+ * (override via `step`); the foreground is the higher-contrast of neutral-0 / -900.
+ * Returns null if the neutral ramp or chosen step is missing.
+ */
+export function suggestNeutralSemantics(
+  colors: Record<string, Record<string, string>>,
+  role: string,
+  step?: string,
+): NeutralPairSuggestion | null {
+  const neutral = colors.neutral
+  if (!neutral) return null
+  const surfaceStep = step ?? NEUTRAL_SURFACE_DEFAULTS[role] ?? '100'
+
+  const surfaceHex = stepValueToHex(neutral[surfaceStep])
+  const n0 = stepValueToHex(neutral['0'])
+  const n900 = stepValueToHex(neutral['900'])
+  if (!surfaceHex || !n0 || !n900) return null
+
+  const cWhite = contrastRatio(surfaceHex, n0)
+  const cDark = contrastRatio(surfaceHex, n900)
+  const useWhite = cWhite >= cDark
+  const contrast = useWhite ? cWhite : cDark
+
+  return {
+    surface: makeColorRef('neutral', surfaceStep),
+    foreground: makeColorRef('neutral', useWhite ? '0' : '900'),
+    contrast,
+    belowAA: contrast < WCAG_AA_NORMAL,
+    step: surfaceStep,
+  }
+}
+
+export interface BrandSuggestion {
+  /** Alias for --primary, e.g. "var(--color-brand-600)". */
+  primary: string
+  /** Alias for --primary-foreground (neutral-0 or neutral-900). */
+  'primary-foreground': string
+  /** Alias for --ring — same step as primary. */
+  ring: string
+  /** The underlying pick (step, contrast, belowAA) for UI badges/warnings. */
+  meta: PrimaryPick
+}
+
+/**
+ * Compute suggested brand-driven semantics for the given ramp family (default
+ * "brand"). Returns alias strings ready to stage. v1 = light-mode primary +
+ * primary-foreground + ring. Returns null if the family/neutrals are missing.
+ */
+export function suggestBrandSemantics(
+  colors: Record<string, Record<string, string>>,
+  family = 'brand',
+): BrandSuggestion | null {
+  const scale = colors[family]
+  const neutral0 = stepValueToHex(colors.neutral?.['0'])
+  const neutral900 = stepValueToHex(colors.neutral?.['900'])
+  if (!scale || !neutral0 || !neutral900) return null
+
+  const pick = pickPrimaryStep(scale, neutral0, neutral900)
+  const fgFamilyShade = pick.foreground.split('-') as [string, string]
+
+  return {
+    primary: makeColorRef(family, pick.step),
+    'primary-foreground': makeColorRef(fgFamilyShade[0], fgFamilyShade[1]),
+    ring: makeColorRef(family, pick.step),
+    meta: pick,
+  }
 }

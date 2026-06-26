@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { parseV2Semantics, parseV2Dark } from './cssParser'
 import { generateV2Semantics, generateV2Dark } from './cssGenerator'
+import { generateMergedTokens } from './exportFormatter'
 import type { GeeklegoTokensV2 } from '../types'
 
 // These tests pin the "semantics.css is canonical" contract: a core semantic that is NOT in
@@ -119,6 +120,18 @@ describe('v2 semantics round-trip — semantics.css is canonical', () => {
     expect(out).toContain('@keyframes accordion-down')
   })
 
+  it('emits the @source inline safelist so semantic color utilities are always built', () => {
+    // Without this, `accent`/`muted` (used only as variant/-foreground forms in components) get
+    // tree-shaken out of dist/geeklego.css and token edits to --accent don't reflect. The safelist
+    // MUST be generator-emitted so it survives every export.
+    const { light, extBlock } = parseV2Semantics(SEMANTICS_CSS)
+    const out = generateV2Semantics(modelFrom(light, extBlock, {}, ''))
+    expect(out).toContain('@source inline(')
+    // covers the two semantics that collide with Tailwind native utils / appear only as -foreground
+    expect(out).toMatch(/@source inline\([^)]*\baccent\b[^)]*\)/)
+    expect(out).toMatch(/@source inline\([^)]*\bmuted\b[^)]*\)/)
+  })
+
   it('round-trips a new semantic dark override through generate → re-parse', () => {
     const { dark, darkOverride } = parseV2Dark(DARK_CSS)
     expect(dark['info']).toBe('var(--color-accent-400)')
@@ -128,5 +141,74 @@ describe('v2 semantics round-trip — semantics.css is canonical', () => {
     expect(out).toContain('--ext-button-gamified-shadow')
     const { dark: dark2 } = parseV2Dark(out)
     expect(dark2['info']).toBe('var(--color-accent-400)')
+  })
+})
+
+// The staging → merge path (generateMergedTokens) is what the Inspector + Export flow use to
+// apply edits before BOTH diffing and saving. The round-trip tests above inject into the model
+// directly and so never exercise it — which is exactly how a regression hid here: single-word
+// semantics (--primary, --accent, --ring, …) were dropped by a `parts.length < 2` guard that ran
+// before the semantic match. These tests lock the guard ordering.
+describe('v2 semantics — staging → merge path (generateMergedTokens)', () => {
+  const { light } = parseV2Semantics(SEMANTICS_CSS)
+  const { dark } = parseV2Dark(DARK_CSS)
+  const base = modelFrom(light, '', dark, '')
+
+  it('applies a single-word semantic edit (--primary) — was silently dropped', () => {
+    const merged = generateMergedTokens(base, new Map([['--primary', 'var(--color-brand-500)']]))
+    expect(merged.semantics.light.primary).toBe('var(--color-brand-500)')
+  })
+
+  it('applies --primary AND --accent together (the reported repro)', () => {
+    // --accent isn't in the minimal fixture; add it so the `in semantics.light` match holds,
+    // mirroring the real model where every standard semantic is present.
+    const withAccent = modelFrom({ ...light, accent: 'var(--color-neutral-100)' }, '', dark, '')
+    const merged = generateMergedTokens(
+      withAccent,
+      new Map([
+        ['--primary', 'var(--color-brand-500)'],
+        ['--accent', 'var(--color-brand-500)'],
+      ]),
+    )
+    expect(merged.semantics.light.primary).toBe('var(--color-brand-500)')
+    expect(merged.semantics.light.accent).toBe('var(--color-brand-500)')
+  })
+
+  it('still applies a multi-word semantic edit (--primary-foreground) — regression guard', () => {
+    const merged = generateMergedTokens(base, new Map([['--primary-foreground', 'var(--color-neutral-50)']]))
+    expect(merged.semantics.light['primary-foreground']).toBe('var(--color-neutral-50)')
+  })
+
+  it('does not disturb primitive edits (--color-brand-500) sharing the loop', () => {
+    const withPrim = modelFrom(light, '', dark, '')
+    withPrim.primitives = { colors: { brand: { '500': 'oklch(60% 0.2 300)' } } } as unknown as GeeklegoTokensV2['primitives']
+    const merged = generateMergedTokens(withPrim, new Map([['--color-brand-500', 'oklch(70% 0.25 200)']]))
+    expect(merged.primitives.colors.brand['500']).toBe('oklch(70% 0.25 200)')
+  })
+
+  // ── Dark-theme edits: staged under the `dark:` prefix, routed to semantics.dark ──
+  it('routes a dark edit (dark:--primary) to semantics.dark, NOT semantics.light', () => {
+    const merged = generateMergedTokens(base, new Map([['dark:--primary', 'var(--color-brand-500)']]))
+    expect(merged.semantics.dark.primary).toBe('var(--color-brand-500)')
+    // light must be untouched
+    expect(merged.semantics.light.primary).toBe(light.primary)
+  })
+
+  it('applies a light AND a dark edit of the SAME token to their own tiers', () => {
+    const merged = generateMergedTokens(
+      base,
+      new Map([
+        ['--primary', 'var(--color-brand-500)'],
+        ['dark:--primary', 'var(--color-brand-300)'],
+      ]),
+    )
+    expect(merged.semantics.light.primary).toBe('var(--color-brand-500)')
+    expect(merged.semantics.dark.primary).toBe('var(--color-brand-300)')
+  })
+
+  it('creates a dark override for a key not previously in semantics.dark', () => {
+    // --accent is not in the dark fixture; a dark edit should add it to semantics.dark.
+    const merged = generateMergedTokens(base, new Map([['dark:--accent', 'var(--color-neutral-800)']]))
+    expect(merged.semantics.dark.accent).toBe('var(--color-neutral-800)')
   })
 })

@@ -5,9 +5,11 @@ import type { TokenMetadata, MetadataStagedChanges } from '../../state/metadata.
 import { useMetadata } from '../../state/metadata'
 import { EdButton, EdScrollArea, EdEmptyState, EdColorPicker, EdInput } from '../../editor-ds/primitives'
 import { isPinned, togglePin } from '../../state/pinning'
-import { subscribeToPendingChanges, getAllStaged, getStagedValue, setDraft, unstage, getStagedNewTokens } from '../../state/staging'
-import { withPxAnnotation } from '../../utils/colorUtils'
+import { subscribeToPendingChanges, getAllStaged, getStagedValue, setDraft, unstage, getStagedNewTokens, stage, DARK_EDIT_PREFIX, themedStagingKey } from '../../state/staging'
+import { isLocked, lockSemantic, toggleLock, subscribeToLockChanges } from '../../state/semanticLocks'
+import { withPxAnnotation, suggestBrandSemantics, suggestNeutralSemantics, parseColorRef } from '../../utils/colorUtils'
 import type { GeeklegoTokensV2, TokenUsageMap } from '../../types'
+import { V2_SEMANTIC_KEYS } from '../../types'
 import { UsedBy } from './UsedBy'
 import { UsedInComponents } from './UsedInComponents'
 import { GoogleFontPicker } from './GoogleFontPicker'
@@ -85,10 +87,24 @@ const PRIMITIVE_PREFIX: Record<string, string> = {
 
 function resolveTokenValue(
   tokenName: string,
-  tokens: GeeklegoTokensV2
+  tokens: GeeklegoTokensV2,
+  theme: 'light' | 'dark' = 'light',
 ): string | null {
-  const staged = getStagedValue(tokenName)
-  if (staged !== undefined) return staged
+  // Dark resolution: a dark edit is staged under `dark:--<key>` and lives in
+  // semantics.dark. Primitives are SHARED (no dark tier), so for a primitive token
+  // we fall through to the shared lookup below regardless of theme.
+  if (theme === 'dark') {
+    const semanticKey = tokenName.replace(/^--/, '')
+    const stagedDark = getStagedValue(`${DARK_EDIT_PREFIX}${tokenName}`)
+    if (stagedDark !== undefined) return stagedDark
+    const darkVal = tokens.semantics.dark[semanticKey]
+    if (typeof darkVal === 'string') return darkVal
+    // Not overridden in dark → semantic inherits its light value at runtime.
+    // Fall through to the shared/light lookup so the editor shows the effective value.
+  } else {
+    const staged = getStagedValue(tokenName)
+    if (staged !== undefined) return staged
+  }
 
   const prims = tokens.primitives as unknown as Record<string, unknown>
   for (const category of Object.keys(prims)) {
@@ -683,6 +699,51 @@ function TypographyStyleInspector({ styleName, tokens, onStageEdit }: Typography
   )
 }
 
+// ─── Brand-aware auto-pick (Suggest from brand) ─────────────────────────────────
+
+/** Core semantic keys (no leading `--`). Used to auto-lock on manual edit. */
+const CORE_SEMANTIC_KEYS = new Set<string>(V2_SEMANTIC_KEYS)
+
+/** The brand-driven semantics the auto-pick engine sets (vivid step + contrast fg). */
+const BRAND_DRIVEN_KEYS = new Set(['primary', 'primary-foreground', 'ring'])
+
+/** Neutral-structure roles (surface + foreground) the engine sets to quiet neutrals. */
+const NEUTRAL_ROLES = ['accent', 'secondary', 'muted'] as const
+/** Map any neutral key (surface or its -foreground) → its role. */
+function neutralRoleOf(key: string): (typeof NEUTRAL_ROLES)[number] | null {
+  for (const role of NEUTRAL_ROLES) {
+    if (key === role || key === `${role}-foreground`) return role
+  }
+  return null
+}
+
+/** "--primary" → "primary"; passes through bare keys. */
+function semanticKeyOf(tokenName: string): string {
+  return tokenName.replace(/^--/, '')
+}
+
+/**
+ * Build the brand/neutral color map for suggestBrandSemantics, overlaying any
+ * staged primitive-color edits (e.g. `--color-brand-600`) onto the model so the
+ * suggestion reflects the user's in-flight ramp change, not just disk state.
+ */
+function resolvedColorsWithStaged(
+  tokens: GeeklegoTokensV2,
+  staged: Map<string, string>,
+): Record<string, Record<string, string>> {
+  const out: Record<string, Record<string, string>> = {}
+  for (const [family, scale] of Object.entries(tokens.primitives.colors)) {
+    out[family] = { ...scale }
+  }
+  for (const [name, value] of staged) {
+    const m = name.match(/^--color-([a-z0-9]+)-([a-z0-9]+)$/i)
+    if (!m) continue
+    const [, family, shade] = m
+    ;(out[family] ??= {})[shade] = value
+  }
+  return out
+}
+
 interface InspectorProps {
   selectedTokenName: string | null
   tokens: GeeklegoTokensV2
@@ -704,35 +765,82 @@ export function Inspector({
 }: InspectorProps) {
   const { metadata, stagedChanges: metadataStagedChanges, setMetadataDescription, clearDescription } = useMetadata()
   const [, forceUpdate] = useState(0)
+  // Per-theme drafts: light edit vs dark edit are independent in-flight values.
   const [draftValue, setDraftValue] = useState<string | null>(null)
+  const [darkDraftValue, setDarkDraftValue] = useState<string | null>(null)
+  // Which theme the Value section is currently editing (the Light|Dark tab).
+  const [editTheme, setEditTheme] = useState<'light' | 'dark'>('light')
 
   useEffect(() => {
-    return subscribeToPendingChanges(() => forceUpdate(n => n + 1))
+    const unsubPending = subscribeToPendingChanges(() => forceUpdate(n => n + 1))
+    const unsubLocks = subscribeToLockChanges(() => forceUpdate(n => n + 1))
+    return () => { unsubPending(); unsubLocks() }
   }, [])
 
-  // Reset draft whenever the selected token changes
+  // Reset both drafts (and the active tab) whenever the selected token changes
   useEffect(() => {
     setDraftValue(null)
+    setDarkDraftValue(null)
+    setEditTheme('light')
   }, [selectedTokenName])
+
+  // Per-theme draft accessors so the handlers below stay theme-agnostic.
+  const activeDraft = editTheme === 'dark' ? darkDraftValue : draftValue
+  const setActiveDraft = editTheme === 'dark' ? setDarkDraftValue : setDraftValue
+  // The staging key for the active theme: light = `--primary`, dark = `dark:--primary`.
+  const activeStagingKey = selectedTokenName !== null
+    ? themedStagingKey(selectedTokenName, editTheme)
+    : null
+  // The lock key for the active theme (per-theme locks): `primary` vs `dark:primary`.
+  const activeLockKey = (key: string) => editTheme === 'dark' ? `${DARK_EDIT_PREFIX}${key}` : key
 
   // All useCallbacks must be unconditional — before any early return
   const handleSave = useCallback(() => {
-    if (draftValue !== null && selectedTokenName !== null) {
-      onStageEdit(selectedTokenName, draftValue)
-      setDraftValue(null)
+    if (activeDraft !== null && activeStagingKey !== null && selectedTokenName !== null) {
+      stage(activeStagingKey, activeDraft)
+      // Auto-lock on manual edit (per-theme): the saved theme's value is pinned so
+      // the auto-pick engine won't overwrite it. User can unlock later.
+      const key = selectedTokenName.replace(/^--/, '')
+      if (CORE_SEMANTIC_KEYS.has(key)) lockSemantic(activeLockKey(key))
+      setActiveDraft(null)
     }
-  }, [draftValue, selectedTokenName, onStageEdit])
+  }, [activeDraft, activeStagingKey, selectedTokenName, editTheme]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleCancel = useCallback(() => {
-    setDraftValue(null)
-  }, [])
+    setActiveDraft(null)
+  }, [editTheme]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleUndo = useCallback(() => {
-    if (selectedTokenName !== null) {
-      unstage(selectedTokenName)
-      setDraftValue(null)
+    if (activeStagingKey !== null) {
+      unstage(activeStagingKey)
+      setActiveDraft(null)
     }
-  }, [selectedTokenName])
+  }, [activeStagingKey, editTheme]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Apply the brand suggestion into the ACTIVE theme: stage primary/primary-foreground/
+  // ring under the theme-scoped key, skipping any per-theme-locked key (suggest-only).
+  const handleApplyBrandSuggestion = useCallback(
+    (s: { primary: string; 'primary-foreground': string; ring: string }) => {
+      const writes: Array<[string, string]> = [
+        ['primary', s.primary],
+        ['primary-foreground', s['primary-foreground']],
+        ['ring', s.ring],
+      ]
+      for (const [key, value] of writes) {
+        if (!isLocked(activeLockKey(key))) stage(themedStagingKey(`--${key}`, editTheme), value)
+      }
+    },
+    [editTheme], // eslint-disable-line react-hooks/exhaustive-deps
+  )
+
+  // Apply a neutral-role suggestion into the ACTIVE theme.
+  const handleApplyNeutralSuggestion = useCallback(
+    (role: string, s: { surface: string; foreground: string }) => {
+      if (!isLocked(activeLockKey(role))) stage(themedStagingKey(`--${role}`, editTheme), s.surface)
+      if (!isLocked(activeLockKey(`${role}-foreground`))) stage(themedStagingKey(`--${role}-foreground`, editTheme), s.foreground)
+    },
+    [editTheme], // eslint-disable-line react-hooks/exhaustive-deps
+  )
 
   if (selectedTokenName === null) {
     return (
@@ -762,21 +870,78 @@ export function Inspector({
   const tokenMetadata = metadata.tokens[selectedTokenName]
   const breadcrumb = deriveBreadcrumb(selectedTokenName)
   const staged = getAllStaged()
-  const stagedValue = getStagedValue(selectedTokenName)
-  const resolvedValue = resolveTokenValue(selectedTokenName, tokens)
+
+  // A semantic token can be edited per-theme via the Light|Dark tab. Primitives and
+  // non-semantic tokens have no dark tier, so they ignore editTheme (always light).
+  const isSemanticToken = CORE_SEMANTIC_KEYS.has(semanticKeyOf(selectedTokenName))
+  const effectiveTheme: 'light' | 'dark' = isSemanticToken ? editTheme : 'light'
+
+  // Active-theme staged value + resolved value (theme-aware).
+  const stagedValue = effectiveTheme === 'dark'
+    ? getStagedValue(`${DARK_EDIT_PREFIX}${selectedTokenName}`)
+    : getStagedValue(selectedTokenName)
+  const resolvedValue = resolveTokenValue(selectedTokenName, tokens, effectiveTheme)
 
   const aliasChain = walkAliasChain(selectedTokenName, graph, tokens)
 
-  // What's currently persisted (staged or original)
+  // What's currently persisted (staged or original) for the active theme
   const committedValue = stagedValue ?? resolvedValue ?? ''
-  // What's shown in the editor (draft takes priority)
-  const displayValue = draftValue ?? committedValue
+  // What's shown in the editor (active-theme draft takes priority)
+  const displayValue = activeDraft ?? committedValue
 
-  const isDirty = draftValue !== null && draftValue !== committedValue
+  const isDirty = activeDraft !== null && activeDraft !== committedValue
   const isStaged = stagedValue !== undefined
 
+  // ── Auto-pick: brand-driven (vivid) OR neutral-structure (quiet) semantics ──
+  const semKey = semanticKeyOf(selectedTokenName)
+  const isBrandDrivenSemantic = BRAND_DRIVEN_KEYS.has(semKey)
+  const neutralRole = neutralRoleOf(semKey)
+  const keyLocked = isLocked(activeLockKey(semKey))
+  // Suggestion is theme-agnostic: it reads the SHARED primitive ramps. Only which
+  // semantic value we compare against / write to depends on the active theme.
+  const resolvedColors = resolvedColorsWithStaged(tokens, staged)
+
+  const brandSuggestion = isBrandDrivenSemantic
+    ? suggestBrandSemantics(resolvedColors, 'brand')
+    : null
+  const neutralSuggestion = neutralRole
+    ? suggestNeutralSemantics(resolvedColors, neutralRole)
+    : null
+
+  // The current alias's step vs the suggested step, for the hint.
+  const currentStep = parseColorRef(committedValue)?.shade ?? null
+  const suggestedStep = brandSuggestion
+    ? parseColorRef(brandSuggestion.primary)?.shade ?? null
+    : neutralSuggestion?.step ?? null
+
+  // Current committed value of a semantic key in the ACTIVE theme (staged wins, else model).
+  const currentSemanticValue = (key: string): string =>
+    (effectiveTheme === 'dark'
+      ? getStagedValue(`${DARK_EDIT_PREFIX}--${key}`)
+      : getStagedValue(`--${key}`))
+    ?? resolveTokenValue(`--${key}`, tokens, effectiveTheme) ?? ''
+  // A suggestion is a no-op when every key it would write already equals its target.
+  const writesAreNoop = (writes: Array<[string, string]>): boolean =>
+    writes.every(([key, value]) => currentSemanticValue(key) === value)
+
+  const brandWrites: Array<[string, string]> = brandSuggestion
+    ? [
+        ['primary', brandSuggestion.primary],
+        ['primary-foreground', brandSuggestion['primary-foreground']],
+        ['ring', brandSuggestion.ring],
+      ]
+    : []
+  const neutralWrites: Array<[string, string]> = (neutralRole && neutralSuggestion)
+    ? [
+        [neutralRole, neutralSuggestion.surface],
+        [`${neutralRole}-foreground`, neutralSuggestion.foreground],
+      ]
+    : []
+  const brandNoChange = brandSuggestion ? writesAreNoop(brandWrites) : false
+  const neutralNoChange = neutralSuggestion ? writesAreNoop(neutralWrites) : false
+
   const handleValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setDraftValue(e.target.value)
+    setActiveDraft(e.target.value)
   }
 
   const remToPxHint = (() => {
@@ -786,6 +951,119 @@ export function Inspector({
     const px = Math.round(parseFloat(match[1]) * 16)
     return `= ${px}px`
   })()
+
+  // Auto-pick suggestion panel — rendered inline under the value picker (so it sits
+  // with the alias dropdown, not down by Save/Cancel). Brand-driven OR neutral role.
+  const suggestionPanel = (isBrandDrivenSemantic || neutralRole) ? (
+    <div className="ed-brand-suggest">
+      <div className="ed-brand-suggest__lock-row">
+        <span className="ed-brand-suggest__lock-label">
+          {keyLocked
+            ? 'Locked — auto-pick will not change this token.'
+            : neutralRole
+              ? `${neutralRole} is a neutral surface — kept off the brand ramp so it never bleeds.`
+              : 'Auto-pick may set this token when the brand changes.'}
+        </span>
+        <EdButton variant="secondary" size="sm" onClick={() => toggleLock(activeLockKey(semKey))}>
+          {keyLocked ? 'Unlock' : 'Lock'}
+        </EdButton>
+      </div>
+
+      {isBrandDrivenSemantic && (
+        brandSuggestion ? (
+          <div className="ed-brand-suggest__card">
+            <div className="ed-brand-suggest__line">
+              Suggested primary:{' '}
+              <strong>brand-{suggestedStep ?? '?'}</strong>
+              {currentStep && suggestedStep && currentStep !== suggestedStep && (
+                <span className="ed-brand-suggest__from"> (currently brand-{currentStep})</span>
+              )}
+            </div>
+            <div className="ed-brand-suggest__line">
+              Foreground:{' '}
+              <strong>{brandSuggestion.meta.foreground}</strong>
+              {' · '}
+              <span
+                className={
+                  brandSuggestion.meta.belowAA
+                    ? 'ed-brand-suggest__badge ed-brand-suggest__badge--fail'
+                    : 'ed-brand-suggest__badge ed-brand-suggest__badge--pass'
+                }
+              >
+                {brandSuggestion.meta.belowAA ? 'Below AA' : 'AA'}{' '}
+                {brandSuggestion.meta.contrast.toFixed(2)}:1
+              </span>
+            </div>
+            {brandSuggestion.meta.belowAA && (
+              <div className="ed-brand-suggest__warn">
+                No brand step reaches 4.5:1 with either foreground. Applying anyway
+                may fail contrast — consider a deeper or more saturated brand color.
+              </div>
+            )}
+            <EdButton
+              variant="primary"
+              size="sm"
+              onClick={() => handleApplyBrandSuggestion(brandSuggestion)}
+              disabled={brandNoChange}
+            >
+              {brandNoChange ? 'Already matches suggestion' : 'Suggest from brand'}
+            </EdButton>
+          </div>
+        ) : (
+          <div className="ed-brand-suggest__line">
+            No brand ramp found — define a `brand` color scale to enable auto-pick.
+          </div>
+        )
+      )}
+
+      {neutralRole && (
+        neutralSuggestion ? (
+          <div className="ed-brand-suggest__card">
+            <div className="ed-brand-suggest__line">
+              Suggested {neutralRole}:{' '}
+              <strong>neutral-{neutralSuggestion.step}</strong>
+              {currentStep && currentStep !== neutralSuggestion.step && (
+                <span className="ed-brand-suggest__from"> (currently {parseColorRef(committedValue)?.family ?? '?'}-{currentStep})</span>
+              )}
+            </div>
+            <div className="ed-brand-suggest__line">
+              Foreground:{' '}
+              <strong>{neutralSuggestion.foreground.replace(/^var\(--color-|\)$/g, '')}</strong>
+              {' · '}
+              <span
+                className={
+                  neutralSuggestion.belowAA
+                    ? 'ed-brand-suggest__badge ed-brand-suggest__badge--fail'
+                    : 'ed-brand-suggest__badge ed-brand-suggest__badge--pass'
+                }
+              >
+                {neutralSuggestion.belowAA ? 'Below AA' : 'AA'}{' '}
+                {neutralSuggestion.contrast.toFixed(2)}:1
+              </span>
+            </div>
+            {neutralSuggestion.belowAA && (
+              <div className="ed-brand-suggest__warn">
+                This neutral surface sits in the mid-gray contrast dead zone — neither
+                light nor dark text clears 4.5:1. Pick a lighter or darker step.
+              </div>
+            )}
+            <EdButton
+              variant="primary"
+              size="sm"
+              onClick={() => handleApplyNeutralSuggestion(neutralRole, neutralSuggestion)}
+              disabled={neutralNoChange}
+            >
+              {neutralNoChange ? 'Already matches suggestion' : 'Suggest neutral pair'}
+            </EdButton>
+          </div>
+        ) : (
+          <div className="ed-brand-suggest__line">
+            No neutral ramp found — define a `neutral` color scale to enable auto-pick.
+          </div>
+        )
+      )}
+    </div>
+  ) : null
 
   return (
     <EdScrollArea className="ed-inspector">
@@ -802,6 +1080,28 @@ export function Inspector({
 
         <div className="ed-inspector__section">
           <h3 className="ed-inspector__section-title">Value</h3>
+
+          {isSemanticToken && (
+            <div className="ed-theme-tabs" role="tablist" aria-label="Edit theme">
+              {(['light', 'dark'] as const).map((t) => {
+                const hasEdit = getStagedValue(themedStagingKey(selectedTokenName, t)) !== undefined
+                return (
+                  <button
+                    key={t}
+                    type="button"
+                    role="tab"
+                    aria-selected={editTheme === t}
+                    className={`ed-theme-tabs__tab${editTheme === t ? ' ed-theme-tabs__tab--active' : ''}`}
+                    onClick={() => setEditTheme(t)}
+                  >
+                    {t === 'light' ? 'Light' : 'Dark'}
+                    {hasEdit && <span className="ed-theme-tabs__dot" aria-label="has staged edit" />}
+                  </button>
+                )
+              })}
+            </div>
+          )}
+
           <div className="ed-inspector__value-editor">
             {fontFamilySlot(selectedTokenName) ? (
               <>
@@ -823,14 +1123,14 @@ export function Inspector({
             ) : isFoundationColorToken(selectedTokenName) ? (
               <EdColorPicker
                 value={displayValue || '#000000'}
-                onChange={(color) => setDraftValue(color)}
+                onChange={(color) => setActiveDraft(color)}
               />
             ) : displayValue.trim().startsWith('var(') ? (
               <TokenAliasPicker
                 currentValue={displayValue}
                 tokenName={selectedTokenName}
                 tokens={tokens}
-                onChange={(v) => setDraftValue(v)}
+                onChange={(v) => setActiveDraft(v)}
               />
             ) : (
               <div className="ed-inspector__value-input-wrap">
@@ -847,6 +1147,35 @@ export function Inspector({
             )}
           </div>
 
+          {suggestionPanel}
+
+          <div className="ed-inspector__value-actions">
+            <EdButton
+              variant="primary"
+              size="sm"
+              onClick={handleSave}
+              disabled={!isDirty}
+            >
+              Save
+            </EdButton>
+            <EdButton
+              variant="secondary"
+              size="sm"
+              onClick={handleCancel}
+              disabled={!isDirty}
+            >
+              Cancel
+            </EdButton>
+            {isStaged && !isDirty && (
+              <EdButton
+                variant="secondary"
+                size="sm"
+                onClick={handleUndo}
+              >
+                Undo
+              </EdButton>
+            )}
+          </div>
         </div>
 
         {aliasChain.length > 1 && (
@@ -891,34 +1220,6 @@ export function Inspector({
             usage={usage}
             onRescan={onRescanUsage}
           />
-        </div>
-
-        <div className="ed-inspector__value-actions">
-          <EdButton
-            variant="primary"
-            size="sm"
-            onClick={handleSave}
-            disabled={!isDirty}
-          >
-            Save
-          </EdButton>
-          <EdButton
-            variant="secondary"
-            size="sm"
-            onClick={handleCancel}
-            disabled={!isDirty}
-          >
-            Cancel
-          </EdButton>
-          {isStaged && !isDirty && (
-            <EdButton
-              variant="secondary"
-              size="sm"
-              onClick={handleUndo}
-            >
-              Undo
-            </EdButton>
-          )}
         </div>
       </div>
     </EdScrollArea>

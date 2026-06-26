@@ -11,6 +11,19 @@ const STORAGE_KEY_NEW = "geeklego.editor.new-tokens.v1";
  */
 export const FONT_LOADER_EDIT_PREFIX = '--font-loader-';
 
+/**
+ * Staged-edit key prefix marking a DARK-theme semantic edit. A dark edit of `--primary`
+ * is staged under `dark:--primary`, keeping it a distinct entry from the light `--primary`
+ * in the same store. The export merge (exportFormatter) routes these to semantics.dark;
+ * the Inspector/PendingDrawer strip the prefix for display. Light edits stay unprefixed.
+ */
+export const DARK_EDIT_PREFIX = 'dark:';
+
+/** Build the staging key for a semantic edit in the given theme. */
+export function themedStagingKey(cssName: string, theme: 'light' | 'dark'): string {
+  return theme === 'dark' ? `${DARK_EDIT_PREFIX}${cssName}` : cssName;
+}
+
 const stagedEdits: Map<string, string> = new Map();
 
 // ─── New token store ──────────────────────────────────────────────────────────

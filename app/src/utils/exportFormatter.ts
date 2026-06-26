@@ -1,7 +1,7 @@
 import { structuredPatch } from 'diff'
 import type { GeeklegoTokensV2 } from '../types'
 import { generateGeeklegoV2 } from './cssGenerator'
-import { FONT_LOADER_EDIT_PREFIX, type StagedNewToken } from '../state/staging'
+import { FONT_LOADER_EDIT_PREFIX, DARK_EDIT_PREFIX, type StagedNewToken } from '../state/staging'
 
 // Re-export so existing importers (the picker, display filters) keep their import site.
 export { FONT_LOADER_EDIT_PREFIX }
@@ -99,16 +99,28 @@ export function generateMergedTokens(
       continue
     }
 
-    const parts = tokenName.replace(/^--/, '').split('-')
-    if (parts.length < 2) continue
+    // DARK-theme semantic edit (`dark:--<key>`): strip the prefix and route to
+    // semantics.dark. Must precede the light/primitive matchers below, which assume
+    // a key starting with `--`. A dark edit only ever targets a core semantic.
+    if (tokenName.startsWith(DARK_EDIT_PREFIX)) {
+      const darkSemanticKey = tokenName.slice(DARK_EDIT_PREFIX.length).replace(/^--/, '')
+      modifiedTokens.semantics.dark[darkSemanticKey] = stagedValue
+      continue
+    }
 
     // v2 flat semantics: a staged edit keyed by the CSS name `--<semanticKey>` maps
-    // directly onto modifiedTokens.semantics.light[semanticKey]. Match these first.
+    // directly onto modifiedTokens.semantics.light[semanticKey]. Match these FIRST —
+    // before the `parts.length < 2` primitive-name guard below, which would otherwise
+    // drop single-word semantics (--primary, --accent, --ring, --border, …) that split
+    // into one part and never reach this handler.
     const semanticKey = tokenName.replace(/^--/, '')
     if (semanticKey in modifiedTokens.semantics.light) {
       modifiedTokens.semantics.light[semanticKey] = stagedValue
       continue
     }
+
+    const parts = tokenName.replace(/^--/, '').split('-')
+    if (parts.length < 2) continue
 
     if (tokenName.startsWith('--color-')) {
       const colorName = parts.slice(1).join('-')

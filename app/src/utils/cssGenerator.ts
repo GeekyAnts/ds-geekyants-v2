@@ -392,6 +392,24 @@ export function generateV2Semantics(t: GeeklegoTokensV2): string {
   }
   lines.push(`}`)
 
+  // 2b · @source inline safelist — FORCE-generate the semantic color utilities.
+  //
+  //   Tailwind v4 only emits a utility when it detects the literal class string in scanned
+  //   content. In components, `accent`/`muted` appear almost only as variant/opacity/-foreground
+  //   forms (focus:bg-accent, text-muted-foreground, bg-muted/50), so the bare `bg-accent` /
+  //   `bg-muted` / `text-accent-foreground` utilities — and their --color-* registrations — get
+  //   tree-shaken out of the built dist/geeklego.css. Editing --accent then has no rule to apply to.
+  //   This safelist guarantees every semantic's bg/text (+ border/ring for the structural ones)
+  //   utility is always built, regardless of usage. Emitted by the generator so it survives export.
+  const bgText = V2_SEMANTIC_KEYS.filter((k) => k !== 'radius' && k !== 'border' && k !== 'input' && k !== 'ring')
+  lines.push(``)
+  lines.push(`/* ---------------------------------------------------------------------------`)
+  lines.push(`   2b · Safelist — always generate the semantic color utilities (see note above).`)
+  lines.push(`   --------------------------------------------------------------------------- */`)
+  lines.push(`@source inline("{hover:,focus:,}{bg,text}-{${bgText.join(',')}}");`)
+  lines.push(`@source inline("border-{border,input}");`)
+  lines.push(`@source inline("ring-ring");`)
+
   // 3 · ext.rawBlock — opaque, appended verbatim.
   let out = lines.join('\n')
   if (t.ext.rawBlock && t.ext.rawBlock.trim().length > 0) {
