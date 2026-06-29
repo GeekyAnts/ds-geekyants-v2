@@ -36,4 +36,13 @@
 
   /* --ext-* overrides for dark (opaque passthrough). */
   --ext-button-gamified-shadow: 0 2px 0 0 var(--color-accent-800);
+
+  /* Sidebar surface in dark — slightly raised off --background, matching the
+     core dark --card/--accent steps so the panel reads as a distinct layer. */
+  --ext-sidebar-bg:                var(--color-neutral-900);
+  --ext-sidebar-foreground:        var(--color-neutral-50);
+  --ext-sidebar-border:            var(--color-neutral-700);
+  --ext-sidebar-accent:            var(--color-neutral-800);
+  --ext-sidebar-accent-foreground: var(--color-neutral-50);
+  --ext-sidebar-ring:              var(--color-brand-300);
 }

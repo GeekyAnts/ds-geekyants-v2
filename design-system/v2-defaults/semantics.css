@@ -100,6 +100,14 @@
   --ext-button-gamified-foreground: var(--color-neutral-0);
   --ext-button-gamified-ring:       var(--color-accent-300);
   --ext-button-gamified-shadow:     0 2px 0 0 var(--color-accent-700);
+
+  /* Sidebar — its own navigation surface (see semantics.css for notes). */
+  --ext-sidebar-bg:               var(--color-neutral-50);
+  --ext-sidebar-foreground:       var(--color-neutral-900);
+  --ext-sidebar-border:           var(--color-neutral-200);
+  --ext-sidebar-accent:           var(--color-neutral-100);
+  --ext-sidebar-accent-foreground: var(--color-neutral-900);
+  --ext-sidebar-ring:             var(--color-brand-600);
 }
 
 @theme inline {
@@ -108,6 +116,13 @@
   --color-ext-button-gamified-bg-active:  var(--ext-button-gamified-bg-active);
   --color-ext-button-gamified-foreground: var(--ext-button-gamified-foreground);
   --color-ext-button-gamified-ring:       var(--ext-button-gamified-ring);
+
+  --color-ext-sidebar-bg:               var(--ext-sidebar-bg);
+  --color-ext-sidebar-foreground:       var(--ext-sidebar-foreground);
+  --color-ext-sidebar-border:           var(--ext-sidebar-border);
+  --color-ext-sidebar-accent:           var(--ext-sidebar-accent);
+  --color-ext-sidebar-accent-foreground: var(--ext-sidebar-accent-foreground);
+  --color-ext-sidebar-ring:             var(--ext-sidebar-ring);
 }
 
 /* ---------------------------------------------------------------------------
