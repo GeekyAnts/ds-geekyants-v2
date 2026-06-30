@@ -96,6 +96,8 @@ export * from './v2/Separator/Separator';
 export type * from './v2/Separator/Separator.types';
 export * from './v2/Sheet/Sheet';
 export type * from './v2/Sheet/Sheet.types';
+export * from './v2/Sidebar/Sidebar';
+export type * from './v2/Sidebar/Sidebar.types';
 export * from './v2/Skeleton/Skeleton';
 export type * from './v2/Skeleton/Skeleton.types';
 export * from './v2/Sonner/Sonner';

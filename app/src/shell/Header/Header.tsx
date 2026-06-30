@@ -1,5 +1,4 @@
-import { EdButton, EdIconButton } from '../../editor-ds/primitives'
-import { Sun, Moon } from 'lucide-react'
+import { EdButton } from '../../editor-ds/primitives'
 import './Header.css'
 
 interface HeaderProps {
@@ -7,8 +6,6 @@ interface HeaderProps {
   onOpenCommandPalette: () => void
   onOpenExport: () => void
   onOpenPending: () => void
-  previewTheme: 'light' | 'dark'
-  onTogglePreviewTheme: () => void
 }
 
 export function Header({
@@ -16,8 +13,6 @@ export function Header({
   onOpenCommandPalette,
   onOpenExport,
   onOpenPending,
-  previewTheme,
-  onTogglePreviewTheme,
 }: HeaderProps) {
   return (
     <header className="ed-header" role="banner">
@@ -55,13 +50,6 @@ export function Header({
           </button>
         )}
 
-        <EdIconButton
-          icon={previewTheme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
-          aria-label={`Switch to ${previewTheme === 'dark' ? 'light' : 'dark'} preview`}
-          onClick={onTogglePreviewTheme}
-          variant="ghost"
-          size="sm"
-        />
 
         <EdButton
           variant="primary"

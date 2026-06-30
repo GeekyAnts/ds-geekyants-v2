@@ -19,8 +19,6 @@ export const Default: Story = {
     onOpenCommandPalette: () => alert('Open command palette'),
     onOpenExport: () => alert('Open export'),
     onOpenPending: () => alert('Open pending changes'),
-    previewTheme: 'dark',
-    onTogglePreviewTheme: () => {},
   },
 }
 
@@ -28,12 +26,5 @@ export const WithPendingChanges: Story = {
   args: {
     ...Default.args,
     pendingCount: 5,
-  },
-}
-
-export const LightPreview: Story = {
-  args: {
-    ...Default.args,
-    previewTheme: 'light',
   },
 }

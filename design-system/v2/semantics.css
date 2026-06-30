@@ -12,7 +12,7 @@
 :root {
   --background:            var(--color-neutral-0);
   --foreground:            var(--color-neutral-900);
-  --primary:               var(--color-brand-600);
+  --primary:               var(--color-brand-500);
   --primary-foreground:    var(--color-neutral-0);
   --secondary:             var(--color-neutral-100);
   --secondary-foreground:  var(--color-neutral-900);
@@ -95,6 +95,19 @@
   --ext-button-gamified-foreground: var(--color-neutral-0);
   --ext-button-gamified-ring:       var(--color-accent-300);
   --ext-button-gamified-shadow:     0 2px 0 0 var(--color-accent-700);
+
+  /* Sidebar — its own navigation surface, distinct from --background/--card.
+     ShadCN ships a dedicated --sidebar-* token group for exactly this; in v2
+     it lives in the --ext-* block (chained to primitives, never hardcoded).
+     `bg`/`fg` = the panel surface; `border` = its edge + internal separators;
+     `accent`/`accent-fg` = the hovered/active menu-item highlight (quiet,
+     neutral — same role as the core --accent); `ring` = focus ring on items. */
+  --ext-sidebar-bg:               var(--color-neutral-50);
+  --ext-sidebar-foreground:       var(--color-neutral-900);
+  --ext-sidebar-border:           var(--color-neutral-200);
+  --ext-sidebar-accent:           var(--color-neutral-100);
+  --ext-sidebar-accent-foreground: var(--color-neutral-900);
+  --ext-sidebar-ring:             var(--color-brand-600);
 }
 
 @theme inline {
@@ -103,6 +116,13 @@
   --color-ext-button-gamified-bg-active:  var(--ext-button-gamified-bg-active);
   --color-ext-button-gamified-foreground: var(--ext-button-gamified-foreground);
   --color-ext-button-gamified-ring:       var(--ext-button-gamified-ring);
+
+  --color-ext-sidebar-bg:               var(--ext-sidebar-bg);
+  --color-ext-sidebar-foreground:       var(--ext-sidebar-foreground);
+  --color-ext-sidebar-border:           var(--ext-sidebar-border);
+  --color-ext-sidebar-accent:           var(--ext-sidebar-accent);
+  --color-ext-sidebar-accent-foreground: var(--ext-sidebar-accent-foreground);
+  --color-ext-sidebar-ring:             var(--ext-sidebar-ring);
 }
 
 /* ---------------------------------------------------------------------------

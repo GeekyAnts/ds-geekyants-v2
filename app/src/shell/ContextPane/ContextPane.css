@@ -1,8 +1,17 @@
 .ed-context-pane {
   height: 100%;
-  overflow-y: auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
   background: var(--ed-bg);
   min-width: 0;
+}
+
+/* The active module scrolls below the docked preview band. */
+.ed-context-pane__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 /* ─── Home page ─────────────────────────────────────────────────────────── */
