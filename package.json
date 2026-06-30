@@ -52,7 +52,7 @@
     "storybook": "storybook dev -p 6006",
     "lint": "eslint --max-warnings 0",
     "build:css": "tailwindcss -i ./design-system/v2/index.css -o ./dist/geeklego.css --minify",
-    "sync-build": "npm run build:css",
+    "sync-build": "npm run build",
     "validate-tokens": "npx tsx scripts/validate-tokens.ts",
     "export-ir": "npx tsx scripts/export-ir.ts",
     "export-design-md": "npx tsx scripts/export-design-md.ts",

@@ -117,7 +117,6 @@ function EditorShellContent() {
   const [tokens, setTokens] = useState<GeeklegoTokensV2 | null>(null)
   const [usage, setUsage] = useState<TokenUsageMap>({})
   const [selectedTokenName, setSelectedTokenName] = useState<string | null>(null)
-  const [previewTheme, setPreviewTheme] = useState<'light' | 'dark'>('dark')
   const [commandOpen, setCommandOpen] = useState(false)
   const [exportOpen, setExportOpen] = useState(false)
   const [pendingDrawerOpen, setPendingDrawerOpen] = useState(false)
@@ -355,8 +354,6 @@ function EditorShellContent() {
         onOpenCommandPalette={() => setCommandOpen(true)}
         onOpenExport={() => setExportOpen(true)}
         onOpenPending={() => setPendingModalOpen(true)}
-        previewTheme={previewTheme}
-        onTogglePreviewTheme={() => setPreviewTheme(t => t === 'dark' ? 'light' : 'dark')}
       />
 
       {classification && (

@@ -1,0 +1,578 @@
+[
+  {
+    "name": "Accordion",
+    "storyIdPrefix": "v2-accordion",
+    "defaultStory": "Default",
+    "stories": [
+      "Default",
+      "Multiple",
+      "DefaultOpen",
+      "DisabledItem",
+      "DarkMode"
+    ]
+  },
+  {
+    "name": "Alert",
+    "storyIdPrefix": "v2-alert",
+    "defaultStory": "Default",
+    "stories": [
+      "Default",
+      "Variants",
+      "NoIcon",
+      "TitleOnly",
+      "DarkMode"
+    ]
+  },
+  {
+    "name": "AlertDialog",
+    "storyIdPrefix": "v2-alertdialog",
+    "defaultStory": "Default",
+    "stories": [
+      "Default",
+      "DarkMode"
+    ]
+  },
+  {
+    "name": "AspectRatio",
+    "storyIdPrefix": "v2-aspectratio",
+    "defaultStory": "Default",
+    "stories": [
+      "Default",
+      "Square",
+      "WithImage",
+      "DarkMode"
+    ]
+  },
+  {
+    "name": "Avatar",
+    "storyIdPrefix": "v2-avatar",
+    "defaultStory": "Default",
+    "stories": [
+      "Default",
+      "Fallback",
+      "Sizes",
+      "Group",
+      "DarkMode"
+    ]
+  },
+  {
+    "name": "Badge",
+    "storyIdPrefix": "v2-badge",
+    "defaultStory": "Default",
+    "stories": [
+      "Default",
+      "Variants",
+      "WithIcon",
+      "AsChildLink",
+      "DarkMode"
+    ]
+  },
+  {
+    "name": "Breadcrumb",
+    "storyIdPrefix": "v2-breadcrumb",
+    "defaultStory": "Default",
+    "stories": [
+      "Default",
+      "CustomSeparator",
+      "Collapsed",
+      "DarkMode"
+    ]
+  },
+  {
+    "name": "Button",
+    "storyIdPrefix": "v2-button",
+    "defaultStory": "Default",
+    "stories": [
+      "Default",
+      "Variants",
+      "Sizes",
+      "Gamified",
+      "Disabled",
+      "AsChildLink",
+      "DarkMode"
+    ]
+  },
+  {
+    "name": "Calendar",
+    "storyIdPrefix": "v2-calendar",
+    "defaultStory": "Default",
+    "stories": [
+      "Default",
+      "Range",
+      "DisabledDays",
+      "DarkMode"
+    ]
+  },
+  {
+    "name": "Card",
+    "storyIdPrefix": "v2-card",
+    "defaultStory": "Default",
+    "stories": [
+      "Default",
+      "HeaderOnly",
+      "WithForm",
+      "ContentOnly",
+      "DarkMode"
+    ]
+  },
+  {
+    "name": "Carousel",
+    "storyIdPrefix": "v2-carousel",
+    "defaultStory": "Default",
+    "stories": [
+      "Default",
+      "MultipleItems",
+      "Loop",
+      "DarkMode"
+    ]
+  },
+  {
+    "name": "Chart",
+    "storyIdPrefix": "v2-chart",
+    "defaultStory": "Bars",
+    "stories": [
+      "Bars",
+      "Lines",
+      "DarkMode"
+    ]
+  },
+  {
+    "name": "Checkbox",
+    "storyIdPrefix": "v2-checkbox",
+    "defaultStory": "Default",
+    "stories": [
+      "Default",
+      "WithLabel",
+      "States",
+      "DarkMode"
+    ]
+  },
+  {
+    "name": "Collapsible",
+    "storyIdPrefix": "v2-collapsible",
+    "defaultStory": "Default",
+    "stories": [
+      "Default",
+      "OpenByDefault",
+      "DarkMode"
+    ]
+  },
+  {
+    "name": "Combobox",
+    "storyIdPrefix": "v2-combobox",
+    "defaultStory": "Default",
+    "stories": [
+      "Default",
+      "Controlled",
+      "Disabled",
+      "CustomEmpty",
+      "DarkMode"
+    ]
+  },
+  {
+    "name": "Command",
+    "storyIdPrefix": "v2-command",
+    "defaultStory": "Default",
+    "stories": [
+      "Default",
+      "EmptyState",
+      "WithDisabled",
+      "DarkMode"
+    ]
+  },
+  {
+    "name": "ContextMenu",
+    "storyIdPrefix": "v2-contextmenu",
+    "defaultStory": "Default",
+    "stories": [
+      "Default",
+      "Full",
+      "DarkMode"
+    ]
+  },
+  {
+    "name": "Dashboard",
+    "storyIdPrefix": "preview-dashboard",
+    "defaultStory": "Default",
+    "stories": [
+      "Default"
+    ]
+  },
+  {
+    "name": "DataTable",
+    "storyIdPrefix": "v2-datatable",
+    "defaultStory": "Default",
+    "stories": [
+      "Default",
+      "Empty",
+      "NoPagination",
+      "DarkMode"
+    ]
+  },
+  {
+    "name": "DatePicker",
+    "storyIdPrefix": "v2-datepicker",
+    "defaultStory": "Default",
+    "stories": [
+      "Default",
+      "PreSelected",
+      "Controlled",
+      "Disabled",
+      "DarkMode"
+    ]
+  },
+  {
+    "name": "Dialog",
+    "storyIdPrefix": "v2-dialog",
+    "defaultStory": "Default",
+    "stories": [
+      "Default",
+      "Destructive",
+      "ScrollableContent",
+      "WithoutCloseButton",
+      "DarkMode"
+    ]
+  },
+  {
+    "name": "Drawer",
+    "storyIdPrefix": "v2-drawer",
+    "defaultStory": "Bottom",
+    "stories": [
+      "Bottom",
+      "Top",
+      "Left",
+      "Right",
+      "DarkMode"
+    ]
+  },
+  {
+    "name": "DropdownMenu",
+    "storyIdPrefix": "v2-dropdownmenu",
+    "defaultStory": "Default",
+    "stories": [
+      "Default",
+      "CheckboxItems",
+      "RadioGroupItems",
+      "WithSubmenu",
+      "InsetItems",
+      "DarkMode"
+    ]
+  },
+  {
+    "name": "Field",
+    "storyIdPrefix": "v2-field",
+    "defaultStory": "Default",
+    "stories": [
+      "Default",
+      "WithDescription",
+      "WithValidationError",
+      "Disabled",
+      "DarkMode"
+    ]
+  },
+  {
+    "name": "Form",
+    "storyIdPrefix": "v2-form",
+    "defaultStory": "Default",
+    "stories": [
+      "Default",
+      "DarkMode"
+    ]
+  },
+  {
+    "name": "HoverCard",
+    "storyIdPrefix": "v2-hovercard",
+    "defaultStory": "Default",
+    "stories": [
+      "Default",
+      "TextTrigger",
+      "TopPlacement",
+      "DarkMode"
+    ]
+  },
+  {
+    "name": "Input",
+    "storyIdPrefix": "v2-input",
+    "defaultStory": "Default",
+    "stories": [
+      "Default",
+      "Variants",
+      "Sizes",
+      "Types",
+      "Disabled",
+      "WithLabel",
+      "DarkMode"
+    ]
+  },
+  {
+    "name": "InputOTP",
+    "storyIdPrefix": "v2-inputotp",
+    "defaultStory": "Default",
+    "stories": [
+      "Default",
+      "WithSeparator",
+      "FourDigits",
+      "Controlled",
+      "Disabled",
+      "DarkMode"
+    ]
+  },
+  {
+    "name": "Label",
+    "storyIdPrefix": "v2-label",
+    "defaultStory": "Default",
+    "stories": [
+      "Default",
+      "WithInput",
+      "PeerDisabled",
+      "DarkMode"
+    ]
+  },
+  {
+    "name": "Menubar",
+    "storyIdPrefix": "v2-menubar",
+    "defaultStory": "Default",
+    "stories": [
+      "Default",
+      "RadioSelection",
+      "DarkMode"
+    ]
+  },
+  {
+    "name": "NavigationMenu",
+    "storyIdPrefix": "v2-navigationmenu",
+    "defaultStory": "Default",
+    "stories": [
+      "Default",
+      "LinkBar",
+      "DarkMode"
+    ]
+  },
+  {
+    "name": "Pagination",
+    "storyIdPrefix": "v2-pagination",
+    "defaultStory": "Default",
+    "stories": [
+      "Default",
+      "DarkMode"
+    ]
+  },
+  {
+    "name": "PieChart",
+    "storyIdPrefix": "v2-piechart",
+    "defaultStory": "DonutWithText",
+    "stories": [
+      "DonutWithText",
+      "WithLegend",
+      "WithLabels",
+      "Simple",
+      "DarkMode"
+    ]
+  },
+  {
+    "name": "Popover",
+    "storyIdPrefix": "v2-popover",
+    "defaultStory": "Default",
+    "stories": [
+      "Default",
+      "WithForm",
+      "Aligned",
+      "DarkMode"
+    ]
+  },
+  {
+    "name": "ProductCard",
+    "storyIdPrefix": "v2-productcard",
+    "defaultStory": "Default",
+    "stories": [
+      "Default",
+      "OnSale",
+      "Horizontal",
+      "Grid",
+      "DarkMode"
+    ]
+  },
+  {
+    "name": "Progress",
+    "storyIdPrefix": "v2-progress",
+    "defaultStory": "Default",
+    "stories": [
+      "Default",
+      "Steps",
+      "Indeterminate",
+      "Animated",
+      "CustomSize",
+      "DarkMode"
+    ]
+  },
+  {
+    "name": "Resizable",
+    "storyIdPrefix": "v2-resizable",
+    "defaultStory": "Default",
+    "stories": [
+      "Default",
+      "WithHandle",
+      "Vertical",
+      "Nested",
+      "DarkMode"
+    ]
+  },
+  {
+    "name": "ScrollArea",
+    "storyIdPrefix": "v2-scrollarea",
+    "defaultStory": "Default",
+    "stories": [
+      "Default",
+      "Horizontal",
+      "Prose",
+      "DarkMode"
+    ]
+  },
+  {
+    "name": "Select",
+    "storyIdPrefix": "v2-select",
+    "defaultStory": "Default",
+    "stories": [
+      "Default",
+      "Grouped",
+      "DisabledStates",
+      "Invalid",
+      "DarkMode"
+    ]
+  },
+  {
+    "name": "Separator",
+    "storyIdPrefix": "v2-separator",
+    "defaultStory": "Default",
+    "stories": [
+      "Default",
+      "Horizontal",
+      "Vertical",
+      "DarkMode"
+    ]
+  },
+  {
+    "name": "Sheet",
+    "storyIdPrefix": "v2-sheet",
+    "defaultStory": "Default",
+    "stories": [
+      "Default",
+      "Sides",
+      "WithoutCloseButton",
+      "DarkMode"
+    ]
+  },
+  {
+    "name": "Sidebar",
+    "storyIdPrefix": "v2-sidebar",
+    "defaultStory": "Default",
+    "stories": [
+      "Default",
+      "OffcanvasCollapsible",
+      "Floating",
+      "RightSide",
+      "DarkMode"
+    ]
+  },
+  {
+    "name": "Skeleton",
+    "storyIdPrefix": "v2-skeleton",
+    "defaultStory": "Default",
+    "stories": [
+      "Default",
+      "Shapes",
+      "CardPlaceholder",
+      "DarkMode"
+    ]
+  },
+  {
+    "name": "Sonner",
+    "storyIdPrefix": "v2-sonner",
+    "defaultStory": "Default",
+    "stories": [
+      "Default",
+      "Promise",
+      "RichColors",
+      "DarkMode"
+    ]
+  },
+  {
+    "name": "Switch",
+    "storyIdPrefix": "v2-switch",
+    "defaultStory": "Default",
+    "stories": [
+      "Default",
+      "WithLabel",
+      "States",
+      "DarkMode"
+    ]
+  },
+  {
+    "name": "Table",
+    "storyIdPrefix": "v2-table",
+    "defaultStory": "Default",
+    "stories": [
+      "Default",
+      "DarkMode"
+    ]
+  },
+  {
+    "name": "Tabs",
+    "storyIdPrefix": "v2-tabs",
+    "defaultStory": "Default",
+    "stories": [
+      "Default",
+      "ThreeTabs",
+      "DisabledTab",
+      "DarkMode"
+    ]
+  },
+  {
+    "name": "Toggle",
+    "storyIdPrefix": "v2-toggle",
+    "defaultStory": "Default",
+    "stories": [
+      "Default",
+      "WithText",
+      "Variants",
+      "Sizes",
+      "States",
+      "DarkMode"
+    ]
+  },
+  {
+    "name": "ToggleGroup",
+    "storyIdPrefix": "v2-togglegroup",
+    "defaultStory": "Default",
+    "stories": [
+      "Default",
+      "SingleSelection",
+      "Outline",
+      "Sizes",
+      "WithLabels",
+      "DarkMode"
+    ]
+  },
+  {
+    "name": "Tooltip",
+    "storyIdPrefix": "v2-tooltip",
+    "defaultStory": "Default",
+    "stories": [
+      "Default",
+      "Sides",
+      "DarkMode"
+    ]
+  },
+  {
+    "name": "Typography",
+    "storyIdPrefix": "v2-typography",
+    "defaultStory": "Default",
+    "stories": [
+      "Default",
+      "AllVariants",
+      "Article",
+      "AsChild",
+      "DarkMode"
+    ]
+  }
+]

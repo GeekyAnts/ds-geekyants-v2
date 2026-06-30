@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { useRouter } from '../../routing'
 import { CategoryPage } from '../../views'
+import { PreviewBand } from '../PreviewBand/PreviewBand'
 import type { GeeklegoTokensV2 } from '../../types'
 import type { RoutePath } from '../../routing'
 import './ContextPane.css'
@@ -107,36 +108,35 @@ export function ContextPane({ tokens, onSelectToken }: ContextPaneProps) {
     onSelectToken(token.name)
   }
 
+  // The active module rendered BELOW the persistent preview band.
+  let body: React.ReactNode
   switch (route.type) {
-    case 'home':
-      return (
-        <main className="ed-context-pane">
-          <HomePage onNavigate={navigate} />
-        </main>
-      )
     case 'foundations':
     case 'semantic':
-      return (
-        <main className="ed-context-pane">
-          <CategoryPage
-            category={route.category}
-            tokens={allTokenEntries}
-            geeklegoTokens={tokens}
-            onTokenClick={handleTokenClick}
-          />
-        </main>
+      body = (
+        <CategoryPage
+          category={route.category}
+          tokens={allTokenEntries}
+          geeklegoTokens={tokens}
+          onTokenClick={handleTokenClick}
+        />
       )
+      break
     case 'token':
-      return (
-        <main className="ed-context-pane">
-          <TokenFocusView tokenName={route.tokenName} />
-        </main>
-      )
+      body = <TokenFocusView tokenName={route.tokenName} />
+      break
+    case 'home':
     default:
-      return (
-        <main className="ed-context-pane">
-          <HomePage onNavigate={navigate} />
-        </main>
-      )
+      body = <HomePage onNavigate={navigate} />
+      break
   }
+
+  // The preview band is docked at the top on every module; the module body
+  // scrolls independently below it.
+  return (
+    <main className="ed-context-pane">
+      <PreviewBand />
+      <div className="ed-context-pane__body">{body}</div>
+    </main>
+  )
 }

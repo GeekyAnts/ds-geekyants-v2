@@ -332,7 +332,7 @@ export default function ExportModal({ isOpen, onClose, onExport, onExportTarget,
                     <FileCode size={18} aria-hidden="true" />
                     <div className="ed-export-target-titles">
                       <span className="ed-export-target-name">CSS</span>
-                      <span className="ed-export-target-desc">Write the v2 design system to <code>design-system/v2/</code> and rebuild <code>dist/geeklego.css</code>.</span>
+                      <span className="ed-export-target-desc">Write the v2 design system to <code>design-system/v2/</code> and rebuild <code>dist/</code> (CSS + components).</span>
                     </div>
                   </div>
                   {hasExported ? (

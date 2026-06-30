@@ -1,108 +1,84 @@
-// ─── Storybook Story URL Mapping ─────────────────────────────────────────────
-// Maps token editor component names (camelCase) to Storybook story URLs.
+// ─── Storybook Story URL Mapping (v2) ────────────────────────────────────────
+// Maps Token Editor component names to v2 Storybook story URLs.
 //
-// NOTE (v2 / §7.5 cut): the old `components/catalog` was deleted along with the
-// 3-tier components, so there are no catalog-derived component sets anymore.
-// COMPONENT_LEVEL_MAP is now empty — every consumer (ComponentPreview*) therefore
-// resolves to the no-preview state, which is correct until the component UI is
-// stripped in the rebuild plan's Phase 5.
+// v2 stories are all titled `v2/<Name>` → Storybook lowercases the title and
+// swaps "/" for "-" with NO separators inserted at word boundaries, giving ids
+// like `v2-button--default` and `v2-inputotp--dark-mode`. (The old 3-tier
+// `atoms-/molecules-/organisms-` tier scheme and `COMPONENT_LEVEL_MAP` are gone
+// along with the deleted catalog.)
+//
+// The component/story inventory now comes from the generated catalog
+// (`scripts/generate-catalog.ts` → `app/src/generated/catalog.json`), so the set
+// stays in sync with the actual story files — no hand-maintained map.
 
-function toCamel(pascal: string): string {
-  return pascal.charAt(0).toLowerCase() + pascal.slice(1)
-}
+import catalog from '../generated/catalog.json'
+import type { CatalogEntry } from './catalog.types'
 
-export type StoryLevel = 'atom' | 'molecule' | 'organism'
+const CATALOG = catalog as CatalogEntry[]
+const BY_NAME = new Map(CATALOG.map(entry => [entry.name.toLowerCase(), entry]))
 
-export const DEFAULT_STORIES = ['Default', 'Variants', 'Sizes', 'States', 'DarkMode'] as const
-export type StoryName = (typeof DEFAULT_STORIES)[number]
-
-// ─── Per-component story overrides ──────────────────────────────────────────
-// Only components whose tabs differ from DEFAULT_STORIES need an entry here.
-// Keys are camelCase component names.
-const STORY_OVERRIDES: Readonly<Record<string, readonly string[]>> = {
-  // Atoms
-  chatBubble:      ['Default', 'Variants', 'MessageThread', 'States', 'DarkMode'],
-  chatMessage:     ['Default', 'Variants', 'Thread',        'States', 'DarkMode'],
-  heading:         ['Default', 'Levels',   'Sizes',         'Colors', 'DarkMode'],
-  slider:          ['Default', 'Sizes',    'States',        'Range',  'DarkMode'],
-  typingIndicator: ['Default', 'WithName', 'InContext',     'States', 'DarkMode'],
-  // Molecules
-  alertBanner:     ['Default', 'Variants', 'Appearances',   'States', 'DarkMode'],
-  popover:         ['Default', 'Placements', 'ContentVariants', 'States', 'DarkMode'],
-  toast:           ['Default', 'Variants', 'Appearances',   'States', 'DarkMode'],
-  tooltip:         ['Default', 'Placements', 'ContentTypes', 'States', 'DarkMode'],
-  // Organisms
-  barChart:        ['Default', 'SeriesColors', 'PositiveDelta', 'States', 'DarkMode'],
-  drawer:          ['Default', 'Placements', 'Sizes',        'States', 'DarkMode'],
-  footer:          ['Default', 'Sizes', 'Loading', 'DarkMode', 'Accessibility'],
-  sidebar:         ['Default', 'CollapsedIconRail', 'CollapsibleOffcanvas', 'States', 'DarkMode'],
-}
-
-// Component Sets — formerly derived from the deleted catalog.ts. Empty in v2.
-export const COMPONENT_LEVEL_MAP: Readonly<Record<string, StoryLevel>> = {}
-
-const TIER_LABEL: Record<StoryLevel, string> = {
-  atom: 'Atoms',
-  molecule: 'Molecules',
-  organism: 'Organisms',
-}
-
-/** Converts PascalCase/camelCase story name to Storybook kebab-case ID segment.
- *  'DarkMode' → 'dark-mode', 'Default' → 'default', 'Sizes' → 'sizes'
- */
-function toStorySegment(storyName: string): string {
-  return storyName
-    .replace(/([A-Z])/g, (m, l, offset) => (offset > 0 ? '-' : '') + l.toLowerCase())
-    .toLowerCase()
+function lookup(componentName: string): CatalogEntry | undefined {
+  return BY_NAME.get(componentName.toLowerCase())
 }
 
 /**
- * Converts componentName + level + storyName to a Storybook story ID.
+ * Converts componentName + storyName to a v2 Storybook story id.
  *
- * Storybook generates IDs by lowercasing the full title string (no word separators inserted).
- *   'button'    + 'atom'     + 'Default'  → 'atoms-button--default'
- *   'emptyState'+ 'atom'     + 'DarkMode' → 'atoms-emptystate--darkmode'
- *   'areaChart' + 'organism' + 'Variants' → 'organisms-areachart--variants'
+ *   'Button'   + 'Default'  → 'v2-button--default'
+ *   'InputOTP' + 'DarkMode' → 'v2-inputotp--dark-mode'
  *
- * Accepts both camelCase and PascalCase componentName.
+ * The `level` parameter is vestigial (3-tier holdover) and ignored — kept so the
+ * existing ComponentPreviewFrame call site doesn't have to change.
  */
 export function componentToStoryId(
   componentName: string,
-  level: string,
-  storyName: string
+  _level: string,
+  storyName: string,
 ): string {
-  const camel = toCamel(componentName)
-  const resolvedLevel = (level in TIER_LABEL ? level : COMPONENT_LEVEL_MAP[camel]) as StoryLevel | undefined
-  const tier = resolvedLevel ? TIER_LABEL[resolvedLevel] : 'Atoms'
-  const pascalName = componentName.charAt(0).toUpperCase() + componentName.slice(1)
-  // Storybook lowercases "Atoms/EmptyState" → "atoms-emptystate", no hyphen between word boundaries
-  const storyId = `${tier.toLowerCase()}-${pascalName.toLowerCase()}--${toStorySegment(storyName)}`
-  return storyId
+  const entry = lookup(componentName)
+  // Prefer the catalog's real prefix; fall back to Storybook's own sanitize over
+  // `v2/<name>` (collapse non-alphanumerics → "-") for components not in catalog.
+  const prefix =
+    entry?.storyIdPrefix ??
+    `v2-${componentName}`.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
+  return `${prefix}--${toStorySegment(storyName)}`
 }
 
-/**
- * Returns the full Storybook iframe URL for a given story ID.
- */
+/** 'DarkMode' → 'dark-mode', 'Default' → 'default', 'Sizes' → 'sizes' */
+function toStorySegment(storyName: string): string {
+  return storyName
+    .replace(/([A-Z])/g, (_m, l, offset) => (offset > 0 ? '-' : '') + l.toLowerCase())
+    .toLowerCase()
+}
+
+/** Full Storybook iframe URL for a given story id. */
 export function getStoryUrl(storyId: string, port = 6006): string {
   return `http://localhost:${port}/iframe.html?id=${storyId}&viewMode=story`
 }
 
 /**
- * Returns the list of story names available in the story picker for a component.
- * Returns an empty array for components not in COMPONENT_LEVEL_MAP (triggers no-preview state).
- * Accepts both camelCase and PascalCase componentName.
- * Uses per-component overrides from STORY_OVERRIDES when the component deviates from defaults.
+ * Story names available in the picker for a component. Returns an empty array
+ * for unknown components (triggers the no-preview state). Driven by the catalog.
  */
 export function getAvailableStories(componentName: string): readonly string[] {
-  const camel = toCamel(componentName)
-  if (!(camel in COMPONENT_LEVEL_MAP)) return []
-  return STORY_OVERRIDES[camel] ?? DEFAULT_STORIES
+  return lookup(componentName)?.stories ?? []
+}
+
+/** True if the component has v2 Storybook stories in the catalog. */
+export function hasStorybookStory(componentName: string): boolean {
+  return BY_NAME.has(componentName.toLowerCase())
+}
+
+/** The full catalog, sorted by name. */
+export function getComponentCatalog(): CatalogEntry[] {
+  return CATALOG
 }
 
 /**
- * Returns true if the component has Storybook stories available.
- * Accepts both camelCase and PascalCase componentName.
+ * The composed "preview set" stories (title `preview/<Set>` → id `preview-*`) —
+ * the dense collages the docked preview band renders, as opposed to the 50
+ * individual per-component stories. These are authored in `components/v2/_preview/`.
  */
-export function hasStorybookStory(componentName: string): boolean {
-  return toCamel(componentName) in COMPONENT_LEVEL_MAP
+export function getPreviewSets(): CatalogEntry[] {
+  return CATALOG.filter(e => e.storyIdPrefix.startsWith('preview-'))
 }

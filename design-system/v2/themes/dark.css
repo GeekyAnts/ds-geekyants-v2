@@ -11,8 +11,8 @@
 .dark {
   --background:            var(--color-neutral-950);
   --foreground:            var(--color-neutral-50);
-  --primary:               var(--color-neutral-50);
-  --primary-foreground:    var(--color-brand-900);
+  --primary:               var(--color-brand-50);
+  --primary-foreground:    var(--color-neutral-900);
   --secondary:             var(--color-neutral-800);
   --secondary-foreground:  var(--color-neutral-50);
   --muted:                 var(--color-neutral-800);
@@ -23,7 +23,7 @@
   --destructive-foreground: var(--color-neutral-50);
   --border:                var(--color-neutral-700);
   --input:                 var(--color-neutral-700);
-  --ring:                  var(--color-brand-300);
+  --ring:                  var(--color-brand-600);
   --card:                  var(--color-neutral-900);
   --card-foreground:       var(--color-neutral-50);
   --popover:               var(--color-neutral-900);
@@ -36,13 +36,10 @@
 
   /* --ext-* overrides for dark (opaque passthrough). */
   --ext-button-gamified-shadow: 0 2px 0 0 var(--color-accent-800);
-
-  /* Sidebar surface in dark — slightly raised off --background, matching the
-     core dark --card/--accent steps so the panel reads as a distinct layer. */
-  --ext-sidebar-bg:                var(--color-neutral-900);
-  --ext-sidebar-foreground:        var(--color-neutral-50);
-  --ext-sidebar-border:            var(--color-neutral-700);
-  --ext-sidebar-accent:            var(--color-neutral-800);
+  --ext-sidebar-bg: var(--color-neutral-900);
+  --ext-sidebar-foreground: var(--color-neutral-50);
+  --ext-sidebar-border: var(--color-neutral-700);
+  --ext-sidebar-accent: var(--color-neutral-800);
   --ext-sidebar-accent-foreground: var(--color-neutral-50);
-  --ext-sidebar-ring:              var(--color-brand-300);
+  --ext-sidebar-ring: var(--color-brand-300);
 }

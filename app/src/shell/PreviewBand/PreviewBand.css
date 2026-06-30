@@ -1,0 +1,80 @@
+/* The docked preview band: fixed ~40% of the center pane, its iframe scrolls
+   inside it, and the token module below scrolls independently. */
+.ed-preview-band {
+  flex: 0 0 40%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  border-bottom: 1px solid var(--ed-border);
+  background: var(--ed-bg-subtle);
+}
+
+.ed-preview-band__bar {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--ed-space-2) var(--ed-space-4);
+  border-bottom: 1px solid var(--ed-border-soft);
+}
+
+.ed-preview-band__label {
+  font-size: var(--ed-text-xs);
+  font-weight: var(--ed-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ed-text-muted);
+}
+
+/* Segmented Light|Dark control */
+.ed-preview-band__theme {
+  display: inline-flex;
+  padding: 2px;
+  gap: 2px;
+  background: var(--ed-bg-muted);
+  border: 1px solid var(--ed-border);
+  border-radius: var(--ed-radius-md);
+}
+
+.ed-preview-band__seg {
+  appearance: none;
+  border: 0;
+  cursor: pointer;
+  padding: 4px 12px;
+  font-size: var(--ed-text-xs);
+  font-weight: var(--ed-weight-medium);
+  color: var(--ed-text-muted);
+  background: transparent;
+  border-radius: calc(var(--ed-radius-md) - 2px);
+  transition: background var(--ed-motion-fast), color var(--ed-motion-fast);
+}
+
+.ed-preview-band__seg.is-active {
+  background: var(--ed-bg-panel);
+  color: var(--ed-text-strong);
+  box-shadow: var(--ed-shadow-focus, 0 1px 2px rgba(0, 0, 0, 0.08));
+}
+
+/* One full-width dashboard iframe fills the band; it scrolls internally. */
+.ed-preview-band__frame {
+  flex: 1 1 auto;
+  min-height: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.ed-preview-band__frame .ed-component-preview-frame,
+.ed-preview-band__frame iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.ed-preview-band__missing {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-size: var(--ed-text-sm);
+  color: var(--ed-text-muted);
+}

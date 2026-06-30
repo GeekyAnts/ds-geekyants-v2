@@ -11,7 +11,7 @@
 .dark {
   --background:            var(--color-neutral-950);
   --foreground:            var(--color-neutral-50);
-  --primary:               var(--color-neutral-50);
+  --primary:               var(--color-brand-200);
   --primary-foreground:    var(--color-brand-900);
   /* secondary/muted = NEUTRAL structure (never the brand ramp). */
   --secondary:             var(--color-neutral-800);

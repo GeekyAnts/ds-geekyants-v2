@@ -7,6 +7,7 @@ import { EdButton, EdScrollArea, EdEmptyState, EdColorPicker, EdInput } from '..
 import { isPinned, togglePin } from '../../state/pinning'
 import { subscribeToPendingChanges, getAllStaged, getStagedValue, setDraft, unstage, getStagedNewTokens, stage, DARK_EDIT_PREFIX, themedStagingKey } from '../../state/staging'
 import { isLocked, lockSemantic, toggleLock, subscribeToLockChanges } from '../../state/semanticLocks'
+import { usePreviewTheme, setPreviewTheme } from '../../state/previewTheme'
 import { withPxAnnotation, suggestBrandSemantics, suggestNeutralSemantics, parseColorRef } from '../../utils/colorUtils'
 import type { GeeklegoTokensV2, TokenUsageMap } from '../../types'
 import { V2_SEMANTIC_KEYS } from '../../types'
@@ -769,7 +770,10 @@ export function Inspector({
   const [draftValue, setDraftValue] = useState<string | null>(null)
   const [darkDraftValue, setDarkDraftValue] = useState<string | null>(null)
   // Which theme the Value section is currently editing (the Light|Dark tab).
-  const [editTheme, setEditTheme] = useState<'light' | 'dark'>('light')
+  // Shared with the docked preview band via the previewTheme store, so switching
+  // to the Dark tab auto-flips the live component preview to dark (and back).
+  const editTheme = usePreviewTheme()
+  const setEditTheme = setPreviewTheme
 
   useEffect(() => {
     const unsubPending = subscribeToPendingChanges(() => forceUpdate(n => n + 1))
@@ -777,11 +781,12 @@ export function Inspector({
     return () => { unsubPending(); unsubLocks() }
   }, [])
 
-  // Reset both drafts (and the active tab) whenever the selected token changes
+  // Reset both drafts whenever the selected token changes. The active theme is
+  // intentionally NOT reset here — it's shared with the preview band, so forcing
+  // it back to light on every selection would fight the user's band toggle.
   useEffect(() => {
     setDraftValue(null)
     setDarkDraftValue(null)
-    setEditTheme('light')
   }, [selectedTokenName])
 
   // Per-theme draft accessors so the handlers below stay theme-agnostic.
@@ -819,16 +824,11 @@ export function Inspector({
 
   // Apply the brand suggestion into the ACTIVE theme: stage primary/primary-foreground/
   // ring under the theme-scoped key, skipping any per-theme-locked key (suggest-only).
+  // Apply the brand suggestion for the SELECTED token only — writes a single key
+  // (primary, primary-foreground, or ring) under the active theme, honoring its lock.
   const handleApplyBrandSuggestion = useCallback(
-    (s: { primary: string; 'primary-foreground': string; ring: string }) => {
-      const writes: Array<[string, string]> = [
-        ['primary', s.primary],
-        ['primary-foreground', s['primary-foreground']],
-        ['ring', s.ring],
-      ]
-      for (const [key, value] of writes) {
-        if (!isLocked(activeLockKey(key))) stage(themedStagingKey(`--${key}`, editTheme), value)
-      }
+    (key: string, value: string) => {
+      if (!isLocked(activeLockKey(key))) stage(themedStagingKey(`--${key}`, editTheme), value)
     },
     [editTheme], // eslint-disable-line react-hooks/exhaustive-deps
   )
@@ -908,6 +908,15 @@ export function Inspector({
     ? suggestNeutralSemantics(resolvedColors, neutralRole)
     : null
 
+  // Selected brand key → the one alias the suggestion would write for it.
+  const brandValueFor = (key: string): string | null => {
+    if (!brandSuggestion) return null
+    if (key === 'primary') return brandSuggestion.primary
+    if (key === 'primary-foreground') return brandSuggestion['primary-foreground']
+    if (key === 'ring') return brandSuggestion.ring
+    return null
+  }
+
   // The current alias's step vs the suggested step, for the hint.
   const currentStep = parseColorRef(committedValue)?.shade ?? null
   const suggestedStep = brandSuggestion
@@ -924,13 +933,13 @@ export function Inspector({
   const writesAreNoop = (writes: Array<[string, string]>): boolean =>
     writes.every(([key, value]) => currentSemanticValue(key) === value)
 
-  const brandWrites: Array<[string, string]> = brandSuggestion
-    ? [
-        ['primary', brandSuggestion.primary],
-        ['primary-foreground', brandSuggestion['primary-foreground']],
-        ['ring', brandSuggestion.ring],
-      ]
-    : []
+  // Scoped to the selected brand key — the suggestion is a no-op only when THAT
+  // token already matches, not when the whole triad does.
+  const selectedBrandValue = brandValueFor(semKey)
+  const brandWrites: Array<[string, string]> =
+    brandSuggestion && selectedBrandValue != null
+      ? [[semKey, selectedBrandValue]]
+      : []
   const neutralWrites: Array<[string, string]> = (neutralRole && neutralSuggestion)
     ? [
         [neutralRole, neutralSuggestion.surface],
@@ -972,13 +981,15 @@ export function Inspector({
       {isBrandDrivenSemantic && (
         brandSuggestion ? (
           <div className="ed-brand-suggest__card">
-            <div className="ed-brand-suggest__line">
-              Suggested primary:{' '}
-              <strong>brand-{suggestedStep ?? '?'}</strong>
-              {currentStep && suggestedStep && currentStep !== suggestedStep && (
-                <span className="ed-brand-suggest__from"> (currently brand-{currentStep})</span>
-              )}
-            </div>
+            {semKey !== 'primary-foreground' && (
+              <div className="ed-brand-suggest__line">
+                Suggested {semKey === 'ring' ? 'ring' : 'primary'}:{' '}
+                <strong>brand-{suggestedStep ?? '?'}</strong>
+                {currentStep && suggestedStep && currentStep !== suggestedStep && (
+                  <span className="ed-brand-suggest__from"> (currently brand-{currentStep})</span>
+                )}
+              </div>
+            )}
             <div className="ed-brand-suggest__line">
               Foreground:{' '}
               <strong>{brandSuggestion.meta.foreground}</strong>
@@ -1003,8 +1014,8 @@ export function Inspector({
             <EdButton
               variant="primary"
               size="sm"
-              onClick={() => handleApplyBrandSuggestion(brandSuggestion)}
-              disabled={brandNoChange}
+              onClick={() => handleApplyBrandSuggestion(semKey, selectedBrandValue!)}
+              disabled={brandNoChange || selectedBrandValue == null}
             >
               {brandNoChange ? 'Already matches suggestion' : 'Suggest from brand'}
             </EdButton>

@@ -66,7 +66,20 @@ async function ensureV2DefaultsSnapshot(): Promise<void> {
 function tokenApiPlugin(): Plugin {
   return {
     name: 'geeklego-token-api',
-    configureServer(server) {
+    async configureServer(server) {
+      // Regenerate the component catalog from the story files on dev-server
+      // start so the "Components" gallery always reflects the current set of
+      // v2 components (a new component appears without any manual step). The
+      // committed catalog.json is the fallback for tests/build where this
+      // plugin doesn't run.
+      try {
+        const { writeCatalog } = await import('./scripts/generate-catalog');
+        const entries = await writeCatalog(dirname);
+        server.config.logger.info(`geeklego: catalog regenerated (${entries.length} components)`);
+      } catch (e: any) {
+        server.config.logger.warn(`geeklego: catalog regeneration failed — ${e?.message ?? e}`);
+      }
+
       server.middlewares.use(async (req, res, next) => {
         const url = req.url?.split('?')[0];
 
