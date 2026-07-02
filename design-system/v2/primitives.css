@@ -21,7 +21,7 @@
      =========================================================================== */
 
   --font-sans:                 "Figtree", ui-sans-serif, system-ui, sans-serif;
-  --font-mono:                 "JetBrains Mono", ui-monospace, "Cascadia Code", monospace;
+  --font-mono:                 "Geist Mono", ui-monospace, monospace;
   --font-display:              "Figtree", ui-sans-serif, system-ui, sans-serif;
 
   /* Font sizes */
@@ -208,17 +208,17 @@
   --color-neutral-950:         oklch(17.5% 0.002 67.643);
 
   /* Brand */
-  --color-brand-50:            oklch(97% 0.015 30.488);
-  --color-brand-100:           oklch(95.741% 0.021 30.488);
-  --color-brand-200:           oklch(90.457% 0.05 30.488);
-  --color-brand-300:           oklch(82.922% 0.095 30.488);
-  --color-brand-400:           oklch(73.679% 0.162 30.488);
-  --color-brand-500:           oklch(63.001% 0.2 30.488);
-  --color-brand-600:           oklch(58.235% 0.184 30.488);
-  --color-brand-700:           oklch(49.519% 0.143 30.488);
-  --color-brand-800:           oklch(38.234% 0.094 30.488);
-  --color-brand-900:           oklch(24.869% 0.052 30.488);
-  --color-brand-950:           oklch(17.5% 0.037 30.488);
+  --color-brand-50:            oklch(97% 0.015 27.239);
+  --color-brand-100:           oklch(95.367% 0.023 27.239);
+  --color-brand-200:           oklch(88.512% 0.061 27.239);
+  --color-brand-300:           oklch(78.737% 0.123 27.239);
+  --color-brand-400:           oklch(66.748% 0.197 27.239);
+  --color-brand-500:           oklch(52.896% 0.214 27.239);
+  --color-brand-600:           #CA0515;
+  --color-brand-700:           #A50000;
+  --color-brand-800:           #780000;
+  --color-brand-900:           #4E0401;
+  --color-brand-950:           oklch(17.5% 0.039 27.239);
 
   /* Accent */
   --color-accent-50:           oklch(97% 0.016 43.804);
@@ -347,7 +347,7 @@
 
   /* Fonts */
   --font-sans:                 "Figtree", ui-sans-serif, system-ui, sans-serif;
-  --font-mono:                 "JetBrains Mono", ui-monospace, "Cascadia Code", monospace;
+  --font-mono:                 "Geist Mono", ui-monospace, monospace;
   --font-display:              "Figtree", ui-sans-serif, system-ui, sans-serif;
 
   --text-2xs:              0.625rem;
@@ -502,17 +502,17 @@
   --color-neutral-950:         oklch(17.5% 0.002 67.643);
 
   /* Brand */
-  --color-brand-50:            oklch(97% 0.015 30.488);
-  --color-brand-100:           oklch(95.741% 0.021 30.488);
-  --color-brand-200:           oklch(90.457% 0.05 30.488);
-  --color-brand-300:           oklch(82.922% 0.095 30.488);
-  --color-brand-400:           oklch(73.679% 0.162 30.488);
-  --color-brand-500:           oklch(63.001% 0.2 30.488);
-  --color-brand-600:           oklch(58.235% 0.184 30.488);
-  --color-brand-700:           oklch(49.519% 0.143 30.488);
-  --color-brand-800:           oklch(38.234% 0.094 30.488);
-  --color-brand-900:           oklch(24.869% 0.052 30.488);
-  --color-brand-950:           oklch(17.5% 0.037 30.488);
+  --color-brand-50:            oklch(97% 0.015 27.239);
+  --color-brand-100:           oklch(95.367% 0.023 27.239);
+  --color-brand-200:           oklch(88.512% 0.061 27.239);
+  --color-brand-300:           oklch(78.737% 0.123 27.239);
+  --color-brand-400:           oklch(66.748% 0.197 27.239);
+  --color-brand-500:           oklch(52.896% 0.214 27.239);
+  --color-brand-600:           #CA0515;
+  --color-brand-700:           #A50000;
+  --color-brand-800:           #780000;
+  --color-brand-900:           #4E0401;
+  --color-brand-950:           oklch(17.5% 0.039 27.239);
 
   /* Accent */
   --color-accent-50:           oklch(97% 0.016 43.804);
