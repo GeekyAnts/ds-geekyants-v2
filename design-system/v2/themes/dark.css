@@ -28,6 +28,9 @@
   --card-foreground:       var(--color-neutral-50);
   --popover:               var(--color-neutral-900);
   --popover-foreground:    var(--color-neutral-50);
+  /* Inverse flips: dark theme => light surface (mirrors legacy --ds-*-inverse). */
+  --inverse:               var(--color-neutral-0);
+  --inverse-foreground:    var(--color-neutral-900);
   --chart-1:               var(--color-brand-400);
   --chart-2:               var(--color-accent-400);
   --chart-3:               var(--color-success-400);

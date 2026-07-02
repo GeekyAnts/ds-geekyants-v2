@@ -30,6 +30,13 @@
   --popover:               var(--color-neutral-0);
   --popover-foreground:    var(--color-neutral-900);
 
+  /* Inverse — a surface that is always the OPPOSITE of the current theme
+     (light theme => dark surface, dark theme => light surface). Used by the
+     "always-inverted" primary CTA. Flips explicitly in themes/dark.css.
+     Mirrors the legacy --ds-bg-inverse / --ds-text-inverse pair. */
+  --inverse:               var(--color-neutral-900);
+  --inverse-foreground:    var(--color-neutral-0);
+
   /* ShadCN expects a single --radius; component utilities derive sm/md/lg from it. */
   --radius:                var(--radius-lg);
   --chart-1:               var(--color-brand-500);
@@ -63,6 +70,8 @@
   --color-card-foreground:       var(--card-foreground);
   --color-popover:               var(--popover);
   --color-popover-foreground:    var(--popover-foreground);
+  --color-inverse:               var(--inverse);
+  --color-inverse-foreground:    var(--inverse-foreground);
   --color-chart-1:               var(--chart-1);
   --color-chart-2:               var(--chart-2);
   --color-chart-3:               var(--chart-3);
@@ -78,7 +87,7 @@
 /* ---------------------------------------------------------------------------
    2b · Safelist — always generate the semantic color utilities (see note above).
    --------------------------------------------------------------------------- */
-@source inline("{hover:,focus:,}{bg,text}-{background,foreground,primary,primary-foreground,secondary,secondary-foreground,muted,muted-foreground,accent,accent-foreground,destructive,destructive-foreground,card,card-foreground,popover,popover-foreground}");
+@source inline("{hover:,focus:,group-hover:,}{bg,text}-{background,foreground,primary,primary-foreground,secondary,secondary-foreground,muted,muted-foreground,accent,accent-foreground,destructive,destructive-foreground,card,card-foreground,popover,popover-foreground,inverse,inverse-foreground}");
 @source inline("border-{border,input}");
 @source inline("ring-ring");
 
